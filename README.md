@@ -1,118 +1,19 @@
-[![Build Status](https://travis-ci.org/Yelp/detect-secrets.svg?branch=master)](https://travis-ci.org/Yelp/detect-secrets)
-[![PyPI version](https://badge.fury.io/py/detect-secrets.svg)](https://badge.fury.io/py/detect-secrets)
+# river-detector
 
-# detect-secrets
+Scanning:
 
-## About
-
-`detect-secrets` is an aptly named module for (surprise, surprise) **detecting
-secrets** within a code base.
-
-However, unlike other similar packages that solely focus on finding secrets,
-this package is designed with the enterprise client in mind: providing a
-**backwards compatible**, systematic means of:
-
-1. Preventing new secrets from entering the code base,
-2. Detecting if such preventions are explicitly bypassed, and
-3. Providing a checklist of secrets to roll, and migrate off to a more secure
-   storage.
-
-This way, you create a
-[separation of concern](https://en.wikipedia.org/wiki/Separation_of_concerns):
-accepting that there may *currently* be secrets hiding in your large repository
-(this is what we refer to as a _baseline_),
-but preventing this issue from getting any larger, without dealing with the
-potentially gargantuous effort of moving existing secrets away.
-
-It does this by running periodic diff outputs against heuristically crafted
-regex statements, to identify whether any *new* secret has been committed. This
-way, it avoids the overhead of digging through all git history, as well as the
-need to scan the entire repository every time.
-
-For a look at recent changes, please see the
-[changelog](https://github.com/Yelp/detect-secrets/blob/master/CHANGELOG.md).
-
-## Example Usage
-
-### Setting Up a Baseline
-
-```
-$ detect-secrets scan > .secrets.baseline
+```SH
+docker run -v $CODEBASE:/code --rm -it txo-whitewater-docker-local.artifactory.swg-devops.com/river-dector
 ```
 
-### pre-commit Hook
+The docker image just runs the `run-scan.sh` script in the repo, which this package install. The secrets are stored in the `.secrets.baseline`, in a json format.
 
+After the repo is scanned and new secrets are found, run the audit to mark the secrets as valid or invalid. You can do this by running audit flag on the script.
+
+Audit:
+```SH
+docker run -v $CODEBASE:/code --rm -it txo-whitewater-docker-local.artifactory.swg-devops.com/river-dector audit
 ```
-$ cat .pre-commit-config.yaml
--   repo: git@github.com:Yelp/detect-secrets
-    rev: 0.10.1
-    hooks:
-    -   id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-        exclude: .*/tests/.*
-```
-
-### Auditing a Baseline
-
-```
-$ detect-secrets audit .secrets.baseline
-```
-
-### Upgrading Baselines
-
-This is only applicable for upgrading baselines that have been created after version 0.9.
-For upgrading baselines lower than that version, just recreate it.
-
-```
-$ detect-secrets scan --update .secrets.baseline
-```
-
-### Command Line
-
-`detect-secrets` is designed to be used as a git pre-commit hook, but you can also invoke `detect-secrets scan [path]` directly (`path` defaults to `.` if not specified).
-
-It should be noted that by default, `detect-secrets scan` only operates on files that are tracked by git. So if you intend to scan files outside of a git repository, you will need to pass the `--all-files` flag.
-
-
-## Installation
-
-There are three components that you can setup, depending on your purposes.
-While all three are independent, you should pair the Secrets Baseline with
-either the client-side pre-commit hook, or the server-side secret scanner.
-
-1. **Client-side Pre-Commit Hook**, that alerts developers when they attempt
-   to enter a secret in the code base.
-
-2. **Server-side Secret Scanning**, to periodically scan tracked repositories,
-   and make sure developers didn't accidentally skip the pre-commit check.
-
-3. **Secrets Baseline**, to whitelist pre-existing secrets in the repository,
-   so that they won't be continuously caught through scan iterations.
-
-### Client-side Pre-commit Hook
-
-See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions
-to install the pre-commit framework. The example usage above has a sample
-installation configuration, with a whitelisted secrets baseline.
-
-Hooks available:
-
-- `detect-secrets`: This hook detects and prevents high entropy strings from
-  entering the codebase.
-
-### Server-side Secret Scanning
-
-Please see the [detect-secrets-server](https://github.com/Yelp/detect-secrets-server)
-repository for installation instructions.
-
-### Secrets Baseline
-
-```
-$ pip install detect-secrets
-```
-
-Remember to initialize your baseline with the same plugin configurations
-as your pre-commit hook, and server-side secret scanner!
 
 #### Inline Whitelisting
 
@@ -135,25 +36,23 @@ This may be a convenient way for you to whitelist secrets, without having to
 regenerate the entire baseline again. Furthermore, this makes the whitelisted
 secrets easily searchable, auditable, and maintainable.
 
-## Current Supported Plugins
+### Pre-commit Hook
 
-The current heuristic searches we implement out of the box include:
+**TODO: validate**
 
-* **Base64HighEntropyString**: checks for all strings matching the Base64
-  character set, and alerts if their Shannon entropy is above a certain limit.
+The code can be run as a pre commit hook using either docker, or running the pip package directly. An easy to manage pre commit hooks is with the pre commit hook framework, which can be found here: https://pre-commit.com/
 
-* **HexHighEntropyString**: checks for all strings matching the Hex character
-  set, and alerts if their Shannon entropy is above a certain limit.
+```
+$ cat .pre-commit-config.yaml
+-   repo: git@github.ibm.com:river/river-detector
+    rev: master
+    hooks:
+    -   id: detect-secrets
+```
 
-* **PrivateKeyDetector**: checks to see if any private keys are committed.
+## Running via Travis CI
 
-* **BasicAuthDetector**: checks to see if BasicAuth is used e.g. `https://username:password@example.com`
-
-* **KeywordDetector**: checks to see if certain keywords are being used e.g. `password` or `secret`
-
-See [detect_secrets/
-plugins](https://github.com/Yelp/detect-secrets/tree/master/detect_secrets/plugins)
-for more details.
+**TODO: add documentation**
 
 ## A Few Caveats
 
