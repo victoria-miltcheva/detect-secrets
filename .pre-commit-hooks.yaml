@@ -1,7 +1,8 @@
 -   id: detect-secrets
     name: Detect secrets
     description: Detects high entropy strings that are likely to be passwords.
-    entry: run-scan.sh
+    entry: detect-secrets-hook
+    args: ['--baseline', '.secrets.baseline']
     language: python
     # for backward compatibility
     files: .*

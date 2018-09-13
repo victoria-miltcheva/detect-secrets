@@ -38,16 +38,23 @@ secrets easily searchable, auditable, and maintainable.
 
 ### Pre-commit Hook
 
-**TODO: validate**
+The code can be run as a pre commit hook using either docker, or running the code directly. Those meathods need to be customized for each release. An easy to manage pre commit hooks is with the pre commit hook framework, which can be found here: https://pre-commit.com/ . To setup the pre-commit framework run:
 
-The code can be run as a pre commit hook using either docker, or running the pip package directly. An easy to manage pre commit hooks is with the pre commit hook framework, which can be found here: https://pre-commit.com/
+Follow the instruction to install the pre-commit hook from: https://pre-commit.com .
 
+Add a file to configure the pre-commit hook
 ```
 $ cat .pre-commit-config.yaml
 -   repo: git@github.ibm.com:river/river-detector
     rev: master
     hooks:
     -   id: detect-secrets
+```
+
+Run the install command once per repo clone, by running:
+
+```
+pre-commit install
 ```
 
 ## Running via Travis CI
