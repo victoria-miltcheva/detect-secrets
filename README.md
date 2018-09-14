@@ -59,7 +59,22 @@ pre-commit install
 
 ## Running via Travis CI
 
-**TODO: add documentation**
+***Note:*** **Using this method will fail pull requests from forks because the Artifactory login info stored in Travis secure environment variables are not available to pull request from forks.**
+
+1. Setup travis for the repository
+1. Add you artifactory password as a secret variable by running the following command:
+```BASH
+travis encrypt SECRET_DOCKER_USER="$USER_NAME" --add # user who has access to artifactory
+travis encrypt SECRET_DOCKER_PASS="$PASSWORD" --add # API key of the user who has access to artifactory
+```
+1. Add the following to your `.travis.yml`
+```yaml
+services:
+    - docker
+after_script:
+    - docker login txo-whitewater-docker-local.artifactory.swg-devops.com --username $SECRET_DOCKER_USER --password $SECRET_DOCKER_PASS
+    - docker run --rm -v $TRAVIS_BUILD_DIR:/code txo-whitewater-docker-local.artifactory.swg-devops.com/river-detector:latest
+```
 
 ## A Few Caveats
 
