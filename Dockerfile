@@ -1,5 +1,5 @@
 FROM python:alpine
-RUN apk add --no-cache jq git
+RUN apk add --no-cache jq git curl
 RUN mkdir -p /code
 COPY . /usr/src/app
 WORKDIR /usr/src/app
