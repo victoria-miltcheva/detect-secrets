@@ -61,13 +61,7 @@ fi
 
 echo "Cloning repo"
 cd $CODE_DIR
-git init
-git remote add origin https://x-access-token:$ACCESS_TOKEN@$GITHUB_ADDR/$REPO_SLUG.git
-git fetch origin $COMMIT_HASH
-git reset --hard FETCH_HEAD
-
-echo "Checking out commit to run"
-git checkout $COMMIT_HASH
+GITHUB_CURL -L tarball/$COMMIT_HASH | tar -x --strip 1
 
 echo "Running scan"
 RET_VAL=0
