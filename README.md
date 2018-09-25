@@ -3,7 +3,7 @@
 Scanning:
 
 ```SH
-docker run -v $CODEBASE:/code --rm -it txo-whitewater-docker-local.artifactory.swg-devops.com/river-dector
+docker run -v $CODEBASE:/code --rm -it txo-whitewater-docker-local.artifactory.swg-devops.com/river-detector
 ```
 
 The docker image just runs the `run-scan.sh` script in the repo, which this package install. The secrets are stored in the `.secrets.baseline`, in a json format.
@@ -12,7 +12,7 @@ After the repo is scanned and new secrets are found, run the audit to mark the s
 
 Audit:
 ```SH
-docker run -v $CODEBASE:/code --rm -it txo-whitewater-docker-local.artifactory.swg-devops.com/river-dector audit
+docker run -v $CODEBASE:/code --rm -it txo-whitewater-docker-local.artifactory.swg-devops.com/river-detector audit
 ```
 
 #### Inline Whitelisting
