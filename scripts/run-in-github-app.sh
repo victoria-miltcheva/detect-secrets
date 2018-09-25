@@ -61,7 +61,7 @@ fi
 
 echo "Cloning repo"
 cd $CODE_DIR
-GITHUB_CURL tarball/$COMMIT_HASH -L | tar -x --strip 1
+GITHUB_CURL tarball/$COMMIT_HASH -L | tar -xz --strip 1
 
 echo "Running scan"
 RET_VAL=0
