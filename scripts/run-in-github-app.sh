@@ -5,7 +5,7 @@
 # GITHUB_APP_KEY
 # REPO_INSTALL_ID
 # COMMIT_HASH
-# GHE_PR Optional if this comes from a github pr
+
 BASEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $BASEDIR/lib.sh
 CODE_DIR=`mktemp -d`
@@ -64,9 +64,12 @@ echo "Cloning repo"
 git clone --depth 50 --no-single-branch https://x-access-token:$ACCESS_TOKEN@$GITHUB_ADDR/$REPO_SLUG.git $CODE_DIR
 cd $CODE_DIR
 
-if [ -n "$GHE_PR" ]
+# only support commit at the tip of the pull request
+GIT_BRANCH=$(git ls-remote | grep -m1 "^$COMMIT_HASH" | cut -f2 || true)
+
+if [ -n "$GIT_BRANCH" ]
 then
-  git fetch origin +refs/pull/$GHE_PR/head
+  git fetch origin $GIT_BRANCH
   git checkout -qf FETCH_HEAD
 else
   if git checkout $COMMIT_HASH; then
