@@ -5,6 +5,7 @@
 # GITHUB_APP_KEY
 # REPO_INSTALL_ID
 # COMMIT_HASH
+# GHE_PR Optional if this comes from a github pr
 BASEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $BASEDIR/lib.sh
 CODE_DIR=`mktemp -d`
@@ -62,13 +63,20 @@ fi
 echo "Cloning repo"
 git clone --depth 50 --no-single-branch https://x-access-token:$ACCESS_TOKEN@$GITHUB_ADDR/$REPO_SLUG.git $CODE_DIR
 cd $CODE_DIR
-if git checkout $COMMIT_HASH; then
-    echo "Find $COMMIT_HASH"
+
+if [ -n "$GHE_PR" ]
+then
+  git fetch origin +refs/pull/$GHE_PR/head
+  git checkout -qf FETCH_HEAD
 else
+  if git checkout $COMMIT_HASH; then
+    echo "Find $COMMIT_HASH"
+  else
     echo -n "Can not find $COMMIT_HASH with shallow clone. "
     echo "We will fetch all refs."
     git fetch --unshallow origin
     git checkout $COMMIT_HASH
+  fi
 fi
 
 echo "Running scan"
