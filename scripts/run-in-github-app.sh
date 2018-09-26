@@ -60,8 +60,16 @@ else
 fi
 
 echo "Cloning repo"
+git clone --depth 50 --no-single-branch https://x-access-token:$ACCESS_TOKEN@$GITHUB_ADDR/$REPO_SLUG.git $CODE_DIR
 cd $CODE_DIR
-GITHUB_CURL tarball/$COMMIT_HASH -L | tar -xz --strip 1
+if git checkout $COMMIT_HASH; then
+    echo "Find $COMMIT_HASH"
+else
+    echo -n "Can not find $COMMIT_HASH with shallow clone. "
+    echo "We will fetch all refs."
+    git fetch --unshallow origin
+    git checkout $COMMIT_HASH
+fi
 
 echo "Running scan"
 RET_VAL=0
