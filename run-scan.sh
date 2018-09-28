@@ -27,7 +27,7 @@ else
   then
     detect-secrets scan > "$BASEFILE"
   else
-    detect-secrets scan --update "$BASEFILE"
+    detect-secrets scan --exclude "$BASEFILE" --update "$BASEFILE"
   fi
 
   if [ `get_non_resolve_secret_count` -gt 0 ]
