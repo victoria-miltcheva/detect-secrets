@@ -1,4 +1,5 @@
 FROM python:alpine
+MAINTAINER toolbox-dev@us.ibm.com
 RUN apk add --no-cache jq git curl bash openssl
 RUN mkdir -p /code
 COPY . /usr/src/app
