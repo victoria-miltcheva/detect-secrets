@@ -5,6 +5,7 @@
 # GITHUB_APP_KEY
 # REPO_INSTALL_ID
 # COMMIT_HASH
+# Optional CHECK_RUN_ID if a queued check run was run`
 
 BASEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $BASEDIR/lib.sh
@@ -31,11 +32,9 @@ GET_CHECK_RUN_ID() {
         jq -r '.check_runs[0].id'
 }
 
-CHECK_RUN_ID=`GET_CHECK_RUN_ID`
+echo "Seeing check run '$CHECK_RUN_ID' (will be blank if no check run)"
 
-echo "Checking check run '$CHECK_RUN_ID' (will be blank if no check run)"
-
-if [ "$CHECK_RUN_ID" = "null" ]
+if [ -z "$CHECK_RUN_ID" ]
 then
     echo "Making new check_run"
     jq -n "{
@@ -102,6 +101,10 @@ echo "Refreshing access token"
 ACCESS_TOKEN=`GET_INSTALLATION_TOKEN $GITHUB_APP_ID $GITHUB_APP_KEY $REPO_INSTALL_ID`
 
 echo "Updating check run"
+if [ "$DEBUG" = "yes" ]
+then
+  cat $CODE_DIR/.secrets.baseline
+fi
 
 # todo update to latest when GHE update. 2.14 is on a different API version as github.com
 cat $CODE_DIR/.secrets.baseline | jq "{

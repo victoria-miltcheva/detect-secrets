@@ -1,5 +1,11 @@
 # river-detector
 
+## About
+
+The purpose of the project is to **detecting secrets** within a code base. This is a fork of [detect-secrets](https://github.com/Yelp/detect-secrets) from yelp. This include more detection, some of which are unique for IBM. Additional features to help integrate with services IBM uses.
+
+## Running
+
 Scanning:
 
 ```SH
