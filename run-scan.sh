@@ -4,7 +4,7 @@ echo "Scanning the code"
 # setting variables
 if [ -n "$CODE" ]
 then
-  cd "$CODE"
+  cd "$CODE" || exit 1
 fi
 if [ -z "$BASEFILE" ]
 then
@@ -30,7 +30,7 @@ else
     detect-secrets scan --exclude "$BASEFILE" --update "$BASEFILE"
   fi
 
-  if [ `get_non_resolve_secret_count` -gt 0 ]
+  if [ "$(get_non_resolve_secret_count)" -gt 0 ]
   then
     echo "Have secrets in code, please run audit to see what the secrets"
     exit 1

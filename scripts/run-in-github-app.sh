@@ -5,11 +5,12 @@
 # GITHUB_APP_KEY
 # REPO_INSTALL_ID
 # COMMIT_HASH
-# Optional CHECK_RUN_ID if a queued check run was run`
+# Optional CHECK_RUN_ID if a queued check run was run
 
 BASEDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-source $BASEDIR/lib.sh
-CODE_DIR=`mktemp -d`
+# shellcheck source=/dev/null
+source "$BASEDIR/lib.sh"
+CODE_DIR=$(mktemp -d)
 GITHUB_ADDR=github.ibm.com
 GITHUB_REPO_URL=https://$GITHUB_ADDR/api/v3/repos/$REPO_SLUG
 CHECK_NAME=river-detector
@@ -21,14 +22,14 @@ GITHUB_CURL() {
         -H "Authorization: token $ACCESS_TOKEN" \
         -H "Accept: application/vnd.github.antiope-preview+json" \
         "$@" \
-        $GITHUB_REPO_URL/$REPO_URL
+        "$GITHUB_REPO_URL/$REPO_URL"
 }
 
 echo "Getting access token"
-ACCESS_TOKEN=`GET_INSTALLATION_TOKEN $GITHUB_APP_ID $GITHUB_APP_KEY $REPO_INSTALL_ID`
+ACCESS_TOKEN=$(GET_INSTALLATION_TOKEN "$GITHUB_APP_ID" "$GITHUB_APP_KEY" "$REPO_INSTALL_ID")
 
 GET_CHECK_RUN_ID() {
-    GITHUB_CURL commits/$COMMIT_HASH/check-runs?check_name=$CHECK_NAME -s | \
+    GITHUB_CURL "commits/$COMMIT_HASH/check-runs?check_name=$CHECK_NAME" -s | \
         jq -r '.check_runs[0].id'
 }
 
@@ -44,7 +45,7 @@ then
         started_at: now | todateiso8601
     }" | GITHUB_CURL check-runs -fs -X POST -d @- > /dev/null
     echo "Made check run, now getting id"
-    CHECK_RUN_ID=`GET_CHECK_RUN_ID`
+    CHECK_RUN_ID=$(GET_CHECK_RUN_ID)
     if [ "$CHECK_RUN_ID" = "null" ]
     then
         echo "Error making check run exiting"
@@ -56,34 +57,34 @@ else
     jq -n "{
         status: \"in_progress\",
         started_at: now | todateiso8601
-    }" | GITHUB_CURL check-runs/$CHECK_RUN_ID -fs -X PATCH -d @- > /dev/null
+    }" | GITHUB_CURL "check-runs/$CHECK_RUN_ID" -fs -X PATCH -d @- > /dev/null
 fi
 
 echo "Cloning repo"
-git clone --depth 50 --no-single-branch https://x-access-token:$ACCESS_TOKEN@$GITHUB_ADDR/$REPO_SLUG.git $CODE_DIR
-cd $CODE_DIR
+git clone --depth 50 --no-single-branch "https://x-access-token:$ACCESS_TOKEN@$GITHUB_ADDR/$REPO_SLUG.git" "$CODE_DIR"
+cd "$CODE_DIR"
 
 # only support commit at the tip of the pull request
 GIT_BRANCH=$(git ls-remote | grep -m1 "^$COMMIT_HASH" | cut -f2 || true)
 
 if [ -n "$GIT_BRANCH" ]
 then
-  git fetch origin $GIT_BRANCH
+  git fetch origin "$GIT_BRANCH"
   git checkout -qf FETCH_HEAD
 else
-  if git checkout $COMMIT_HASH; then
+  if git checkout "$COMMIT_HASH"; then
     echo "Find $COMMIT_HASH"
   else
     echo -n "Can not find $COMMIT_HASH with shallow clone. "
     echo "We will fetch all refs."
     git fetch --unshallow origin
-    git checkout $COMMIT_HASH
+    git checkout "$COMMIT_HASH"
   fi
 fi
 
 echo "Running scan"
 RET_VAL=0
-CODE=$CODE_DIR $BASEDIR/../run-scan.sh || RET_VAL=1
+CODE=$CODE_DIR "$BASEDIR/../run-scan.sh" || RET_VAL=1
 if [ "$RET_VAL" -eq 0 ]
 then
     echo "Scan successful"
@@ -98,16 +99,16 @@ else
 fi
 
 echo "Refreshing access token"
-ACCESS_TOKEN=`GET_INSTALLATION_TOKEN $GITHUB_APP_ID $GITHUB_APP_KEY $REPO_INSTALL_ID`
+ACCESS_TOKEN=$(GET_INSTALLATION_TOKEN "$GITHUB_APP_ID" "$GITHUB_APP_KEY" "$REPO_INSTALL_ID")
 
 echo "Updating check run"
 if [ "$DEBUG" = "yes" ]
 then
-  cat $CODE_DIR/.secrets.baseline
+  cat "$CODE_DIR/.secrets.baseline"
 fi
 
 # todo update to latest when GHE update. 2.14 is on a different API version as github.com
-cat $CODE_DIR/.secrets.baseline | jq "{
+jq "{
     completed_at: now | todateiso8601,
     conclusion: \"$CONCLUSION\",
     status: \"completed\",
@@ -126,7 +127,7 @@ cat $CODE_DIR/.secrets.baseline | jq "{
             }
         ]
     }
-}" | GITHUB_CURL check-runs/$CHECK_RUN_ID -fs -X PATCH -d @- > /dev/null
+}" < "$CODE_DIR/.secrets.baseline" | GITHUB_CURL "check-runs/$CHECK_RUN_ID" -fs -X PATCH -d @- > /dev/null
 
 ## code for the latest github.com
 # cat $CODE_DIR/.secrets.baseline | jq "{
@@ -149,4 +150,4 @@ cat $CODE_DIR/.secrets.baseline | jq "{
 #     }
 # }" | GITHUB_CURL check-runs/$CHECK_RUN_ID -f -X PATCH -d @-
 
-rm -rf $CODE_DIR
+rm -rf "$CODE_DIR"
