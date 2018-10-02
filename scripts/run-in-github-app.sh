@@ -21,7 +21,7 @@ GITHUB_CURL() {
     curl \
         -H "Authorization: token $ACCESS_TOKEN" \
         -H "Accept: application/vnd.github.antiope-preview+json" \
-        "$@" \
+        $@ \
         "$GITHUB_REPO_URL/$REPO_URL"
 }
 

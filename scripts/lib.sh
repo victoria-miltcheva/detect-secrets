@@ -21,7 +21,7 @@ GENERATE_JWT_TOKEN() {
     PRIVATE_KEY="$2" # private key to sign with
 
     HEADER="{\"alg\":\"$ALG\"}"
-    PAYLOAD="{\"iat\":\"$IAT\",\"exp\":$EXP,\"iss\":\"$ISS\"}"
+    PAYLOAD="{\"iat\":$IAT,\"exp\":$EXP,\"iss\":\"$ISS\"}"
 
     encode() {
         echo -n "$1" | openssl enc -base64 -A
