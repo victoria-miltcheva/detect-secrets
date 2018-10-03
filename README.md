@@ -9,7 +9,7 @@ The purpose of the project is to **detecting secrets** within a code base. This 
 Scanning:
 
 ```SH
-docker run -v $CODEBASE:/code --rm -it txo-whitewater-docker-local.artifactory.swg-devops.com/river-detector
+docker run -v $CODEBASE:/code --rm -it txo-whitewater-public-docker-local.artifactory.swg-devops.com/river-detector
 ```
 
 The docker image just runs the `run-scan.sh` script in the repo, which this package install. The secrets are stored in the `.secrets.baseline`, in a json format.
@@ -18,7 +18,22 @@ After the repo is scanned and new secrets are found, run the audit to mark the s
 
 Audit:
 ```SH
-docker run -v $CODEBASE:/code --rm -it txo-whitewater-docker-local.artifactory.swg-devops.com/river-detector audit
+docker run -v $CODEBASE:/code --rm -it txo-whitewater-public-docker-local.artifactory.swg-devops.com/river-detector audit
+```
+
+#### Installing locally
+
+You can install this via pip. The best way to install the package is via github. They are 2 options installing via GitHub: SSH and HTTPS. The best way is to clone it that same way you clone code via GitHub:
+
+Install via SSH:
+```
+pip install -e git+ssh://git@github.ibm.com/river/river-detector.git@master#egg=detect-secrets
+```
+
+Install via HTTPS:
+```
+# Note if it ask you for a password you need to use a github personal access token
+pip install -e git+https://github.ibm.com/river/river-detector.git@master#egg=detect-secrets
 ```
 
 #### Inline Whitelisting
@@ -78,8 +93,8 @@ travis encrypt SECRET_DOCKER_PASS="$PASSWORD" --add # API key of the user who ha
 services:
     - docker
 after_script:
-    - docker login txo-whitewater-docker-local.artifactory.swg-devops.com --username $SECRET_DOCKER_USER --password $SECRET_DOCKER_PASS
-    - docker run --rm -v $TRAVIS_BUILD_DIR:/code txo-whitewater-docker-local.artifactory.swg-devops.com/river-detector:latest
+    - docker login txo-whitewater-public-docker-local.artifactory.swg-devops.com --username $SECRET_DOCKER_USER --password $SECRET_DOCKER_PASS
+    - docker run --rm -v $TRAVIS_BUILD_DIR:/code txo-whitewater-public-docker-local.artifactory.swg-devops.com/river-detector:latest
 ```
 
 ## A Few Caveats
