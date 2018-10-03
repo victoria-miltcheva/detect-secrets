@@ -28,12 +28,23 @@ GITHUB_CURL() {
 echo "Getting access token"
 ACCESS_TOKEN=$(GET_INSTALLATION_TOKEN "$GITHUB_APP_ID" "$GITHUB_APP_KEY" "$REPO_INSTALL_ID")
 
-GET_CHECK_RUN_ID() {
-    GITHUB_CURL "commits/$COMMIT_HASH/check-runs?check_name=$CHECK_NAME" -s | \
-        jq -r '.check_runs[0].id'
+GET_CHECK_RUN() {
+    GITHUB_CURL "commits/$COMMIT_HASH/check-runs?check_name=$CHECK_NAME" -s
 }
 
 echo "Seeing check run '$CHECK_RUN_ID' (will be blank if no check run)"
+
+# trying to find a check run which is queued otherwise it will make a new one
+if [ -z "$CHECK_RUN_ID" ]
+then
+  CHECK_RUN=$(GET_CHECK_RUN)
+
+  CHECK_RUN_STATUS=$(echo "$CHECK_RUN"| jq -r '.check_runs[0].status')
+  if [ "$CHECK_RUN_STATUS" = "queued" ]
+  then
+    CHECK_RUN_ID=$(echo "$CHECK_RUN" | jq -r '.check_runs[0].id')
+  fi
+fi
 
 if [ -z "$CHECK_RUN_ID" ]
 then
@@ -45,7 +56,7 @@ then
         started_at: now | todateiso8601
     }" | GITHUB_CURL check-runs -fs -X POST -d @- > /dev/null
     echo "Made check run, now getting id"
-    CHECK_RUN_ID=$(GET_CHECK_RUN_ID)
+    CHECK_RUN_ID=$(GET_CHECK_RUN | jq -r '.check_runs[0].id')
     if [ "$CHECK_RUN_ID" = "null" ]
     then
         echo "Error making check run exiting"
