@@ -230,6 +230,11 @@ class PluginOptions(object):
             disable_flag_text='--no-keyword-scan',
             disable_help_text='Disables scanning for secret keywords.',
         ),
+        PluginDescriptor(
+            classname='SlackDetector',
+            disable_flag_text='--no-slack-scan',
+            disable_help_text='Disables scanning for secret slack.',
+        ),
     ]
 
     def __init__(self, parser):
