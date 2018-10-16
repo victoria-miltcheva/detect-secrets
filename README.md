@@ -27,13 +27,13 @@ You can install this via pip. The best way to install the package is via github.
 
 Install via SSH:
 ```
-pip install -e git+ssh://git@github.ibm.com/river/river-detector.git@master#egg=detect-secrets
+pip install git+ssh://git@github.ibm.com/river/river-detector.git@master#egg=detect-secrets
 ```
 
 Install via HTTPS:
 ```
 # Note if it ask you for a password you need to use a github personal access token
-pip install -e git+https://github.ibm.com/river/river-detector.git@master#egg=detect-secrets
+pip install git+https://github.ibm.com/river/river-detector.git@master#egg=detect-secrets
 ```
 
 #### Inline Whitelisting

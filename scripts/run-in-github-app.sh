@@ -15,6 +15,16 @@ GITHUB_ADDR=github.ibm.com
 GITHUB_REPO_URL=https://$GITHUB_ADDR/api/v3/repos/$REPO_SLUG
 CHECK_NAME=river-detector
 
+if [ -n "$DEPLOY_LEVEL" ] && [ "$DEPLOY_LEVEL" != "production" ]
+then
+  CHECK_NAME="river-detector-$DEPLOY_LEVEL"
+fi
+
+if [ -n "$APP_ID" ]
+then
+  GITHUB_APP_ID=$APP_ID
+fi
+
 GITHUB_CURL() {
     local REPO_URL=$1
     shift
@@ -88,7 +98,7 @@ else
   else
     echo -n "Can not find $COMMIT_HASH with shallow clone. "
     echo "We will fetch all refs."
-    git fetch --unshallow origin
+    git fetch --unshallow origin || git fetch origin
     git checkout "$COMMIT_HASH"
   fi
 fi
