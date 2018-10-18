@@ -1,4 +1,4 @@
-# river-detector
+# whitewater-detect-secrets
 
 ## About
 
@@ -9,7 +9,7 @@ The purpose of the project is to **detecting secrets** within a code base. This 
 Scanning:
 
 ```SH
-docker run -v $CODEBASE:/code --rm -it txo-whitewater-public-docker-local.artifactory.swg-devops.com/river-detector
+docker run -v $CODEBASE:/code --rm -it txo-whitewater-public-docker-local.artifactory.swg-devops.com/whitewater-detect-secrets
 ```
 
 The docker image just runs the `run-scan.sh` script in the repo, which this package install. The secrets are stored in the `.secrets.baseline`, in a json format.
@@ -18,7 +18,7 @@ After the repo is scanned and new secrets are found, run the audit to mark the s
 
 Audit:
 ```SH
-docker run -v $CODEBASE:/code --rm -it txo-whitewater-public-docker-local.artifactory.swg-devops.com/river-detector audit
+docker run -v $CODEBASE:/code --rm -it txo-whitewater-public-docker-local.artifactory.swg-devops.com/whitewater-detect-secrets audit
 ```
 
 #### Installing locally
@@ -27,13 +27,13 @@ You can install this via pip. The best way to install the package is via github.
 
 Install via SSH:
 ```
-pip install git+ssh://git@github.ibm.com/river/river-detector.git@master#egg=detect-secrets
+pip install git+ssh://git@github.ibm.com/Whitewater/whitewater-detect-secrets.git@master#egg=detect-secrets
 ```
 
 Install via HTTPS:
 ```
 # Note if it ask you for a password you need to use a github personal access token
-pip install git+https://github.ibm.com/river/river-detector.git@master#egg=detect-secrets
+pip install git+https://github.ibm.com/Whitewater/whitewater-detect-secrets.git@master#egg=detect-secrets
 ```
 
 #### Inline Whitelisting
@@ -66,7 +66,7 @@ Follow the instruction to install the pre-commit hook from: https://pre-commit.c
 Add a file to configure the pre-commit hook
 ```
 $ cat .pre-commit-config.yaml
--   repo: git@github.ibm.com:river/river-detector
+-   repo: git@github.ibm.com:Whitewater/whitewater-detect-secrets
     rev: master
     hooks:
     -   id: detect-secrets
@@ -94,7 +94,7 @@ services:
     - docker
 after_script:
     - docker login txo-whitewater-public-docker-local.artifactory.swg-devops.com --username $SECRET_DOCKER_USER --password $SECRET_DOCKER_PASS
-    - docker run --rm -v $TRAVIS_BUILD_DIR:/code txo-whitewater-public-docker-local.artifactory.swg-devops.com/river-detector:latest
+    - docker run --rm -v $TRAVIS_BUILD_DIR:/code txo-whitewater-public-docker-local.artifactory.swg-devops.com/whitewater-detect-secrets:latest
 ```
 
 ## A Few Caveats

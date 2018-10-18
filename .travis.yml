@@ -5,7 +5,7 @@ env:
         - TOXENV=py27
         - DOCKER_USER=travisrw@us.ibm.com
         - DOCKER_IMAGE_HOST=txo-whitewater-public-docker-local.artifactory.swg-devops.com
-        - DOCKER_IMAGE=txo-whitewater-public-docker-local.artifactory.swg-devops.com/river-detector
+        - DOCKER_IMAGE=txo-whitewater-public-docker-local.artifactory.swg-devops.com/whitewater-detect-secrets
         - DOCKER_IMAGE_TAG="$TRAVIS_BUILD_NUMBER-id-$TRAVIS_BUILD_ID-time-$(date +%s)"
 deploy:
 - provider: script

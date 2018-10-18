@@ -13,11 +13,11 @@ source "$BASEDIR/lib.sh"
 CODE_DIR=$(mktemp -d)
 GITHUB_ADDR=github.ibm.com
 GITHUB_REPO_URL=https://$GITHUB_ADDR/api/v3/repos/$REPO_SLUG
-CHECK_NAME=river-detector
+CHECK_NAME=whitewater-detect-secrets
 
 if [ -n "$DEPLOY_LEVEL" ] && [ "$DEPLOY_LEVEL" != "production" ]
 then
-  CHECK_NAME="river-detector-$DEPLOY_LEVEL"
+  CHECK_NAME="whitewater-detect-secrets-$DEPLOY_LEVEL"
 fi
 
 if [ -n "$APP_ID" ]
