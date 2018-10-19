@@ -11,6 +11,7 @@ import pytest
 from detect_secrets.core import audit
 from detect_secrets.core.color import BashColor
 from testing.factories import potential_secret_factory
+from testing.mocks import mock_open as mock_open_base
 from testing.mocks import mock_printer as mock_printer_base
 
 
@@ -318,28 +319,24 @@ class TestPrintContext(object):
             plugin_settings=settings,
         )
 
-    @contextmanager
-    def _mock_sed_call(
+    def mock_open(
         self,
         start_line=10,
         secret_line=15,
         end_line=20,
         line_containing_secret='BEGIN PRIVATE KEY',
     ):
-        with mock.patch(
-            'detect_secrets.core.audit.subprocess',
-        ) as m:
-            m.check_output.return_value = '{}{}{}'.format(
-                self._make_string_into_individual_lines(
-                    string.ascii_letters[:(secret_line - start_line)],
-                ),
-                line_containing_secret + '\n',
-                self._make_string_into_individual_lines(
-                    string.ascii_letters[:(end_line - secret_line)][::-1],
-                ),
-            ).encode()
-
-            yield m.check_output
+        data = '{}{}{}{}'.format(
+            '\n' * (start_line - 1),
+            self._make_string_into_individual_lines(
+                string.ascii_letters[:(secret_line - start_line)],
+            ),
+            line_containing_secret + '\n',
+            self._make_string_into_individual_lines(
+                string.ascii_letters[:(end_line - secret_line)][::-1],
+            ),
+        )
+        return mock_open_base(data, 'detect_secrets.core.audit.codecs.open')
 
     @staticmethod
     def _make_string_into_individual_lines(string):
@@ -351,15 +348,13 @@ class TestPrintContext(object):
         )
 
     def test_basic(self, mock_printer):
-        with self._mock_sed_call(
+        with self.mock_open(
             start_line=10,
             secret_line=15,
             end_line=20,
             line_containing_secret='-----BEGIN PRIVATE KEY-----',
-        ) as sed_call:
+        ):
             self.run_logic()
-
-            assert sed_call.call_args[0][0] == 'sed -n 10,20p filenameA'.split()
 
         assert mock_printer.message == textwrap.dedent("""
             Secret 1 of 2
@@ -381,17 +376,15 @@ class TestPrintContext(object):
         """)[1:-1]
 
     def test_secret_at_top_of_file(self, mock_printer):
-        with self._mock_sed_call(
+        with self.mock_open(
             start_line=1,
             secret_line=1,
             end_line=6,
             line_containing_secret='-----BEGIN PRIVATE KEY-----',
-        ) as sed_call:
+        ):
             self.run_logic(
                 secret_lineno=1,
             )
-
-            assert sed_call.call_args[0][0] == 'sed -n 1,6p filenameA'.split()
 
         assert mock_printer.message == textwrap.dedent("""
             Secret 1 of 2
@@ -408,7 +401,7 @@ class TestPrintContext(object):
         """)[1:-1]
 
     def test_secret_not_found(self, mock_printer):
-        with self._mock_sed_call(), pytest.raises(
+        with self.mock_open(), pytest.raises(
             audit.SecretNotFoundOnSpecifiedLineError,
         ):
             self.run_logic(
@@ -431,7 +424,7 @@ class TestPrintContext(object):
         """)[1:-1]
 
     def test_secret_in_yaml_file(self, mock_printer):
-        with self._mock_sed_call(
+        with self.mock_open(
             line_containing_secret='api key: 123456789a',
         ):
             self.run_logic(

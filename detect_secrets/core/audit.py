@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import codecs
+import itertools
 import json
 import os
 import subprocess
@@ -233,37 +235,22 @@ def _get_secret_with_context(
 
     :raises: SecretNotFoundOnSpecifiedLineError
     """
-    secret_lineno = secret['line_number']
-    start_line = 1 if secret_lineno <= lines_of_context \
-        else secret_lineno - lines_of_context
-    end_line = secret_lineno + lines_of_context
+    secret_line_idx = secret['line_number'] - 1
+    end_line = secret_line_idx + lines_of_context + 1
 
-    output = subprocess.check_output([
-        'sed',
-        '-n', '{},{}p'.format(start_line, end_line),
-        filename,
-    ]).decode('utf-8').splitlines()
+    if secret_line_idx <= lines_of_context:
+        start_line = 0
+        index_of_secret_in_output = secret_line_idx
+    else:
+        start_line = secret_line_idx - lines_of_context
+        index_of_secret_in_output = lines_of_context
 
-    trailing_lines_of_context = lines_of_context
-    if len(output) < end_line - start_line + 1:
-        # This handles the case of a short file.
-        num_lines_in_file = int(subprocess.check_output([
-            'wc',
-            '-l',
-            filename,
-        ]).decode('utf-8').split()[0])
-
-        trailing_lines_of_context = lines_of_context - \
-            (end_line - num_lines_in_file)
-
-    # -1, because that's where the secret actually is (without it,
-    # it would just be the start of the context block).
-    # NOTE: index_of_secret_in_output should *always* be negative.
-    index_of_secret_in_output = -trailing_lines_of_context - 1
+    with codecs.open(filename, encoding='utf-8') as file:
+        output = list(itertools.islice(file.read().splitlines(), start_line, end_line))
 
     output[index_of_secret_in_output] = _highlight_secret(
         output[index_of_secret_in_output],
-        secret_lineno,
+        secret['line_number'],
         secret,
         filename,
         plugin_settings,
@@ -274,7 +261,7 @@ def _get_secret_with_context(
         map(
             lambda x: '{}:{}'.format(
                 BashColor.color(
-                    str(int(x[0]) + start_line),
+                    str(int(x[0]) + start_line + 1),
                     Color.LIGHT_GREEN,
                 ),
                 x[1],
