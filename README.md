@@ -1,126 +1,107 @@
-# whitewater-detect-secrets
+# Whitewater Detect Secrets
 
 ## About
 
 The purpose of the project is to **detecting secrets** within a code base. This is a fork of [detect-secrets](https://github.com/Yelp/detect-secrets) from yelp. This include more detection, some of which are unique for IBM. Additional features to help integrate with services IBM uses.
 
-## Running
+`detect-secrets` is an aptly named module for (surprise, surprise) **detecting
+secrets** within a code base.
 
-Scanning:
+However, unlike other similar packages that solely focus on finding secrets,
+this package is designed with the enterprise client in mind: providing a
+**backwards compatible**, systematic means of:
 
-```SH
-docker run -v $CODEBASE:/code --rm -it txo-whitewater-public-docker-local.artifactory.swg-devops.com/whitewater-detect-secrets
-```
+1. Preventing new secrets from entering the code base,
+2. Detecting if such preventions are explicitly bypassed, and
+3. Providing a checklist of secrets to roll, and migrate off to a more secure
+   storage.
 
-The docker image just runs the `run-scan.sh` script in the repo, which this package install. The secrets are stored in the `.secrets.baseline`, in a json format.
+This way, you create a
+[separation of concern](https://en.wikipedia.org/wiki/Separation_of_concerns):
+accepting that there may *currently* be secrets hiding in your large repository
+(this is what we refer to as a _baseline_),
+but preventing this issue from getting any larger, without dealing with the
+potentially gargantuous effort of moving existing secrets away.
 
-After the repo is scanned and new secrets are found, run the audit to mark the secrets as valid or invalid. You can do this by running audit flag on the script.
+It does this by running periodic diff outputs against heuristically crafted
+regex statements, to identify whether any *new* secret has been committed. This
+way, it avoids the overhead of digging through all git history, as well as the
+need to scan the entire repository every time.
 
-Audit:
-```SH
-docker run -v $CODEBASE:/code --rm -it txo-whitewater-public-docker-local.artifactory.swg-devops.com/whitewater-detect-secrets audit
-```
+For a look at recent changes, please see the
+[changelog](/CHANGELOG.md).
 
-#### Installing locally
+## User Guide
 
-You can install this via pip. The best way to install the package is via github. They are 2 options installing via GitHub: SSH and HTTPS. The best way is to clone it that same way you clone code via GitHub:
+If you are looking for information on how to use this project as an end user please refer to the user guide under [pages](https://pages.github.ibm.com/whitewater/whitewater-detect-secrets).
 
-Install via SSH:
-```
-pip install git+ssh://git@github.ibm.com/Whitewater/whitewater-detect-secrets.git@master#egg=detect-secrets
-```
+## Contribution
 
-Install via HTTPS:
-```
-# Note if it ask you for a password you need to use a github personal access token
-pip install git+https://github.ibm.com/Whitewater/whitewater-detect-secrets.git@master#egg=detect-secrets
-```
+Please read the [CONTRIBUTING.md](/CONTRIBUTING.md). Bellow is information on how setup the testing environment, and run the tests.
 
-#### Inline Whitelisting
+## Testing
 
-Another way of whitelisting secrets is through the inline comment
-`# pragma: whitelist secret`.
+To run the tests you need install the dependencies described bellow.
 
-For example:
-
-```
-API_KEY = "blah-blah-but-actually-not-secret" # pragma: whitelist secret
-
-def main():
-    print('hello world')
-
-if __name__ == '__main__'
-    main()
-```
-
-This may be a convenient way for you to whitelist secrets, without having to
-regenerate the entire baseline again. Furthermore, this makes the whitelisted
-secrets easily searchable, auditable, and maintainable.
-
-### Pre-commit Hook
-
-The code can be run as a pre commit hook using either docker, or running the code directly. Those meathods need to be customized for each release. An easy to manage pre commit hooks is with the pre commit hook framework, which can be found here: https://pre-commit.com/ . To setup the pre-commit framework run:
-
-Follow the instruction to install the pre-commit hook from: https://pre-commit.com .
-
-Add a file to configure the pre-commit hook
-```
-$ cat .pre-commit-config.yaml
--   repo: git@github.ibm.com:Whitewater/whitewater-detect-secrets
-    rev: master
-    hooks:
-    -   id: detect-secrets
-```
-
-Run the install command once per repo clone, by running:
+You need to run the setup once or after you do a `make clean`. To run the setup run the following command:
 
 ```
-pre-commit install
+make setup
 ```
 
-## Running via Travis CI
+To run the tests run:
 
-***Note:*** **Using this method will fail pull requests from forks because the Artifactory login info stored in Travis secure environment variables are not available to pull request from forks.**
-
-1. Setup travis for the repository
-1. Add you artifactory password as a secret variable by running the following command:
-```BASH
-travis encrypt SECRET_DOCKER_USER="$USER_NAME" --add # user who has access to artifactory
-travis encrypt SECRET_DOCKER_PASS="$PASSWORD" --add # API key of the user who has access to artifactory
 ```
-1. Add the following to your `.travis.yml`
-```yaml
-services:
-    - docker
-after_script:
-    - docker login txo-whitewater-public-docker-local.artifactory.swg-devops.com --username $SECRET_DOCKER_USER --password $SECRET_DOCKER_PASS
-    - docker run --rm -v $TRAVIS_BUILD_DIR:/code txo-whitewater-public-docker-local.artifactory.swg-devops.com/whitewater-detect-secrets:latest
+make test
 ```
 
-## A Few Caveats
+If you want to clean you environment, if you have a bad setup or tests, just run:
 
-This is not meant to be a sure-fire solution to prevent secrets from entering
-the codebase. Only proper developer education can truly do that. This pre-commit
-hook merely implements several heuristics to try and prevent obvious cases of
-committing secrets.
+```
+make clean
+```
 
-### Things that won't be prevented
+## Testing Dependencies
 
-* Multi-line secrets
-* Default passwords that do not trigger the `KeywordDetector` (e.g. `paaassword = "paaassword"`)
+This project is written in Python. Here are the dependencies needed to run the tests:
+- `python` The version can be installed using an utility like pyenv ( instructions bellow ) or your os package manager
+    - `2.7`
+    - `3.5`
+    - `3.6`
+    - `pypy`
+- `tox` installed via pip or your os package manager
+- `make`
 
-### Plugin Configuration
+#### Installing via pyenv
 
-One method that this package uses to find secrets is by searching for high
-entropy strings in the codebase. This is calculated through the [Shannon entropy
-formula](http://blog.dkbza.org/2007/05/scanning-data-for-entropy-anomalies.html).
-If the entropy of a given string exceeds the preset amount, the string will be
-rejected as a potential secret.
+1. Install [pyenv](https://github.com/pyenv/pyenv) in your environment. **Note:** you need to add the environment to you `.bashrc`. You will most likely run into the common build problems listed [here](https://github.com/pyenv/pyenv/wiki/Common-build-problems).
+1. Install the environment listed above
+1. Set the environment as global using the `pyenv global $VERSION` command
+1. Install tox `pip install tox`
 
-This preset amount can be adjusted in several ways:
 
-* Specifying it within the config file, for server scanning.
-* Specifying it with command line flags (eg. `--base64-limit`)
+#### Running test in a docker image
 
-Lowering these limits will identify more potential secrets, but also create
-more false positives. Adjust these limits to suit your needs.
+If you don't want to figure out how to install it locally or don't want to spend the time you can use the development docker image. Install `docker` and `docker-compose`. Then run:
+
+```
+docker-compose build test && docker-compose run --rm test
+```
+
+## Plugins
+
+Each of the checks are developed as plugins in the [detect_secrets/plugins](/tree/master/detect_secrets/plugins) directory. Each plugin represent a single test or a group of tests. The following is a list of the currently developed plugins:
+
+The current heuristic searches we implement out of the box include:
+
+* **Base64HighEntropyString**: checks for all strings matching the Base64
+  character set, and alerts if their Shannon entropy is above a certain limit.
+
+* **HexHighEntropyString**: checks for all strings matching the Hex character
+  set, and alerts if their Shannon entropy is above a certain limit.
+
+* **PrivateKeyDetector**: checks to see if any private keys are committed.
+
+* **BasicAuthDetector**: checks to see if BasicAuth is used e.g. `https://username:password@example.com`
+
+* **KeywordDetector**: checks to see if certain keywords are being used e.g. `password` or `secret`

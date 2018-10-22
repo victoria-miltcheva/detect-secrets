@@ -9,11 +9,3 @@ indent_style = space
 insert_final_newline = true
 max_line_length = 80
 trim_trailing_whitespace = true
-
-# Markdown override allow for spaces at end of line
-[*.md]
-trim_trailing_whitespace = false
-
-# hbs files have markdown in them sometimes
-[*.hbs]
-trim_trailing_whitespace = false
