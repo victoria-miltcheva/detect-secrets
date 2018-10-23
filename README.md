@@ -33,7 +33,7 @@ For a look at recent changes, please see the
 
 ## User Guide
 
-If you are looking for information on how to use this project as an end user please refer to the user guide under [pages](https://pages.github.ibm.com/whitewater/whitewater-detect-secrets).
+If you are looking for information on how to use this project as an end user please refer to the user guide [Guide](https://w3.ibm.com/w3publisher/detect-secrets).
 
 ## Contribution
 
