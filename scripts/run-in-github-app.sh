@@ -146,7 +146,7 @@ jq "{
                 message: .type,
                 warning_level: \"failure\"
             }
-        ]
+        ] | [limit(48;.[])]
     }
 }" < "$CODE_DIR/.secrets.baseline" | GITHUB_CURL "check-runs/$CHECK_RUN_ID" -fs -X PATCH -d @- > /dev/null
 
