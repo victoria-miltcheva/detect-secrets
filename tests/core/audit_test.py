@@ -473,7 +473,7 @@ class TestPrintContext(object):
                 secret_lineno=1,
             )
 
-        assert mock_printer.message == textwrap.dedent(u"""
+        assert mock_printer.message == textwrap.dedent("""
             Secret 1 of 2
             Filename: filenameA
             ----------
