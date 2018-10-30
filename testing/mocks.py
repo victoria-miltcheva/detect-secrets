@@ -1,4 +1,6 @@
 """This is a collection of utility functions for easier, DRY testing."""
+from __future__ import unicode_literals
+
 import io
 from collections import defaultdict
 from collections import namedtuple
@@ -136,7 +138,10 @@ def mock_printer(obj):
             self.clear()
 
         def add(self, message):
-            self.message += str(message) + '\n'
+            try:
+                self.message += str(message) + '\n'
+            except UnicodeEncodeError:
+                self.message += unicode(message) + '\n'   # noqa: F821
 
         def clear(self):
             self.message = ''

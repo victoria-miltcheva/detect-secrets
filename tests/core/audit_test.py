@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import string
 import textwrap
@@ -457,6 +458,31 @@ class TestPrintContext(object):
             18:c
             19:b
             20:a
+            ----------
+
+        """)[1:-1]
+
+    def test_unicode_in_output(self, mock_printer):
+        with self.mock_open(
+            start_line=1,
+            secret_line=1,
+            end_line=6,
+            line_containing_secret='-----BEGIN PRIVATE KEY-----\uFFFD',
+        ):
+            self.run_logic(
+                secret_lineno=1,
+            )
+
+        assert mock_printer.message == textwrap.dedent(u"""
+            Secret 1 of 2
+            Filename: filenameA
+            ----------
+            1:-----BEGIN PRIVATE KEY-----\uFFFD
+            2:e
+            3:d
+            4:c
+            5:b
+            6:a
             ----------
 
         """)[1:-1]
