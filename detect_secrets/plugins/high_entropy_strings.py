@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import configparser
+import functools
 import math
 import os
 import re
@@ -32,6 +33,13 @@ IGNORED_SEQUENTIAL_STRINGS = (
 YAML_EXTENSIONS = (
     '.yaml',
     '.yml',
+)
+INI_EXTENSIONS = (
+    'ini',
+    'cfg',
+    'conf'
+    'config.sys',
+    'config.txt',
 )
 
 
@@ -162,6 +170,15 @@ class HighEntropyStringsPlugin(BasePlugin):
         """
         :returns: same format as super().analyze()
         """
+        if not functools.reduce(
+                lambda res, ending: res or filename.lower().endswith(ending),
+                INI_EXTENSIONS, False,
+        ):
+            # INI parser can inmproperly prase mark down and other files
+            # using huristic to skip files that are not a well known
+            # extension or file name
+            raise configparser.Error
+
         potential_secrets = {}
 
         with self.non_quoted_string_regex():
