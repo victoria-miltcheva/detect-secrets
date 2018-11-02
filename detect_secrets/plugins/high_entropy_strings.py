@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import configparser
-import functools
 import math
 import os
 import re
@@ -35,12 +34,15 @@ YAML_EXTENSIONS = (
     '.yml',
 )
 INI_EXTENSIONS = (
-    'ini',
-    'cfg',
-    'conf'
+    '.ini',
+    '.cfg',
+    '.conf',
+)
+
+INI_FILENAMES = {
     'config.sys',
     'config.txt',
-)
+}
 
 
 class HighEntropyStringsPlugin(BasePlugin):
@@ -170,10 +172,8 @@ class HighEntropyStringsPlugin(BasePlugin):
         """
         :returns: same format as super().analyze()
         """
-        if not functools.reduce(
-                lambda res, ending: res or filename.lower().endswith(ending),
-                INI_EXTENSIONS, False,
-        ):
+        if os.path.splitext(filename)[1].lower() not in INI_EXTENSIONS \
+           and os.path.basename(filename).lower() not in INI_FILENAMES:
             # INI parser can inmproperly prase mark down and other files
             # using huristic to skip files that are not a well known
             # extension or file name

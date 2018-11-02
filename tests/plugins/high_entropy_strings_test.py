@@ -149,7 +149,7 @@ class HighEntropyStringsTest(object):
         # this test case ensure that scanning can complete and find
         # high entropy issues
         filenames = [
-            'test_data/config.ini',
+            'test_data/config.txt',
             'test_data/runbook.md',
         ]
 
@@ -166,12 +166,12 @@ class HighEntropyStringsTest(object):
         for secret in accumulated_secrets.values():
             location = str(secret).splitlines()[1]
             assert location in (
-                'Location:    test_data/config.ini:2',
-                'Location:    test_data/config.ini:6',
-                'Location:    test_data/config.ini:10',
-                'Location:    test_data/config.ini:15',
-                'Location:    test_data/config.ini:21',
-                'Location:    test_data/config.ini:22',
+                'Location:    test_data/config.txt:2',
+                'Location:    test_data/config.txt:6',
+                'Location:    test_data/config.txt:10',
+                'Location:    test_data/config.txt:15',
+                'Location:    test_data/config.txt:21',
+                'Location:    test_data/config.txt:22',
                 'Location:    test_data/runbook.md:12',
             )
             count += 1
