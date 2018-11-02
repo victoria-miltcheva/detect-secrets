@@ -110,13 +110,21 @@ if [ "$RET_VAL" -eq 0 ]
 then
     echo "Scan successful"
     CONCLUSION="success"
-    OUTPUT_TITLE="No Secrets"
-    OUTPUT_SUMMARY="All Good to go"
+    OUTPUT_TITLE="No secrets identified"
+    OUTPUT_SUMMARY="We did not find any secrets in the code, but the scan is"
+    OUTPUT_SUMMARY="$OUTPUT_SUMMARY not perfect. You should always review the"
+    OUTPUT_SUMMARY="$OUTPUT_SUMMARY code to make sure no secrets are added."
 else
     echo "Scan failed"
     CONCLUSION="failure"
-    OUTPUT_TITLE="Found Secrets"
-    OUTPUT_SUMMARY="We found secrets you should rotate them"
+    OUTPUT_TITLE="Potential secrets identified"
+    read -r -d '' OUTPUT_SUMMARY << EOF
+Detect Secrets has identified potential secrets in the code.  Review each finding and determine if it is a secret or not a secret.
+
+If it is a secret follow the remediation steps in [ Managing Credentials ]( https://pages.github.ibm.com/Whitewater/fieldguide/practices/managing-credentials).
+
+If it is not a secret you can indicate this in the code with a comment \`# pragma: whitelist secret\` or if you have a large number of results to whitelist we recommend you create a secrets baseline following the steps in the [getting started guide](https://w3.ibm.com/w3publisher/detect-secrets/getting-started).
+EOF
 fi
 
 echo "Refreshing access token"
@@ -143,7 +151,7 @@ jq "{
                 blob_href: ( \"https://github.ibm.com/$REPO_SLUG/blob/$COMMIT_HASH/\" + .filename ),
                 start_line: .line_number,
                 end_line: .line_number,
-                message: .type,
+                message: ( \"Potential secret identified by \" + .type + \" refer to the [guide](https://w3.ibm.com/w3publisher/detect-secrets) for guidance if needed\" ),
                 warning_level: \"failure\"
             }
         ] | [limit(48;.[])]
