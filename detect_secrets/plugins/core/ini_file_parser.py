@@ -2,18 +2,11 @@ import configparser
 import re
 
 
-def formatOption(option):
-    try:
-        return str(option)
-    except UnicodeEncodeError:
-        return unicode(option)  # noqa F821
-
-
 class IniFileParser(object):
 
     def __init__(self, file):
         self.parser = configparser.ConfigParser()
-        self.parser.optionxform = formatOption
+        self.parser.optionxform = str
         self.parser.read_file(file)
 
         # Hacky way to keep track of line location

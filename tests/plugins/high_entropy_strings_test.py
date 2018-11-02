@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-import codecs
 import string
 
 import pytest
@@ -122,7 +121,7 @@ class HighEntropyStringsTest(object):
 
         accumulated_secrets = {}
         for filename in filenames:
-            with codecs.open(filename, encoding='utf-8') as f:
+            with open(filename) as f:
                 accumulated_secrets.update(
                     plugin.analyze(f, filename),
                 )
@@ -143,37 +142,10 @@ class HighEntropyStringsTest(object):
 
         assert count == 7
 
-    def test_ini_file_with_unicode(self):
-        # We're testing two files here, because we want to make sure that
-        # the HighEntropyStrings regex is reset back to normal after
-        # scanning the ini file.
-        filenames = [
-            'test_data/config_with_unicode.ini',
-        ]
-
-        plugin = Base64HighEntropyString(3)
-
-        accumulated_secrets = {}
-        for filename in filenames:
-            with codecs.open(filename, encoding='utf-8') as f:
-                accumulated_secrets.update(
-                    plugin.analyze(f, filename),
-                )
-        count = 0
-        for secret in accumulated_secrets.values():
-            location = str(secret).splitlines()[1]
-            assert location in (
-                'Location:    test_data/config_with_unicode.ini:2',
-                'Location:    test_data/config_with_unicode.ini:6',
-            )
-            count += 1
-
-        assert count == 2
-
     def test_yaml_file(self):
         plugin = Base64HighEntropyString(3)
 
-        with codecs.open('test_data/config.yaml', encoding='utf-8') as f:
+        with open('test_data/config.yaml') as f:
             secrets = plugin.analyze(f, 'test_data/config.yaml')
 
         assert len(secrets.values()) == 1
