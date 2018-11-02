@@ -33,6 +33,16 @@ YAML_EXTENSIONS = (
     '.yaml',
     '.yml',
 )
+INI_EXTENSIONS = (
+    '.ini',
+    '.cfg',
+    '.conf',
+)
+
+INI_FILENAMES = {
+    'config.sys',
+    'config.txt',
+}
 
 
 class HighEntropyStringsPlugin(BasePlugin):
@@ -162,6 +172,13 @@ class HighEntropyStringsPlugin(BasePlugin):
         """
         :returns: same format as super().analyze()
         """
+        if os.path.splitext(filename)[1].lower() not in INI_EXTENSIONS \
+           and os.path.basename(filename).lower() not in INI_FILENAMES:
+            # INI parser can inmproperly prase mark down and other files
+            # using huristic to skip files that are not a well known
+            # extension or file name
+            raise configparser.Error
+
         potential_secrets = {}
 
         with self.non_quoted_string_regex():

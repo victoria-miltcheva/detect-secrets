@@ -142,6 +142,42 @@ class HighEntropyStringsTest(object):
 
         assert count == 7
 
+    def test_md_that_caused_ini_parser_failure_on_27_file(self):
+        # Mark down files with colons and unicode charaters preceding the
+        # colon on the line would cause the scanner to fail and exit on
+        # 2.7 due to ini parser beig used on non-markdown files
+        # this test case ensure that scanning can complete and find
+        # high entropy issues
+        filenames = [
+            'test_data/config.txt',
+            'test_data/runbook.md',
+        ]
+
+        plugin = Base64HighEntropyString(3)
+
+        accumulated_secrets = {}
+        for filename in filenames:
+            with open(filename) as f:
+                accumulated_secrets.update(
+                    plugin.analyze(f, filename),
+                )
+
+        count = 0
+        for secret in accumulated_secrets.values():
+            location = str(secret).splitlines()[1]
+            assert location in (
+                'Location:    test_data/config.txt:2',
+                'Location:    test_data/config.txt:6',
+                'Location:    test_data/config.txt:10',
+                'Location:    test_data/config.txt:15',
+                'Location:    test_data/config.txt:21',
+                'Location:    test_data/config.txt:22',
+                'Location:    test_data/runbook.md:12',
+            )
+            count += 1
+
+        assert count == 7
+
     def test_yaml_file(self):
         plugin = Base64HighEntropyString(3)
 

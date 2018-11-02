@@ -1,0 +1,24 @@
+[credentials]
+password = 12345678901234
+
+[parent]
+    [child]
+    keyA = 678912345
+    keyB = value1
+
+[aws]
+aws_secret_key = 2345678901
+
+[key with multiple values]
+keyA =
+    value2
+    345678912
+
+    # This is a comment
+    value3
+    ; This is another comment
+
+keyB = 456789123
+    567891234
+
+keyC =
