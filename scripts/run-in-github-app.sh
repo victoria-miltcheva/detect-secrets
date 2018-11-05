@@ -118,13 +118,12 @@ else
     echo "Scan failed"
     CONCLUSION="failure"
     OUTPUT_TITLE="Potential secrets identified"
-    read -r -d '' OUTPUT_SUMMARY << EOF
-Detect Secrets has identified potential secrets in the code.  Review each finding and determine if it is a secret or not a secret.
+    OUTPUT_SUMMARY="Detect Secrets has identified potential secrets in the code.  Review each finding and determine if it is a secret or not a secret.
 
 If it is a secret follow the remediation steps in [ Managing Credentials ]( https://pages.github.ibm.com/Whitewater/fieldguide/practices/managing-credentials).
 
 If it is not a secret you can indicate this in the code with a comment \`# pragma: whitelist secret\` or if you have a large number of results to whitelist we recommend you create a secrets baseline following the steps in the [getting started guide](https://w3.ibm.com/w3publisher/detect-secrets/getting-started).
-EOF
+"
 fi
 
 echo "Refreshing access token"
