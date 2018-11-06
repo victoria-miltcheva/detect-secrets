@@ -11,6 +11,10 @@ class TestBasicAuthDetector(object):
         'payload, should_flag',
         [
             ('https://username:password@yelp.com', True,),
+            ('"https://url:8000";@something else', False,),
+            ('\'https://url:8000\';@something else', False,),
+            ('https://url:8000 @something else', False,),
+            ('https://url:8000/ @something else', False,),
         ],
     )
     def test_analyze_string(self, payload, should_flag):
