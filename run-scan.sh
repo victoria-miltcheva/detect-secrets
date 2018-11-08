@@ -25,9 +25,9 @@ else
   # Scanning
   if [ ! -f "$BASEFILE" ]
   then
-    detect-secrets scan --no-keyword-scan > "$BASEFILE"
+    detect-secrets scan > "$BASEFILE"
   else
-    detect-secrets scan --exclude "$BASEFILE" --update "$BASEFILE" --no-keyword-scan
+    detect-secrets scan --update "$BASEFILE"
   fi
 
   if [ "$(get_non_resolve_secret_count)" -gt 0 ]

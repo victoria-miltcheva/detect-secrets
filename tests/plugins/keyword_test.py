@@ -25,6 +25,7 @@ class TestKeywordDetector(object):
 
         f = mock_file_object(file_content)
         output = logic.analyze(f, 'mock_filename')
-        assert len(output) == 1
+        # Since keyword scan is disabled, we don't expect any match
+        assert len(output) == 0
         for potential_secret in output:
             assert 'mock_filename' == potential_secret.filename
