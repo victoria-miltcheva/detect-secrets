@@ -86,12 +86,14 @@ class TestMain(object):
         ), mock_printer(
             main_module,
         ) as printer_shim:
-            assert main('scan --string'.split()) == 0
+            assert main([
+                'scan',
+                '--add-hex-string-scan', '--add-base64-string-scan', '--string',
+            ]) == 0
             assert printer_shim.message == textwrap.dedent("""
                 Base64HighEntropyString: False (3.459)
                 BasicAuthDetector      : False
                 HexHighEntropyString   : True  (3.459)
-                KeywordDetector        : False
                 PrivateKeyDetector     : False
                 SlackDetector          : False
             """)[1:]
@@ -104,12 +106,14 @@ class TestMain(object):
         ), mock_printer(
             main_module,
         ) as printer_shim:
-            assert main('scan --string 012345'.split()) == 0
+            assert main([
+                'scan',
+                '--add-hex-string-scan', '--add-base64-string-scan', '--string', '012345',
+            ]) == 0
             assert printer_shim.message == textwrap.dedent("""
                 Base64HighEntropyString: False (2.585)
                 BasicAuthDetector      : False
                 HexHighEntropyString   : False (2.121)
-                KeywordDetector        : False
                 PrivateKeyDetector     : False
                 SlackDetector          : False
             """)[1:]
@@ -233,7 +237,7 @@ class TestMain(object):
             # To extract the baseline output
             main_module,
         ) as printer_shim:
-            main(['scan', filename])
+            main(['scan', '--add-base64-string-scan', '--add-hex-string-scan', filename])
             baseline = printer_shim.message
 
         with mock_stdin(), mock.patch(

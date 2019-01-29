@@ -26,7 +26,7 @@ def assert_commit_succeeds(command):
 class TestPreCommitHook(object):
 
     def test_file_with_secrets(self, mock_log):
-        assert_commit_blocked('test_data/files/file_with_secrets.py')
+        assert_commit_blocked('--add-base64-string-scan test_data/files/file_with_secrets.py')
 
         message_by_lines = list(filter(
             lambda x: x != '',
@@ -53,7 +53,8 @@ class TestPreCommitHook(object):
             return_value=_create_baseline(),
         ):
             assert_commit_succeeds(
-                '--baseline will_be_mocked test_data/files/file_with_secrets.py',
+                '--add-base64-string-scan --baseline will_be_mocked'
+                + ' test_data/files/file_with_secrets.py',
             )
 
     def test_quit_early_if_bad_baseline(self, mock_get_baseline):
@@ -71,7 +72,7 @@ class TestPreCommitHook(object):
     def test_ignore_baseline_file(self, mock_get_baseline):
         mock_get_baseline.return_value = secrets_collection_factory()
 
-        assert_commit_blocked('test_data/baseline.file')
+        assert_commit_blocked('--add-hex-string-scan test_data/baseline.file')
         assert_commit_succeeds('--baseline baseline.file baseline.file')
 
     def test_quit_if_baseline_is_changed_but_not_staged(self, mock_log):
@@ -142,7 +143,8 @@ class TestPreCommitHook(object):
             'detect_secrets.pre_commit_hook._write_to_baseline_file',
         ) as m:
             assert_commit_blocked(
-                '--baseline will_be_mocked test_data/files/file_with_secrets.py',
+                '--baseline will_be_mocked --add-base64-string-scan' +
+                ' test_data/files/file_with_secrets.py',
             )
 
             baseline_written = m.call_args[0][1]

@@ -165,6 +165,12 @@ class PluginDescriptor(namedtuple(
         # Classname of plugin; used for initialization
         'classname',
 
+        # Flag to enable plugin. e.g. `--add-hex-string-scan`
+        'enable_flag_text',
+
+        # Description for enable flag.
+        'enable_help_text',
+
         # Flag to disable plugin. e.g. `--no-hex-string-scan`
         'disable_flag_text',
 
@@ -183,6 +189,9 @@ class PluginDescriptor(namedtuple(
         # Therefore, only populate the default value upon consolidation
         # (rather than relying on argparse default).
         'related_args',
+
+        # If this plugin is enabled by default
+        'is_default',
     ],
 )):
     def __new__(cls, related_args=None, **kwargs):
@@ -201,41 +210,61 @@ class PluginOptions(object):
     all_plugins = [
         PluginDescriptor(
             classname='HexHighEntropyString',
+            enable_flag_text='--add-hex-string-scan',
+            enable_help_text='Enables scanning for hex high entropy strings',
             disable_flag_text='--no-hex-string-scan',
             disable_help_text='Disables scanning for hex high entropy strings',
             related_args=[
                 ('--hex-limit', 3,),
             ],
+            is_default=False,
         ),
         PluginDescriptor(
             classname='Base64HighEntropyString',
+            enable_flag_text='--add-base64-string-scan',
+            enable_help_text='Enables scanning for base64 high entropy strings',
             disable_flag_text='--no-base64-string-scan',
             disable_help_text='Disables scanning for base64 high entropy strings',
             related_args=[
                 ('--base64-limit', 4.5,),
             ],
+            is_default=False,
         ),
         PluginDescriptor(
             classname='PrivateKeyDetector',
+            enable_flag_text='--add-private-key-scan',
+            enable_help_text='Enables scanning for private keys.',
             disable_flag_text='--no-private-key-scan',
             disable_help_text='Disables scanning for private keys.',
+            is_default=True,
         ),
         PluginDescriptor(
             classname='BasicAuthDetector',
+            enable_flag_text='--add-basic-auth-scan',
+            enable_help_text='Enables scanning for Basic Auth formatted URIs.',
             disable_flag_text='--no-basic-auth-scan',
             disable_help_text='Disables scanning for Basic Auth formatted URIs.',
+            is_default=True,
         ),
         PluginDescriptor(
             classname='KeywordDetector',
+            enable_flag_text='--add-keyword-scan',
+            enable_help_text='Enables scanning for secret keywords.',
             disable_flag_text='--no-keyword-scan',
             disable_help_text='Disables scanning for secret keywords.',
+            is_default=False,
         ),
         PluginDescriptor(
             classname='SlackDetector',
+            enable_flag_text='--add-slack-scan',
+            enable_help_text='Enables scanning for secret slack.',
             disable_flag_text='--no-slack-scan',
             disable_help_text='Disables scanning for secret slack.',
+            is_default=True,
         ),
     ]
+
+    default_plugins = [plugin for plugin in all_plugins if plugin.is_default is True]
 
     def __init__(self, parser):
         self.parser = parser.add_argument_group(
@@ -250,6 +279,7 @@ class PluginOptions(object):
     def add_arguments(self):
         self._add_custom_limits()
         self._add_opt_out_options()
+        self._add_opt_in_options()
 
         return self
 
@@ -278,9 +308,18 @@ class PluginOptions(object):
             )
 
             # Remove disabled plugins
-            is_disabled = getattr(args, arg_name)
+            is_disabled = getattr(args, arg_name, False)
             delattr(args, arg_name)
             if is_disabled:
+                continue
+
+            # Remove non default plugins which are not explictly enabled
+            arg_name = PluginOptions._convert_flag_text_to_argument_name(
+                plugin.enable_flag_text,
+            )
+            is_enabled = getattr(args, arg_name, False)
+            if not plugin.is_default and not is_enabled:
+                delattr(args, arg_name)
                 continue
 
             # Consolidate related args
@@ -334,6 +373,16 @@ class PluginOptions(object):
                 plugin.disable_flag_text,
                 action='store_true',
                 help=plugin.disable_help_text,
+            )
+
+        return self
+
+    def _add_opt_in_options(self):
+        for plugin in self.all_plugins:
+            self.parser.add_argument(
+                plugin.enable_flag_text,
+                action='store_true',
+                help=plugin.enable_help_text,
             )
 
         return self

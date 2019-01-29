@@ -21,8 +21,18 @@ class TestPluginOptions(object):
         self.parse_args('--no-private-key-scan')
 
     def test_consolidates_output_basic(self):
-        """Everything enabled by default, with default values"""
+        """Only default enabled plugins presented, with default values"""
         args = self.parse_args()
+
+        assert args.plugins == {
+            'BasicAuthDetector': {},
+            'PrivateKeyDetector': {},
+            'SlackDetector': {},
+        }
+
+    def test_consolidates_add_non_default_plugins(self):
+        """Non default plugin can be added, and default value are used"""
+        args = self.parse_args('--add-keyword-scan --add-hex-string-scan --add-base64-string-scan')
 
         assert args.plugins == {
             'HexHighEntropyString': {
@@ -36,7 +46,6 @@ class TestPluginOptions(object):
             'PrivateKeyDetector': {},
             'SlackDetector': {},
         }
-        assert not hasattr(args, 'no_private_key_scan')
 
     def test_consolidates_removes_disabled_plugins(self):
         args = self.parse_args('--no-private-key-scan')
@@ -46,12 +55,12 @@ class TestPluginOptions(object):
     @pytest.mark.parametrize(
         'argument_string,expected_value',
         [
-            ('--hex-limit 5', 5.0,),
-            ('--hex-limit 2.3', 2.3,),
-            ('--hex-limit 0', 0),
-            ('--hex-limit 8', 8),
-            ('--hex-limit -1', None),
-            ('--hex-limit 8.1', None),
+            ('--add-hex-string-scan --hex-limit 5', 5.0,),
+            ('--add-hex-string-scan --hex-limit 2.3', 2.3,),
+            ('--add-hex-string-scan --hex-limit 0', 0),
+            ('--add-hex-string-scan --hex-limit 8', 8),
+            ('--add-hex-string-scan --hex-limit -1', None),
+            ('--add-hex-string-scan --hex-limit 8.1', None),
         ],
     )
     def test_custom_limit(self, argument_string, expected_value):

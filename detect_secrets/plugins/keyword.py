@@ -32,6 +32,13 @@ from detect_secrets.plugins.core.constants import WHITELIST_REGEX
 
 
 BLACKLIST = (
+    'PASS =',
+    'password',
+    'passwd',
+    'pwd',
+    'secret',
+    'secrete',
+    'token',
 )
 
 
