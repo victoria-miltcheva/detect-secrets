@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from detect_secrets import main as main_module
+from detect_secrets import VERSION
 from detect_secrets.core import audit as audit_module
 from detect_secrets.core.color import BashColor
 from detect_secrets.main import main
@@ -194,6 +195,108 @@ class TestMain(object):
 
             assert json.loads(file_writer.call_args[0][1])['exclude_regex'] == \
                 expected_regex
+
+    @pytest.mark.parametrize(
+        'plugins_used, plugins_overwriten, plugins_wrote',
+        [
+            (
+                [
+                    {
+                        "base64_limit": 4.5,
+                        "name": "Base64HighEntropyString",
+                    },
+                    {
+                        "name": "PrivateKeyDetector",
+                    },
+                ],
+                '--no-base64-string-scan --no-private-key-scan',
+                [
+                ],
+            ),
+            (
+                [
+                ],
+                '--add-base64-string-scan --add-private-key-scan',
+                [
+                    {
+                        "base64_limit": 4.5,
+                        "name": "Base64HighEntropyString",
+                    },
+                    {
+                        "name": "PrivateKeyDetector",
+                    },
+                ],
+            ),
+            (
+                [
+                    {
+                        "base64_limit": 3.5,
+                        "name": "Base64HighEntropyString",
+                    },
+                    {
+                        "name": "PrivateKeyDetector",
+                    },
+                ],
+                '',
+                [
+                    {
+                        "base64_limit": 3.5,
+                        "name": "Base64HighEntropyString",
+                    },
+                    {
+                        "name": "PrivateKeyDetector",
+                    },
+                ],
+            ),
+            (
+                [
+                    {
+                        "base64_limit": 3.5,
+                        "name": "Base64HighEntropyString",
+                    }, {
+                        "name": "PrivateKeyDetector",
+                    },
+                ],
+                '--add-private-key-scan --add-base64-string-scan --base64-limit=4.5',
+                [
+
+                    {
+                        "base64_limit": 4.5,
+                        "name": "Base64HighEntropyString",
+                    }, {
+                        "name": "PrivateKeyDetector",
+                    },
+                ],
+            ),
+        ],
+    )
+    def test_plugin_from_old_baseline_respected_with_update_flag(
+        self,
+        mock_baseline_initialize,
+        plugins_used, plugins_overwriten, plugins_wrote,
+    ):
+        with mock_stdin(), mock.patch(
+            'detect_secrets.main._read_from_file',
+            return_value={
+                "plugins_used": plugins_used,
+                "results": {},
+                "version": VERSION,
+                "exclude_regex": "",
+            },
+        ), mock.patch(
+            # We don't want to be creating a file during test
+            'detect_secrets.main._write_to_file',
+        ) as file_writer:
+            assert main(
+                shlex.split(
+                    'scan --update old_baseline_file {}'.format(
+                        plugins_overwriten,
+                    ),
+                ),
+            ) == 0
+
+            assert json.loads(file_writer.call_args[0][1])['plugins_used'] == \
+                plugins_wrote
 
     @pytest.mark.parametrize(
         'filename, expected_output',

@@ -30,6 +30,34 @@ def from_parser_builder(plugins_dict):
     return tuple(output)
 
 
+def merge_plugin_from_baseline(baseline_plugins, args):
+    if args.overwrite:
+        plugins = _merge_plugin_from_baseline(baseline_plugins, args)
+    else:
+        plugins = baseline_plugins
+    return plugins
+
+
+def _merge_plugin_from_baseline(baseline_plugins, args):
+    # include all enabled plugins
+    # include all baseline plugins
+    #   - if same as enabled plugin, use parameter from enabled plugin
+    # remove all disabled plugins
+    enabled_plugins = from_parser_builder(args.enabled_plugins)
+    merged_plugins_dict = {vars(plugin)['name']: plugin for plugin in enabled_plugins}
+    baseline_plugins_dict = {vars(plugin)['name']: plugin for plugin in baseline_plugins}
+
+    for plugin_name, plugin in list(baseline_plugins_dict.items()):
+        if plugin_name not in merged_plugins_dict:
+            merged_plugins_dict[plugin_name] = plugin
+
+    for plugin_name in args.disabled_plugins:
+        if plugin_name in merged_plugins_dict:
+            merged_plugins_dict.pop(plugin_name)
+
+    return merged_plugins_dict.values()
+
+
 def from_plugin_classname(plugin_classname, **kwargs):
     """Initializes a plugin class, given a classname and kwargs.
 

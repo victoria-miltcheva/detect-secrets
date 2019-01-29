@@ -20,6 +20,11 @@ class TestPluginOptions(object):
 
         self.parse_args('--no-private-key-scan')
 
+    # def test_conflict_options(self):
+    #     # This is what happens with conflict arguments
+    #     with pytest.raises(SystemExit):
+    #         self.parse_args('--add-keyword-scan --no-keyword-scan'.split())
+
     def test_consolidates_output_basic(self):
         """Only default enabled plugins presented, with default values"""
         args = self.parse_args()

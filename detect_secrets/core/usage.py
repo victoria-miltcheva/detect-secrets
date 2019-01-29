@@ -211,9 +211,9 @@ class PluginOptions(object):
         PluginDescriptor(
             classname='HexHighEntropyString',
             enable_flag_text='--add-hex-string-scan',
-            enable_help_text='Enables scanning for hex high entropy strings',
+            enable_help_text='Enables scanning for hex high entropy strings.',
             disable_flag_text='--no-hex-string-scan',
-            disable_help_text='Disables scanning for hex high entropy strings',
+            disable_help_text='Disables scanning for hex high entropy strings. (Default disabled)',
             related_args=[
                 ('--hex-limit', 3,),
             ],
@@ -222,9 +222,10 @@ class PluginOptions(object):
         PluginDescriptor(
             classname='Base64HighEntropyString',
             enable_flag_text='--add-base64-string-scan',
-            enable_help_text='Enables scanning for base64 high entropy strings',
+            enable_help_text='Enables scanning for base64 high entropy strings.',
             disable_flag_text='--no-base64-string-scan',
-            disable_help_text='Disables scanning for base64 high entropy strings',
+            disable_help_text='Disables scanning for base64 high entropy strings.'
+            + '(Default disabled)',
             related_args=[
                 ('--base64-limit', 4.5,),
             ],
@@ -233,7 +234,7 @@ class PluginOptions(object):
         PluginDescriptor(
             classname='PrivateKeyDetector',
             enable_flag_text='--add-private-key-scan',
-            enable_help_text='Enables scanning for private keys.',
+            enable_help_text='Enables scanning for private keys. (Default enabled)',
             disable_flag_text='--no-private-key-scan',
             disable_help_text='Disables scanning for private keys.',
             is_default=True,
@@ -241,7 +242,7 @@ class PluginOptions(object):
         PluginDescriptor(
             classname='BasicAuthDetector',
             enable_flag_text='--add-basic-auth-scan',
-            enable_help_text='Enables scanning for Basic Auth formatted URIs.',
+            enable_help_text='Enables scanning for Basic Auth formatted URIs. (Default enabled)',
             disable_flag_text='--no-basic-auth-scan',
             disable_help_text='Disables scanning for Basic Auth formatted URIs.',
             is_default=True,
@@ -251,13 +252,13 @@ class PluginOptions(object):
             enable_flag_text='--add-keyword-scan',
             enable_help_text='Enables scanning for secret keywords.',
             disable_flag_text='--no-keyword-scan',
-            disable_help_text='Disables scanning for secret keywords.',
+            disable_help_text='Disables scanning for secret keywords. (Default disabled)',
             is_default=False,
         ),
         PluginDescriptor(
             classname='SlackDetector',
             enable_flag_text='--add-slack-scan',
-            enable_help_text='Enables scanning for secret slack.',
+            enable_help_text='Enables scanning for secret slack. (Default enabled)',
             disable_flag_text='--no-slack-scan',
             disable_help_text='Disables scanning for secret slack.',
             is_default=True,
@@ -267,12 +268,16 @@ class PluginOptions(object):
     default_plugins = [plugin for plugin in all_plugins if plugin.is_default is True]
 
     def __init__(self, parser):
+        default_plugins_list = ", ".join([p.classname for p in self.default_plugins])
         self.parser = parser.add_argument_group(
             title='plugins',
             description=(
                 'Configure settings for each secret scanning '
-                'ruleset. By default, all plugins are enabled '
-                'unless explicitly disabled.'
+                'ruleset. By default, only selected plugins are enabled. '
+                'Some high false positive ratio plugins such as keyword '
+                'and entropy based scans are disabled. You can explicitly '
+                'enable them to use more scans. '
+                'The default plugins are %s.' % default_plugins_list
             ),
         )
 
@@ -301,6 +306,9 @@ class PluginOptions(object):
             return
 
         active_plugins = {}
+        disabled_plugins = {}
+        enabled_plugins = {}
+        args.overwrite = False
 
         for plugin in PluginOptions.all_plugins:
             arg_name = PluginOptions._convert_flag_text_to_argument_name(
@@ -311,14 +319,18 @@ class PluginOptions(object):
             is_disabled = getattr(args, arg_name, False)
             delattr(args, arg_name)
             if is_disabled:
+                disabled_plugins.update({
+                    plugin.classname: {},
+                })
+                args.overwrite = True
                 continue
 
             # Remove non default plugins which are not explictly enabled
             arg_name = PluginOptions._convert_flag_text_to_argument_name(
                 plugin.enable_flag_text,
             )
-            is_enabled = getattr(args, arg_name, False)
-            if not plugin.is_default and not is_enabled:
+            is_enabled = getattr(args, arg_name)
+            if plugin.is_default is False and is_enabled is False:
                 delattr(args, arg_name)
                 continue
 
@@ -344,8 +356,15 @@ class PluginOptions(object):
             active_plugins.update({
                 plugin.classname: related_args,
             })
+            if is_enabled:
+                enabled_plugins.update({
+                    plugin.classname: related_args,
+                })
+                args.overwrite = True
 
         args.plugins = active_plugins
+        args.disabled_plugins = disabled_plugins
+        args.enabled_plugins = enabled_plugins
 
     def _add_custom_limits(self):
         high_entropy_help_text = (

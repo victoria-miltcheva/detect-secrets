@@ -35,7 +35,7 @@ def main(argv=None):
         # Error logs handled within logic.
         return 1
 
-    results = find_secrets_in_files(args)
+    results = find_secrets_in_files(baseline_collection, args)
     if baseline_collection:
         original_results = results
         results = get_secrets_not_in_baseline(
@@ -191,8 +191,12 @@ def raise_exception_if_baseline_version_is_outdated(version):
         raise ValueError
 
 
-def find_secrets_in_files(args):
+def find_secrets_in_files(baseline_collection, args):
     plugins = initialize.from_parser_builder(args.plugins)
+
+    if baseline_collection:
+        plugins = initialize.merge_plugin_from_baseline(baseline_collection.plugins, args)
+
     collection = SecretsCollection(plugins)
 
     for filename in args.filenames:
