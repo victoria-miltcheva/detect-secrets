@@ -419,7 +419,7 @@ class TestPrintContext(object):
             Filename: filenameA
             ----------
             ERROR: Secret not found on line 15!
-            Try recreating your baseline to fix this issue.
+            Try recreating or updating your baseline to fix this issue.
             ----------
 
         """)[1:-1]
