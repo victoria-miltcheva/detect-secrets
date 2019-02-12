@@ -1,1 +1,1 @@
-VERSION = '0.11.4-ibm.2'
+VERSION = '0.12.0-ibm.3'
