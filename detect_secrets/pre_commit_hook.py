@@ -48,6 +48,15 @@ def main(argv=None):
             args,
         )
         baseline_collection.plugins = plugins
+    else:
+        plugins = initialize.from_parser_builder(
+            args.plugins,
+            exclude_lines_regex=args.exclude_lines,
+        )
+        plugins = initialize.remove_non_default_plugins(
+            plugins,
+            args,
+        )
 
     results = find_secrets_in_files(args, plugins)
     if baseline_collection:

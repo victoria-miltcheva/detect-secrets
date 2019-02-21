@@ -26,7 +26,7 @@ def assert_commit_succeeds(command):
 class TestPreCommitHook(object):
 
     def test_file_with_secrets(self, mock_log):
-        assert_commit_blocked('test_data/files/file_with_secrets.py')
+        assert_commit_blocked('--use-all-plugins test_data/files/file_with_secrets.py')
 
         message_by_lines = list(filter(
             lambda x: x != '',
@@ -40,6 +40,9 @@ class TestPreCommitHook(object):
             'Secret Type: Base64 High Entropy String'
         assert message_by_lines[3] == \
             'Location:    test_data/files/file_with_secrets.py:3'
+
+    def test_file_with_secrets_in_non_default_plugin_list(self, mock_log):
+        assert_commit_succeeds('test_data/files/file_with_secrets.py')
 
     def test_file_no_secrets(self):
         assert_commit_succeeds('test_data/files/file_with_no_secrets.py')
@@ -205,7 +208,8 @@ class TestPreCommitHook(object):
             'detect_secrets.pre_commit_hook.write_baseline_to_file',
         ) as m:
             assert_commit_blocked(
-                '--baseline will_be_mocked test_data/files/file_with_secrets.py',
+                '--baseline will_be_mocked --use-all-plugins' +
+                ' test_data/files/file_with_secrets.py',
             )
 
             baseline_written = m.call_args[1]['data']
