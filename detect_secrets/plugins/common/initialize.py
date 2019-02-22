@@ -62,9 +62,9 @@ def remove_non_default_plugins(plugins, args):
     :param plugins: BasePlugin instances from input
 
     :type args: dict
-    :param args: diction of arguments parsed from usage
+    :param args: dictionary of arguments parsed from usage
 
-    :Returns list of default plugins if use_all_plugins is not used
+    :Returns tuple of default plugins if use_all_plugins is not used
     """
 
     if args.use_all_plugins:

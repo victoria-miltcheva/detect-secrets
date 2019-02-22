@@ -298,13 +298,11 @@ class PluginOptions(object):
     ]
 
     default_plugins_list = [
-        plugin.classname
-        for plugin in all_plugins
-        if plugin.is_default is True
+        plugin.classname for plugin in all_plugins if plugin.is_default
     ]
 
     def __init__(self, parser):
-        default_plugins_name_list = ", ".join([p for p in self.default_plugins_list])
+        default_plugins_name_list = ", ".join(self.default_plugins_list)
         self.parser = parser.add_argument_group(
             title='plugins',
             description=(

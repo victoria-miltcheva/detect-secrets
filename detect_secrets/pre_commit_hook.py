@@ -49,10 +49,6 @@ def main(argv=None):
         )
         baseline_collection.plugins = plugins
     else:
-        plugins = initialize.from_parser_builder(
-            args.plugins,
-            exclude_lines_regex=args.exclude_lines,
-        )
         plugins = initialize.remove_non_default_plugins(
             plugins,
             args,
