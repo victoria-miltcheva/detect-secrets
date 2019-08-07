@@ -196,6 +196,15 @@ class TestPreCommitHook(object):
                     'name': 'Base64HighEntropyString',
                 },
                 {
+<<<<<<< HEAD
+=======
+                    'name': 'BasicAuthDetector',
+                },
+                {
+                    'name': 'GHDetector',
+                },
+                {
+>>>>>>> Add GH detector
                     'hex_limit': 3,
                     'name': 'HexHighEntropyString',
                 },

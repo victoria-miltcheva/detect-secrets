@@ -337,6 +337,7 @@ class TestMain(object):
                     },
                 ],
                 '--use-all-plugins',
+<<<<<<< HEAD
                 get_list_of_plugins(
                     include=[
                         {
@@ -345,6 +346,42 @@ class TestMain(object):
                         },
                     ],
                 ),
+=======
+                [
+                    {
+                        'name': 'AWSKeyDetector',
+                    },
+                    {
+                        'name': 'ArtifactoryDetector',
+                    },
+                    {
+                        'base64_limit': 1.5,
+                        'name': 'Base64HighEntropyString',
+                    },
+                    {
+                        'name': 'BasicAuthDetector',
+                    },
+                    {
+                        'name': 'GHDetector',
+                    },
+                    {
+                        'hex_limit': 3,
+                        'name': 'HexHighEntropyString',
+                    },
+                    {
+                        'name': 'KeywordDetector',
+                    },
+                    {
+                        'name': 'PrivateKeyDetector',
+                    },
+                    {
+                        'name': 'SlackDetector',
+                    },
+                    {
+                        'name': 'StripeDetector',
+                    },
+                ],
+>>>>>>> Add GH detector
             ),
             (  # Remove some plugins from all plugins
                 [
@@ -355,12 +392,42 @@ class TestMain(object):
                 ],
 
                 '--use-all-plugins --no-base64-string-scan --no-private-key-scan',
+<<<<<<< HEAD
                 get_list_of_plugins(
                     exclude=(
                         'Base64HighEntropyString',
                         'PrivateKeyDetector',
                     ),
                 ),
+=======
+                [
+                    {
+                        'name': 'AWSKeyDetector',
+                    },
+                    {
+                        'name': 'ArtifactoryDetector',
+                    },
+                    {
+                        'name': 'BasicAuthDetector',
+                    },
+                    {
+                        'name': 'GHDetector',
+                    },
+                    {
+                        'hex_limit': 3,
+                        'name': 'HexHighEntropyString',
+                    },
+                    {
+                        'name': 'KeywordDetector',
+                    },
+                    {
+                        'name': 'SlackDetector',
+                    },
+                    {
+                        'name': 'StripeDetector',
+                    },
+                ],
+>>>>>>> Add GH detector
             ),
             (  # Use same plugin list from baseline
                 [
@@ -427,6 +494,7 @@ class TestMain(object):
                     },
                 ],
                 '--use-all-plugins --base64-limit=5.5 --no-hex-string-scan --no-keyword-scan',
+<<<<<<< HEAD
                 get_list_of_plugins(
                     include=[
                         {
@@ -439,6 +507,35 @@ class TestMain(object):
                         'KeywordDetector',
                     ),
                 ),
+=======
+                [
+                    {
+                        'name': 'AWSKeyDetector',
+                    },
+                    {
+                        'name': 'ArtifactoryDetector',
+                    },
+                    {
+                        'base64_limit': 5.5,
+                        'name': 'Base64HighEntropyString',
+                    },
+                    {
+                        'name': 'BasicAuthDetector',
+                    },
+                    {
+                        'name': 'GHDetector',
+                    },
+                    {
+                        'name': 'PrivateKeyDetector',
+                    },
+                    {
+                        'name': 'SlackDetector',
+                    },
+                    {
+                        'name': 'StripeDetector',
+                    },
+                ],
+>>>>>>> Add GH detector
             ),
             (  # Use plugin limit from baseline when using --use-all-plugins and no input limit
                 [
@@ -451,6 +548,7 @@ class TestMain(object):
                     },
                 ],
                 '--use-all-plugins --no-hex-string-scan --no-keyword-scan',
+<<<<<<< HEAD
                 get_list_of_plugins(
                     include=[
                         {
@@ -463,6 +561,35 @@ class TestMain(object):
                         'KeywordDetector',
                     ),
                 ),
+=======
+                [
+                    {
+                        'name': 'AWSKeyDetector',
+                    },
+                    {
+                        'name': 'ArtifactoryDetector',
+                    },
+                    {
+                        'base64_limit': 2.5,
+                        'name': 'Base64HighEntropyString',
+                    },
+                    {
+                        'name': 'BasicAuthDetector',
+                    },
+                    {
+                        'name': 'GHDetector',
+                    },
+                    {
+                        'name': 'PrivateKeyDetector',
+                    },
+                    {
+                        'name': 'SlackDetector',
+                    },
+                    {
+                        'name': 'StripeDetector',
+                    },
+                ],
+>>>>>>> Add GH detector
             ),
         ],
     )
