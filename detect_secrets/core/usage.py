@@ -257,6 +257,9 @@ class PluginDescriptor(namedtuple(
         # Therefore, only populate the default value upon consolidation
         # (rather than relying on argparse default).
         'related_args',
+
+        # If this plugin is enabled by default
+        'is_default',
     ],
 )):
 
@@ -277,66 +280,88 @@ class PluginOptions(object):
         PluginDescriptor(
             classname='HexHighEntropyString',
             disable_flag_text='--no-hex-string-scan',
-            disable_help_text='Disables scanning for hex high entropy strings',
+            disable_help_text='Disables scanning for hex high entropy strings.'
+            + ' (Disabled by default)',
             related_args=[
                 ('--hex-limit', 3,),
             ],
+            is_default=False,
         ),
         PluginDescriptor(
             classname='Base64HighEntropyString',
             disable_flag_text='--no-base64-string-scan',
-            disable_help_text='Disables scanning for base64 high entropy strings',
+            disable_help_text='Disables scanning for base64 high entropy strings.'
+            + ' (Disabled by default)',
             related_args=[
                 ('--base64-limit', 4.5,),
             ],
+            is_default=False,
         ),
         PluginDescriptor(
             classname='PrivateKeyDetector',
             disable_flag_text='--no-private-key-scan',
             disable_help_text='Disables scanning for private keys.',
+            is_default=True,
         ),
         PluginDescriptor(
             classname='BasicAuthDetector',
             disable_flag_text='--no-basic-auth-scan',
             disable_help_text='Disables scanning for Basic Auth formatted URIs.',
+            is_default=True,
         ),
         PluginDescriptor(
             classname='KeywordDetector',
             disable_flag_text='--no-keyword-scan',
-            disable_help_text='Disables scanning for secret keywords.',
-            related_args=[
-                ('--keyword-exclude', None),
-            ],
+            disable_help_text='Disables scanning for secret keywords. (Disabled by default)',
+            is_default=False,
         ),
         PluginDescriptor(
             classname='AWSKeyDetector',
             disable_flag_text='--no-aws-key-scan',
             disable_help_text='Disables scanning for AWS keys.',
+            is_default=True,
         ),
         PluginDescriptor(
             classname='SlackDetector',
             disable_flag_text='--no-slack-scan',
             disable_help_text='Disables scanning for Slack tokens.',
+            is_default=True,
         ),
         PluginDescriptor(
             classname='ArtifactoryDetector',
             disable_flag_text='--no-artifactory-scan',
             disable_help_text='Disable scanning for Artifactory credentials',
+            is_default=True,
         ),
         PluginDescriptor(
             classname='StripeDetector',
             disable_flag_text='--no-stripe-scan',
             disable_help_text='Disable scanning for Stripe keys',
+            is_default=True,
+        ),
+        PluginDescriptor(
+            classname='GHDetector',
+            disable_flag_text='--no-gh-scan',
+            disable_help_text='Disable scanning for GH credentials',
+            is_default=False,
         ),
     ]
 
+    default_plugins_list = [
+        plugin.classname for plugin in all_plugins if plugin.is_default
+    ]
+
     def __init__(self, parser):
+        default_plugins_name_list = ', '.join(self.default_plugins_list)
         self.parser = parser.add_argument_group(
             title='plugins',
             description=(
                 'Configure settings for each secret scanning '
-                'ruleset. By default, all plugins are enabled '
-                'unless explicitly disabled.'
+                'ruleset. By default, only selected plugins are enabled. '
+                'Some high false positive ratio plugins such as keyword '
+                'and entropy based scans are disabled. You can explicitly '
+                'enable them to use more scans. '
+                'The default plugins are %s.' % default_plugins_name_list
             ),
         )
 
