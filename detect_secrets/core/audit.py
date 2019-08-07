@@ -209,7 +209,7 @@ def compare_baselines(old_baseline_filename, new_baseline_filename):
         except SecretNotFoundOnSpecifiedLineError:
             decision = _get_user_decision(prompt_secret_decision=False)
 
-        if decision == 'q':
+        if decision == 'q':  # pragma: no cover
             print('Quitting...')
             break
 
@@ -546,7 +546,7 @@ def _print_context(  # pragma: no cover
         raise error_obj
 
 
-def _get_user_decision(prompt_secret_decision=True, can_step_back=False):
+def _get_user_decision(prompt_secret_decision=True, can_step_back=False):  # pragma: no cover
     """
     :type prompt_secret_decision: bool
     :param prompt_secret_decision: if False, won't ask to label secret.
@@ -558,7 +558,7 @@ def _get_user_decision(prompt_secret_decision=True, can_step_back=False):
         allowable_user_input.append('b')
 
     user_input = None
-    while user_input not in allowable_user_input:
+    while user_input not in allowable_user_input:  # pragma: no cover
         if user_input:
             print('Invalid input.')
 
