@@ -270,6 +270,9 @@ class TestMain(object):
                         'name': 'BasicAuthDetector',
                     },
                     {
+                        'name': 'GHDetector',
+                    },
+                    {
                         'hex_limit': 3,
                         'name': 'HexHighEntropyString',
                     },
@@ -305,6 +308,9 @@ class TestMain(object):
                     },
                     {
                         'name': 'BasicAuthDetector',
+                    },
+                    {
+                        'name': 'GHDetector',
                     },
                     {
                         'hex_limit': 3,
@@ -401,6 +407,9 @@ class TestMain(object):
                         'name': 'BasicAuthDetector',
                     },
                     {
+                        'name': 'GHDetector',
+                    },
+                    {
                         'name': 'PrivateKeyDetector',
                     },
                     {
@@ -435,6 +444,9 @@ class TestMain(object):
                     },
                     {
                         'name': 'BasicAuthDetector',
+                    },
+                    {
+                        'name': 'GHDetector',
                     },
                     {
                         'name': 'PrivateKeyDetector',

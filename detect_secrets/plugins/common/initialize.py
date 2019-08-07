@@ -4,6 +4,7 @@ from ..aws import AWSKeyDetector                            # noqa: F401
 from ..base import BasePlugin
 from ..basic_auth import BasicAuthDetector                  # noqa: F401
 from ..common.util import get_mapping_from_secret_type_to_class_name
+from ..gh import GHDetector                                 # noqa: F401
 from ..high_entropy_strings import Base64HighEntropyString  # noqa: F401
 from ..high_entropy_strings import HexHighEntropyString     # noqa: F401
 from ..keyword import KeywordDetector                       # noqa: F401

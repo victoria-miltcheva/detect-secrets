@@ -186,6 +186,9 @@ class TestPreCommitHook(object):
                     'name': 'BasicAuthDetector',
                 },
                 {
+                    'name': 'GHDetector',
+                },
+                {
                     'hex_limit': 3,
                     'name': 'HexHighEntropyString',
                 },
