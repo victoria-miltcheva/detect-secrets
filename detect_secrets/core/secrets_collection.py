@@ -22,8 +22,7 @@ class SecretsCollection(object):
         plugins=(),
         exclude_files=None,
         exclude_lines=None,
-        word_list_file=None,
-        word_list_hash=None,
+        output_raw=False,
     ):
         """
         :type plugins: tuple of detect_secrets.plugins.base.BasePlugin
@@ -35,18 +34,18 @@ class SecretsCollection(object):
         :type exclude_lines: str|None
         :param exclude_lines: optional regex for ignored lines.
 
-        :type word_list_file: str|None
-        :param word_list_file: optional word list file for ignoring certain words.
+        :type version: str
+        :param version: version of detect-secrets that SecretsCollection
+            is valid at.
 
-        :type word_list_hash: str|None
-        :param word_list_hash: optional iterated sha1 hash of the words in the word list.
+        :type output_raw: bool|None
+        :param output_raw: whether or not to output the raw, unhashed secret
         """
         self.data = {}
         self.plugins = plugins
         self.exclude_files = exclude_files
         self.exclude_lines = exclude_lines
-        self.word_list_file = word_list_file
-        self.word_list_hash = word_list_hash
+        self.output_raw = output_raw
         self.version = VERSION
 
     @classmethod
@@ -258,7 +257,10 @@ class SecretsCollection(object):
         if type_:
             # Optimized lookup, because we know the type of secret
             # (and therefore, its hash)
-            tmp_secret = PotentialSecret(type_, filename, secret='will be overriden')
+            tmp_secret = PotentialSecret(
+                type_, filename, secret='will be overriden',
+                output_raw=self.output_raw,
+            )
             tmp_secret.secret_hash = secret
 
             if tmp_secret in self.data[filename]:
@@ -337,7 +339,7 @@ class SecretsCollection(object):
             log.info('Checking file: %s', filename)
 
             for results, plugin in self._results_accumulator(filename):
-                results.update(plugin.analyze(f, filename))
+                results.update(plugin.analyze(f, filename, self.output_raw))
                 f.seek(0)
 
         except UnicodeDecodeError:
