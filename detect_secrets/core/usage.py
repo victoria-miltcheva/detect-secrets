@@ -22,12 +22,11 @@ def add_use_all_plugins_argument(parser):
     )
 
 
-def add_no_verify_flag(parser):
+def add_verify_flag(parser):
     parser.add_argument(
-        '-n',
-        '--no-verify',
+        '--verify',
         action='store_true',
-        help='Disables additional verification of secrets via network call.',
+        help='Enables additional verification of secrets via network call.',
     )
 
 
@@ -47,7 +46,7 @@ class ParserBuilder(object):
             ._add_set_baseline_argument()\
             ._add_exclude_lines_argument()\
             ._add_use_all_plugins_argument()\
-            ._add_no_verify_flag()
+            ._add_verify_flag()
 
         PluginOptions(self.parser).add_arguments()
 
@@ -112,8 +111,8 @@ class ParserBuilder(object):
         add_use_all_plugins_argument(self.parser)
         return self
 
-    def _add_no_verify_flag(self):
-        add_no_verify_flag(self.parser)
+    def _add_verify_flag(self):
+        add_verify_flag(self.parser)
         return self
 
 
@@ -176,7 +175,7 @@ class ScanOptions(object):
             help='Scan all files recursively (as compared to only scanning git tracked files).',
         )
 
-        add_no_verify_flag(self.parser)
+        add_verify_flag(self.parser)
 
         return self
 

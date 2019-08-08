@@ -282,7 +282,7 @@ def _get_git_tracked_files(rootdir='.'):
             util.get_relative_path(rootdir, filename)
             for filename in git_files.decode('utf-8').split()
         ])
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError:  # pragma: no cover
         return None
 
 
