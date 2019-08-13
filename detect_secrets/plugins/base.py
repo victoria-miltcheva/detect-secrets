@@ -214,7 +214,7 @@ class BasePlugin(object):
 
         return output[verified_result]
 
-    def verify(self, token, content=''):
+    def verify(self, token, content='', potential_secret=None):
         """
         To increase accuracy and reduce false positives, plugins can also
         optionally declare a method to verify their status.
@@ -222,8 +222,13 @@ class BasePlugin(object):
         :type token: str
         :param token: secret found by current plugin
 
-        :type context: str
-        :param context: lines of context around identified secret
+        :type content: str
+        :param content: lines of context around identified secret
+
+        :type potential_secret: PotentialSecret
+        :param potential_secret: the PotentialSecret object may optionally be
+        passed to verify to allow verification code to add additional factors to
+        potential_secret.other_factors
 
         :rtype: VerifiedResult
         """
