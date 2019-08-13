@@ -8,3 +8,4 @@ pyyaml
 tox>=3.8
 tox-pip-extensions
 unidiff
+responses
