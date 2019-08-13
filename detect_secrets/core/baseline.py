@@ -5,10 +5,8 @@ import os
 import re
 import subprocess
 
-from detect_secrets import util
 from detect_secrets.core.log import get_logger
 from detect_secrets.core.secrets_collection import SecretsCollection
-
 
 log = get_logger(format_string='%(message)s')
 
@@ -45,9 +43,7 @@ def initialize(
             if should_scan_all_files:
                 files_to_scan.extend(_get_files_recursively(element))
             else:
-                files = _get_git_tracked_files(element)
-                if files:
-                    files_to_scan.extend(files)
+                files_to_scan.extend(_get_git_tracked_files(element))
         elif os.path.isfile(element):
             files_to_scan.append(element)
         else:
@@ -242,7 +238,7 @@ def format_baseline_for_output(baseline):
     for filename, secret_list in baseline['results'].items():
         baseline['results'][filename] = sorted(
             secret_list,
-            key=lambda x: (x['line_number'], x['hashed_secret'],),
+            key=lambda x: (x['line_number'], x['hashed_secret']),
         )
 
     return json.dumps(
@@ -272,16 +268,13 @@ def _get_git_tracked_files(rootdir='.'):
             git_files = subprocess.check_output(
                 [
                     'git',
-                    '-C', rootdir,
                     'ls-files',
+                    rootdir,
                 ],
                 stderr=fnull,
             )
 
-        return set([
-            util.get_relative_path(rootdir, filename)
-            for filename in git_files.decode('utf-8').split()
-        ])
+        return set(git_files.decode('utf-8').split())
     except subprocess.CalledProcessError:  # pragma: no cover
         return None
 
@@ -293,6 +286,6 @@ def _get_files_recursively(rootdir):
     output = []
     for root, _, files in os.walk(rootdir):
         for filename in files:
-            output.append(util.get_relative_path(root, filename))
+            output.append(os.path.join(root, filename))
 
     return output
