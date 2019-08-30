@@ -20,6 +20,7 @@ def initialize(
     word_list_hash=None,
     should_scan_all_files=False,
     output_raw=False,
+    output_verified_false=False,
 ):
     """Scans the entire codebase for secrets, and returns a
     SecretsCollection object.
@@ -47,6 +48,7 @@ def initialize(
         exclude_files=exclude_files_regex,
         exclude_lines=exclude_lines_regex,
         output_raw=output_raw,
+        output_verified_false=output_verified_false,
     )
 
     files_to_scan = []

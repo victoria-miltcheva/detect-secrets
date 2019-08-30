@@ -43,6 +43,14 @@ def add_verify_flag(parser):
     )
 
 
+def add_output_verified_false_flag(parser):
+    parser.add_argument(
+        '--output-verified-false',
+        action='store_true',
+        help='Output secrets that are verified false.',
+    )
+
+
 class ParserBuilder(object):
 
     def __init__(self):
@@ -60,7 +68,8 @@ class ParserBuilder(object):
             ._add_exclude_lines_argument()\
             ._add_word_list_argument()\
             ._add_use_all_plugins_argument()\
-            ._add_verify_flag()
+            ._add_verify_flag() \
+            ._add_output_verified_false_flag()
 
         PluginOptions(self.parser).add_arguments()
 
@@ -133,6 +142,10 @@ class ParserBuilder(object):
         add_verify_flag(self.parser)
         return self
 
+    def _add_output_verified_false_flag(self):
+        add_output_verified_false_flag(self.parser)
+        return self
+
 
 class ScanOptions(object):
 
@@ -196,6 +209,7 @@ class ScanOptions(object):
         )
 
         add_verify_flag(self.parser)
+        add_output_verified_false_flag(self.parser)
 
         return self
 
@@ -381,8 +395,8 @@ class PluginOptions(object):
         PluginDescriptor(
             classname='HexHighEntropyString',
             disable_flag_text='--no-hex-string-scan',
-            disable_help_text='Disables scanning for hex high entropy strings.'
-            + ' (Disabled by default)',
+            disable_help_text='Disables scanning for hex high entropy strings.' +
+            ' (Disabled by default)',
             related_args=[
                 ('--hex-limit', 3,),
             ],
@@ -391,8 +405,8 @@ class PluginOptions(object):
         PluginDescriptor(
             classname='Base64HighEntropyString',
             disable_flag_text='--no-base64-string-scan',
-            disable_help_text='Disables scanning for base64 high entropy strings.'
-            + ' (Disabled by default)',
+            disable_help_text='Disables scanning for base64 high entropy strings.' +
+            ' (Disabled by default)',
             related_args=[
                 ('--base64-limit', 4.5,),
             ],

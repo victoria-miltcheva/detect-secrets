@@ -23,6 +23,7 @@ class SecretsCollection(object):
         exclude_files=None,
         exclude_lines=None,
         output_raw=False,
+        output_verified_false=False,
     ):
         """
         :type plugins: tuple of detect_secrets.plugins.base.BasePlugin
@@ -46,6 +47,7 @@ class SecretsCollection(object):
         self.exclude_files = exclude_files
         self.exclude_lines = exclude_lines
         self.output_raw = output_raw
+        self.output_verified_false = output_verified_false
         self.version = VERSION
 
     @classmethod
@@ -339,7 +341,10 @@ class SecretsCollection(object):
             log.info('Checking file: %s', filename)
 
             for results, plugin in self._results_accumulator(filename):
-                results.update(plugin.analyze(f, filename, self.output_raw))
+                results.update(plugin.analyze(
+                    f, filename, self.output_raw,
+                    self.output_verified_false,
+                ))
                 f.seek(0)
 
         except UnicodeDecodeError:
