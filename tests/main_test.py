@@ -217,6 +217,7 @@ class TestMain(object):
                 AWSKeyDetector     : False
                 ArtifactoryDetector: False
                 BasicAuthDetector  : False
+                GHDetectorV2       : False
                 PrivateKeyDetector : False
                 SlackDetector      : False
                 SoftLayerDetector  : False
@@ -710,6 +711,9 @@ class TestMain(object):
             },
             {
                 'name': 'BasicAuthDetector',
+            },
+            {
+                'name': 'GHDetectorV2',
             },
             {
                 'name': 'PrivateKeyDetector',
