@@ -51,7 +51,6 @@ class TestPluginOptions(object):
             'StripeDetector': {},
             'ArtifactoryDetector': {},
             'GHDetector': {},
-            'GHDetectorV2': {},
             'SoftLayerDetector': {},
         }
 >>>>>>> Define default plugin list
