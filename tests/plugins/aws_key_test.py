@@ -57,7 +57,7 @@ class TestAWSKeyDetector(object):
         with mock.patch(
             'detect_secrets.plugins.aws.verify_aws_secret_access_key',
             return_value=True,
-        ):
+        ) as mock_verify:
             potential_secret = PotentialSecret('test aws', 'test filename', self.example_key)
             assert AWSKeyDetector().verify(
                 self.example_key,
@@ -65,18 +65,20 @@ class TestAWSKeyDetector(object):
                 potential_secret,
             ) == VerifiedResult.VERIFIED_TRUE
         assert potential_secret.other_factors['secret_access_key'] == EXAMPLE_SECRET
+        mock_verify.assert_called_with(self.example_key, EXAMPLE_SECRET)
 
     def test_verify_invalid_secret(self):
         with mock.patch(
             'detect_secrets.plugins.aws.verify_aws_secret_access_key',
             return_value=False,
-        ):
+        ) as mock_verify:
             potential_secret = PotentialSecret('test aws', 'test filename', self.example_key)
             assert AWSKeyDetector().verify(
                 self.example_key,
                 '={}'.format(EXAMPLE_SECRET),
                 potential_secret,
             ) == VerifiedResult.VERIFIED_FALSE
+        mock_verify.assert_called_with(self.example_key, EXAMPLE_SECRET)
 
     def test_verify_keep_trying_until_found_something(self):
         data = {'count': 0}
@@ -109,12 +111,14 @@ class TestAWSKeyDetector(object):
     def test_verify_aws_secret_access_key_valid(self, mock_get_caller_info):
         mock_get_caller_info.return_value = mock.MagicMock(status_code=200)
         result = verify_aws_secret_access_key('test-access-key', 'test-secret-access-key')
+        mock_get_caller_info.assert_called_with('test-access-key', 'test-secret-access-key')
         assert result is True
 
     @mock.patch('detect_secrets.plugins.aws.get_caller_info')
     def test_verify_aws_secret_access_key_invalid(self, mock_get_caller_info):
         mock_get_caller_info.return_value = mock.MagicMock(status_code=403)
         result = verify_aws_secret_access_key('test-access-key', 'test-secret-access-key')
+        mock_get_caller_info.assert_called_with('test-access-key', 'test-secret-access-key')
         assert result is False
 
 
