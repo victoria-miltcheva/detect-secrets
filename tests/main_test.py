@@ -188,6 +188,7 @@ class TestMain(object):
                 ArtifactoryDetector    : False
                 Base64HighEntropyString: {}
                 BasicAuthDetector      : False
+                DB2Detector            : False
                 GHDetector             : False
                 HexHighEntropyString   : {}
                 KeywordDetector        : False
@@ -216,6 +217,7 @@ class TestMain(object):
                 AWSKeyDetector     : False
                 ArtifactoryDetector: False
                 BasicAuthDetector  : False
+                DB2Detector        : False
                 GHDetector         : False
                 PrivateKeyDetector : False
                 SlackDetector      : False
@@ -237,6 +239,7 @@ class TestMain(object):
                 ArtifactoryDetector    : False
                 Base64HighEntropyString: False (2.585)
                 BasicAuthDetector      : False
+                DB2Detector            : False
                 GHDetector             : False
                 HexHighEntropyString   : False (2.121)
                 KeywordDetector        : False
@@ -372,6 +375,9 @@ class TestMain(object):
                         'name': 'BasicAuthDetector',
                     },
                     {
+                        'name': 'DB2Detector',
+                    },
+                    {
                         'name': 'GHDetector',
                     },
                     {
@@ -413,6 +419,9 @@ class TestMain(object):
                     },
                     {
                         'name': 'BasicAuthDetector',
+                    },
+                    {
+                        'name': 'DB2Detector',
                     },
                     {
                         'name': 'GHDetector',
@@ -515,6 +524,9 @@ class TestMain(object):
                         'name': 'BasicAuthDetector',
                     },
                     {
+                        'name': 'DB2Detector',
+                    },
+                    {
                         'name': 'GHDetector',
                     },
                     {
@@ -555,6 +567,9 @@ class TestMain(object):
                     },
                     {
                         'name': 'BasicAuthDetector',
+                    },
+                    {
+                        'name': 'DB2Detector',
                     },
                     {
                         'name': 'GHDetector',
@@ -697,6 +712,9 @@ class TestMain(object):
             },
             {
                 'name': 'BasicAuthDetector',
+            },
+            {
+                'name': 'DB2Detector',
             },
             {
                 'name': 'GHDetector',
