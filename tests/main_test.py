@@ -191,6 +191,7 @@ class TestMain(object):
                 DB2Detector            : False
                 GHDetector             : False
                 HexHighEntropyString   : {}
+                IBMCloudIAMDetector    : False
                 KeywordDetector        : False
                 PrivateKeyDetector     : False
                 SlackDetector          : False
@@ -219,6 +220,7 @@ class TestMain(object):
                 BasicAuthDetector  : False
                 DB2Detector        : False
                 GHDetector         : False
+                IBMCloudIAMDetector: False
                 PrivateKeyDetector : False
                 SlackDetector      : False
                 SoftLayerDetector  : False
@@ -242,6 +244,7 @@ class TestMain(object):
                 DB2Detector            : False
                 GHDetector             : False
                 HexHighEntropyString   : False (2.121)
+                IBMCloudIAMDetector    : False
                 KeywordDetector        : False
                 PrivateKeyDetector     : False
                 SlackDetector          : False
@@ -385,6 +388,9 @@ class TestMain(object):
                         'name': 'HexHighEntropyString',
                     },
                     {
+                        'name': 'IBMCloudIAMDetector',
+                    },
+                    {
                         'name': 'KeywordDetector',
                     },
                     {
@@ -429,6 +435,9 @@ class TestMain(object):
                     {
                         'hex_limit': 3,
                         'name': 'HexHighEntropyString',
+                    },
+                    {
+                        'name': 'IBMCloudIAMDetector',
                     },
                     {
                         'name': 'KeywordDetector',
@@ -530,6 +539,9 @@ class TestMain(object):
                         'name': 'GHDetector',
                     },
                     {
+                        'name': 'IBMCloudIAMDetector',
+                    },
+                    {
                         'name': 'PrivateKeyDetector',
                     },
                     {
@@ -573,6 +585,9 @@ class TestMain(object):
                     },
                     {
                         'name': 'GHDetector',
+                    },
+                    {
+                        'name': 'IBMCloudIAMDetector',
                     },
                     {
                         'name': 'PrivateKeyDetector',
@@ -718,6 +733,9 @@ class TestMain(object):
             },
             {
                 'name': 'GHDetector',
+            },
+            {
+                'name': 'IBMCloudIAMDetector',
             },
             {
                 'name': 'PrivateKeyDetector',

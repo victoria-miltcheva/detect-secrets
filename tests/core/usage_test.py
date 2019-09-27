@@ -47,6 +47,7 @@ class TestPluginOptions(object):
             'KeywordDetector': {},
             'PrivateKeyDetector': {},
             'AWSKeyDetector': {},
+            'IBMCloudIAMDetector': {},
             'SlackDetector': {},
             'StripeDetector': {},
             'ArtifactoryDetector': {},
