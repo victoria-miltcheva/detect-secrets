@@ -19,6 +19,7 @@ setup(
         'pyyaml',
         'requests',
         'ibm_db',
+        'boxsdk[jwt]',
     ],
     extras_require={
         ':python_version=="2.7"': [
