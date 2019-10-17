@@ -48,6 +48,7 @@ class TestPluginOptions(object):
             'PrivateKeyDetector': {},
             'AWSKeyDetector': {},
             'BoxDetector': {},
+            'CloudantDetector': {},
             'IBMCloudIAMDetector': {},
             'IBMCosHmacDetector': {},
             'SlackDetector': {},

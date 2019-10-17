@@ -202,6 +202,9 @@ class TestPreCommitHook(object):
                     'name': 'BoxDetector',
                 },
                 {
+                    'name': 'CloudantDetector',
+                },
+                {
                     'name': 'DB2Detector',
                 },
                 {

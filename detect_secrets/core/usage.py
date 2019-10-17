@@ -490,6 +490,12 @@ class PluginOptions(object):
             disable_help_text='Disable scanning for Box API credentials',
             is_default=True,
         ),
+        PluginDescriptor(
+            classname='CloudantDetector',
+            disable_flag_text='--no-cloudant-scan',
+            disable_help_text='Disable scanning for Cloudant credentials',
+            is_default=True,
+        ),
     ]
 
     default_plugins_list = [
