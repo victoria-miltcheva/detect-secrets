@@ -12,7 +12,6 @@ from datetime import datetime
 
 import requests
 
-from .base import classproperty
 from .base import RegexBasedDetector
 from detect_secrets.core.constants import VerifiedResult
 
@@ -26,7 +25,7 @@ class AWSKeyDetector(RegexBasedDetector):
     )
 
     def verify(self, token, content, potential_secret=None):
-        secret_access_key = get_secret_access_key(content)
+        secret_access_key = get_secret_access_keys(content)
         if not secret_access_key:
             return VerifiedResult.UNVERIFIED
 

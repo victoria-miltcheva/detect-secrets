@@ -877,7 +877,7 @@ class TestPrintContext(object):
             Secret Type: Private Key
             ----------
             ERROR: Secret not found on line 15!
-            Try recreating or updating your baseline to fix this issue.
+            Try recreating your baseline to fix this issue.
             ----------
 
         """)[1:-1]
