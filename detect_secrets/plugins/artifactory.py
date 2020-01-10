@@ -4,6 +4,7 @@ import re
 
 import requests
 
+from .base import classproperty
 from .base import RegexBasedDetector
 from detect_secrets.core.constants import VerifiedResult
 
@@ -20,6 +21,10 @@ class ArtifactoryDetector(RegexBasedDetector):
     ]
 
     artifactory_url = 'na.artifactory.swg-devops.com/artifactory'
+
+    @classproperty
+    def disable_flag_text(cls):
+        return 'no-artifactory-scan'
 
     def verify(self, token, **kwargs):
         try:

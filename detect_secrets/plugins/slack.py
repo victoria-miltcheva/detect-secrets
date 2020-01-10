@@ -7,6 +7,7 @@ import re
 
 import requests
 
+from .base import classproperty
 from .base import RegexBasedDetector
 from detect_secrets.core.constants import VerifiedResult
 
@@ -26,6 +27,10 @@ class SlackDetector(RegexBasedDetector):
             flags=re.IGNORECASE | re.VERBOSE,
         ),
     )
+
+    @classproperty
+    def disable_flag_text(cls):
+        return 'no-slack-scan'
 
     def verify(self, token, **kwargs):  # pragma: no cover
         if token.startswith('https://hooks.slack.com/services/T'):

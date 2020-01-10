@@ -4,6 +4,7 @@ import re
 
 import requests
 
+from .base import classproperty
 from .base import RegexBasedDetector
 from detect_secrets.core.constants import VerifiedResult
 
@@ -61,6 +62,10 @@ class CloudantDetector(RegexBasedDetector):
             flags=re.IGNORECASE,
         ),
     ]
+
+    @classproperty
+    def disable_flag_text(cls):
+        return 'no-cloudant-scan'
 
     def verify(self, token, content, potential_secret=None):
 

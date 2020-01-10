@@ -12,6 +12,7 @@ from datetime import datetime
 
 import requests
 
+from .base import classproperty
 from .base import RegexBasedDetector
 from detect_secrets.core.constants import VerifiedResult
 
@@ -19,6 +20,10 @@ from detect_secrets.core.constants import VerifiedResult
 class AWSKeyDetector(RegexBasedDetector):
     """Scans for AWS keys."""
     secret_type = 'AWS Access Key'
+
+    @classproperty
+    def disable_flag_text(cls):
+        return 'no-aws-scan'
 
     denylist = (
         re.compile(r'AKIA[0-9A-Z]{16}'),
