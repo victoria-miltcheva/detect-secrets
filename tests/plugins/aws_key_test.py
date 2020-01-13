@@ -8,7 +8,7 @@ import pytest
 
 from detect_secrets.core.constants import VerifiedResult
 from detect_secrets.core.potential_secret import PotentialSecret
-from detect_secrets.plugins.aws import AwsKeyDetector
+from detect_secrets.plugins.aws import AWSKeyDetector
 from detect_secrets.plugins.aws import get_secret_access_keys
 from detect_secrets.plugins.aws import verify_aws_secret_access_key
 from testing.mocks import mock_file_object
@@ -17,7 +17,7 @@ from testing.mocks import mock_file_object
 EXAMPLE_SECRET = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
 
 
-class TestAwsKeyDetector(object):
+class TestAWSKeyDetector(object):
 
     def setup(self):
         self.example_key = 'AKIAZZZZZZZZZZZZZZZZ'
@@ -40,7 +40,7 @@ class TestAwsKeyDetector(object):
         ],
     )
     def test_analyze(self, file_content, should_flag):
-        logic = AwsKeyDetector()
+        logic = AWSKeyDetector()
 
         f = mock_file_object(file_content)
         output = logic.analyze(f, 'mock_filename')
@@ -49,7 +49,7 @@ class TestAwsKeyDetector(object):
             assert 'mock_filename' == potential_secret.filename
 
     def test_verify_no_secret(self):
-        logic = AwsKeyDetector()
+        logic = AWSKeyDetector()
 
         assert logic.verify(self.example_key, '') == VerifiedResult.UNVERIFIED
 
@@ -59,7 +59,7 @@ class TestAwsKeyDetector(object):
             return_value=True,
         ) as mock_verify:
             potential_secret = PotentialSecret('test aws', 'test filename', self.example_key)
-            assert AwsKeyDetector().verify(
+            assert AWSKeyDetector().verify(
                 self.example_key,
                 '={}'.format(EXAMPLE_SECRET),
                 potential_secret,
@@ -73,7 +73,7 @@ class TestAwsKeyDetector(object):
             return_value=False,
         ) as mock_verify:
             potential_secret = PotentialSecret('test aws', 'test filename', self.example_key)
-            assert AwsKeyDetector().verify(
+            assert AWSKeyDetector().verify(
                 self.example_key,
                 '={}'.format(EXAMPLE_SECRET),
                 potential_secret,
@@ -94,7 +94,7 @@ class TestAwsKeyDetector(object):
             counter,
         ):
             potential_secret = PotentialSecret('test aws', 'test filename', self.example_key)
-            assert AwsKeyDetector().verify(
+            assert AWSKeyDetector().verify(
                 self.example_key,
                 textwrap.dedent("""
                     false_secret = {}
