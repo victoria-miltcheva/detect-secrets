@@ -139,6 +139,7 @@ class SecretsCollection(object):
                     secret='will be replaced',
                     lineno=item['line_number'],
                     is_secret=item.get('is_secret'),
+                    output_raw=result.output_raw,
                 )
                 secret.secret_hash = item['hashed_secret']
                 result.data[filename][secret] = secret
