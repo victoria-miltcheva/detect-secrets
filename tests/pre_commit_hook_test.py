@@ -205,7 +205,7 @@ class TestPreCommitHook(object):
                     'name': 'CloudantDetector',
                 },
                 {
-                    'name': 'DB2Detector',
+                    'name': 'Db2Detector',
                 },
                 {
                     'name': 'GHDetector',
@@ -218,10 +218,10 @@ class TestPreCommitHook(object):
                     'name': 'HexHighEntropyString',
                 },
                 {
-                    'name': 'IBMCloudIAMDetector',
+                    'name': 'IbmCloudIamDetector',
                 },
                 {
-                    'name': 'IBMCosHmacDetector',
+                    'name': 'IbmCosHmacDetector',
                 },
                 {
                     'name': 'KeywordDetector',
