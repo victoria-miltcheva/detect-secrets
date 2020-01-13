@@ -208,10 +208,10 @@ class TestPreCommitHook(object):
                     'name': 'Db2Detector',
                 },
                 {
-                    'name': 'GHDetector',
+                    'name': 'GheDetector',
                 },
                 {
-                    'name': 'GHDetectorV2',
+                    'name': 'GheDetectorV2',
                 },
                 {
                     'hex_limit': 3,
