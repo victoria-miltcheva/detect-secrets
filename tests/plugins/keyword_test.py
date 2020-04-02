@@ -38,6 +38,7 @@ FOLLOWED_BY_COLON_EQUAL_SIGNS_RE = {
             'apikey :=m{{h}o)p${e]nob(ody[finds>-_$#thisone}}',
             'apikey:= m{{h}o)p${e]nob(ody[finds>-_$#thisone}}',
             'apikey:=m{{h}o)p${e]nob(ody[finds>-_$#thisone}}',
+            'api-key:=m{{h}o)p${e]nob(ody[finds>-_$#thisone}}',
         ],
     },
 }
@@ -138,6 +139,7 @@ FOLLOWED_BY_QUOTES_AND_SEMICOLON_RE = {
             'fooapikeyfoo "m{{h}o)p${e]nob(ody[finds>-_$#thisone}}";',  # Double-quotes
             'fooapikeyfoo"m{{h}o)p${e]nob(ody[finds>-_$#thisone}}";',  # Double-quotes
             'private_key \'m{{h}o)p${e]nob(ody[finds>-_$#thisone}}\';',  # Single-quotes
+            'private-key \'m{{h}o)p${e]nob(ody[finds>-_$#thisone}}\';',  # Single-quotes
             'fooprivate_keyfoo\'m{{h}o)p${e]nob(ody[finds>-_$#thisone}}\';',  # Single-quotes
             'fooprivate_key\'m{{h}o)p${e]nob(ody[finds>-_$#thisone}}\';',  # Single-quotes
         ],
