@@ -21,6 +21,7 @@ setup(
         'ibm_db',
         'boxsdk[jwt]',
         'packaging',
+        'pyahocorasick',
     ],
     extras_require={
         ':python_version=="2.7"': [
@@ -28,9 +29,6 @@ setup(
             'enum34',
             'future',
             'functools32',
-        ],
-        'word_list': [
-            'pyahocorasick',
         ],
     },
     entry_points={
