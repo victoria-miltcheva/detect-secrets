@@ -13,3 +13,4 @@ responses
 ibm_db
 boxsdk[jwt]
 pyahocorasick
+safety
