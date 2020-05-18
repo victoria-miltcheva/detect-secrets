@@ -123,7 +123,7 @@ class SecretsCollection(object):
                     plugin_classname,
                     exclude_lines_regex=result.exclude_lines,
                     automaton=automaton,
-                    should_verify_secrets=False,
+                    should_verify_secrets=True,
                     **plugin
                 ),
             )

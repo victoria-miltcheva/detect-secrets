@@ -493,7 +493,6 @@ class TestMergeBaseline(object):
             },
 
         }
-        pass
 
 
 class TestMergeResults(object):
