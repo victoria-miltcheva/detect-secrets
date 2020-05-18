@@ -234,7 +234,7 @@ class BasePlugin(object):
 
         verified_result = VerifiedResult.UNVERIFIED
         for result in results:
-            is_verified = self.verify(result.secret_value)
+            is_verified = self.verify(result.secret_value, string, result)
             if is_verified != VerifiedResult.UNVERIFIED:
                 verified_result = is_verified
                 break
