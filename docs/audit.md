@@ -1,5 +1,19 @@
 # Audit
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [How to Audit a Baseline](#how-to-audit-a-baseline)
+  - [Windows Powershell and cmd](#windows-powershell-and-cmd)
+  - [Windows git bash](#windows-git-bash)
+  - [MacOS & Linux](#macos--linux)
+- [Manually Labelling Secrets](#manually-labelling-secrets)
+  - [Handling Developer Secrets](#handling-developer-secrets)
+- [What to do after marking an potential secret as a valid secret?](#what-to-do-after-marking-an-potential-secret-as-a-valid-secret)
+- [Comparing Baselines](#comparing-baselines)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 The `audit` command is a set of functionality designed for analysts to do more with
 a pre-generated baseline. Some common use cases of this include:
 
