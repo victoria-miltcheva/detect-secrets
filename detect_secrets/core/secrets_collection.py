@@ -2,8 +2,12 @@ import codecs
 import json
 import os
 import re
+from collections import defaultdict
 from time import gmtime
 from time import strftime
+from typing import Any
+from typing import Dict
+from typing import Set
 
 from detect_secrets import VERSION
 from detect_secrets.core.constants import IGNORED_FILE_EXTENSIONS
@@ -41,7 +45,7 @@ class SecretsCollection:
         :type output_verified_false: bool
         :param output_verified_false: whether to output secrets that fail verification.
         """
-        self.data = {}
+        self.data: Dict[str, Set[PotentialSecret]] = defaultdict(set)
         self.plugins = plugins
         self.exclude_files = exclude_files
         self.exclude_lines = exclude_lines
@@ -50,6 +54,25 @@ class SecretsCollection:
         self.version = VERSION
         self.output_raw = output_raw
         self.output_verified_false = output_verified_false
+        self.type = type
+
+    @classmethod
+    def load_from_baseline(cls, baseline: Dict[str, Any]) -> 'SecretsCollection':
+        print('reached load_from_baseline')
+        output = cls()
+        print('output before', output)  # should be output is <detect_secrets.core.secrets_collection.SecretsCollection object at 0x1058c2690>
+        for filename in baseline['results']:
+            print('filename is', filename)
+            for item in baseline['results'][filename]:
+                print('item is', item)
+                secret = PotentialSecret.load_secret_from_dict({'filename': filename, **item})
+                print('secret is', secret)
+                print('breaks before output[filename].add(secret)')
+                output[filename].add(secret)
+                print('output after?', output)
+
+        print('output after', output)
+        return output
 
     @classmethod
     def load_baseline_from_string(cls, string, plugin_filenames=None):

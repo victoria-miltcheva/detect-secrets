@@ -5,7 +5,7 @@ from functools import lru_cache
 from importlib import import_module
 
 from detect_secrets.plugins.base import BasePlugin
-from detect_secrets.util import get_root_directory
+from detect_secrets.util.git import get_root_directory
 
 
 @lru_cache(maxsize=1)

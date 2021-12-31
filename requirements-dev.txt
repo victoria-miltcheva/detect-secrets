@@ -18,3 +18,5 @@ ibm_db
 boxsdk[jwt]
 pyahocorasick
 safety
+requests==2.25.0
+packaging==20.7

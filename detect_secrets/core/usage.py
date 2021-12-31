@@ -1,8 +1,11 @@
 import argparse
 from collections import namedtuple
 
+from . import audit
+from . import baseline
 from detect_secrets import VERSION
 from detect_secrets.consts import DEFAULT_GHE_INSTANCE
+# from . import scan
 
 
 def add_exclude_lines_argument(parser):
@@ -84,6 +87,34 @@ class ParserBuilder(object):
             action_parser(subparser).add_arguments()
 
         return self
+
+    # def add_console_use_arguments(self) -> 'ParserBuilder':
+    #     subparser = self._parser.add_subparsers(dest='action')
+    #     self._post_processors = [_assert_action_is_specified, *self._post_processors]
+
+    #     # parser = scan.add_scan_action(subparser)
+
+    #     # NOTE: This ordering is important.
+    #     #   1. Baselines will be handled accordingly, and the global settings object will
+    #     #      be initialized with a certain state.
+    #     #   2. Scan options can override this (e.g. --force-use-all-plugins)
+    #     #   3. Plugin options can override this again (e.g. disabling plugins, or different configs)
+    #     #
+    #     # In a similar way, the filter options must come after the settings object is initialized.
+    #     # self._post_processors.append(scan.parse_args)
+    #     self.add_plugin_options(parser, action_filter='scan')
+    #     self.add_filter_options(parser, action_filter='scan')
+
+    #     # NOTE: scan allows a baseline, but we need to override the first post_processor
+    #     self._post_processors[1] = baseline.parse_args
+
+    #     audit.add_audit_action(subparser)
+    #     self._post_processors.append(audit.parse_args)
+    #     return self
+
+    def _assert_action_is_specified(args: argparse.Namespace) -> None:
+        if not args.action:
+            raise argparse.ArgumentTypeError('Unspecified action.')
 
     def parse_args(self, argv):
         output = self.parser.parse_args(argv)

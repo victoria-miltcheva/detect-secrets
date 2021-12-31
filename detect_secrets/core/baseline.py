@@ -3,7 +3,16 @@ import os
 import re
 import subprocess
 import types
+from typing import Any
+from typing import Callable
+from typing import cast
+from typing import Dict
 
+from ..__init__ import VERSION
+from ..exceptions import UnableToReadBaselineError
+from ..settings import configure_settings_from_baseline
+from ..util.importlib import import_modules_from_package
+from ..util.semver import Version
 from detect_secrets import util
 from detect_secrets.core.log import get_logger
 from detect_secrets.core.secrets_collection import SecretsCollection
@@ -253,6 +262,56 @@ def trim_baseline_of_removed_secrets(results, baseline, filelist):
     return updated
 
 
+def upgrade(baseline: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Baselines will eventually require format changes. This function is responsible for upgrading
+    an older baseline to the latest version.
+    """
+    # FIXME
+    # baseline_version = Version(baseline['version'])
+    baseline_version = Version('1.1.0')
+
+    if baseline_version >= Version(VERSION):
+        return baseline
+
+    modules = import_modules_from_package(
+        upgrades,
+        filter=lambda x: not _is_relevant_upgrade_module(baseline_version)(x),
+    )
+
+    new_baseline = {**baseline}
+    for module in modules:
+        module.upgrade(new_baseline)    # type: ignore
+
+    new_baseline['version'] = VERSION
+    return new_baseline
+
+
+def load(baseline: Dict[str, Any], filename: str = '') -> SecretsCollection:
+    """
+    With a given baseline file, load all settings and discovered secrets from it.
+
+    :raises: KeyError
+    """
+    # This is required for backwards compatibility, and supporting upgrades from older versions.
+    baseline = upgrade(baseline)
+
+    configure_settings_from_baseline(baseline, filename=filename)
+    return SecretsCollection.load_from_baseline(baseline)
+
+
+def load_from_file(filename: str) -> Dict[str, Any]:
+    """
+    :raises: UnableToReadBaselineError
+    :raises: InvalidBaselineError
+    """
+    try:
+        with open(filename) as f:
+            return cast(Dict[str, Any], json.loads(f.read()))
+    except (FileNotFoundError, IOError, json.decoder.JSONDecodeError) as e:
+        raise UnableToReadBaselineError from e
+
+
 def merge_baseline(old_baseline, new_baseline):
     """Updates baseline to be compatible with the latest version of
     detect-secrets.
@@ -382,3 +441,16 @@ def _get_files_recursively(rootdir):
             if relative_path:
                 output.append(relative_path)
     return output
+
+
+def _is_relevant_upgrade_module(current_version: Version) -> Callable:
+    def wrapped(module_path: str) -> bool:
+        # This converts `v1_0` to `1.0`
+        affected_version_string = module_path.rsplit('.', 1)[-1].lstrip('v').replace('_', '.')
+
+        # Patch version doesn't matter, because patches should not require baseline bumps.
+        affected_version = Version(f'{affected_version_string}.0')
+
+        return current_version < affected_version
+
+    return wrapped

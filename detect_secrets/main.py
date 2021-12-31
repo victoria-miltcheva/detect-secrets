@@ -1,7 +1,11 @@
+import argparse
 import json
 import sys
+from typing import List
+from typing import Optional
 
-from detect_secrets.core import audit
+from . import audit
+from .exceptions import InvalidBaselineError
 from detect_secrets.core import baseline
 from detect_secrets.core.common import write_baseline_to_file
 from detect_secrets.core.log import log
@@ -9,16 +13,16 @@ from detect_secrets.core.secrets_collection import SecretsCollection
 from detect_secrets.core.usage import ParserBuilder
 from detect_secrets.plugins.common import initialize
 from detect_secrets.util import build_automaton
-from detect_secrets.util import version_check
+from detect_secrets.util.version_check import version_check
 
 
-def parse_args(argv):
+def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     return ParserBuilder()\
         .add_console_use_arguments()\
         .parse_args(argv)
 
 
-def main(argv=None):
+def main(argv: Optional[List[str]] = None) -> int:
 
     version_check()
 
@@ -73,28 +77,46 @@ def main(argv=None):
                 )
 
     elif args.action == 'audit':
-        if not args.diff and not args.display_results:
-            audit.audit_baseline(args.filename[0])
-            return 0
+        handle_audit_action(args)
 
-        if args.display_results:
-            audit.print_audit_results(args.filename[0])
-            return 0
+    # elif args.action == 'audit':
+    #     if not args.diff and not args.display_results:
+    #         audit.audit_baseline(args.filename[0])
+    #         return 0
 
-        if len(args.filename) != 2:
-            print(
-                'Must specify two files to compare!',
-                file=sys.stderr,
-            )
-            return 1
+    #     if args.display_results:
+    #         audit.print_audit_results(args.filename[0])
+    #         return 0
 
-        try:
-            audit.compare_baselines(args.filename[0], args.filename[1])
-        except audit.RedundantComparisonError:
-            print(
-                'No difference, because it\'s the same file!',
-                file=sys.stderr,
-            )
+    #     if args.report:
+    #         class_to_print = None
+    #         if args.only_real:
+    #             class_to_print = audit.report.SecretClassToPrint.REAL_SECRET
+    #         elif args.only_false:
+    #             class_to_print = audit.report.SecretClassToPrint.FALSE_POSITIVE
+    #         print(
+    #             json.dumps(
+    #                 audit.report.generate_report(args.filename[0], class_to_print),
+    #                 indent=4,
+    #                 sort_keys=True,
+    #             ),
+    #         )
+    #         return 0
+
+        # if len(args.filename) != 2:
+        #     print(
+        #         'Must specify two files to compare!',
+        #         file=sys.stderr,
+        #     )
+        #     return 1
+
+        # try:
+        #     audit.compare_baselines(args.filename[0], args.filename[1])
+        # except audit.RedundantComparisonError:
+        #     print(
+        #         'No difference, because it\'s the same file!',
+        #         file=sys.stderr,
+        #     )
 
     return 0
 
@@ -248,6 +270,50 @@ def _add_baseline_to_exclude_files(args):
         args.exclude_files = baseline_name_regex
     elif baseline_name_regex not in args.exclude_files:
         args.exclude_files += r'|{}'.format(baseline_name_regex)
+
+
+def handle_audit_action(args: argparse.Namespace) -> None:
+    print(args)
+    try:
+        if hasattr(args, 'stats'):
+            stats = audit.analytics.calculate_statistics_for_baseline(args.filename[0])
+            if args.diff:
+                # TODO
+                raise NotImplementedError
+
+            if args.json:
+                print(json.dumps(stats.json(), indent=2))
+            else:
+                print(str(stats))
+        elif hasattr(args, 'report'):
+            class_to_print = None
+            if hasattr(args, 'only_real'):
+                class_to_print = audit.report.SecretClassToPrint.REAL_SECRET
+            elif hasattr(args, 'only_false'):
+                class_to_print = audit.report.SecretClassToPrint.FALSE_POSITIVE
+            print(
+                json.dumps(
+                    audit.report.generate_report(args.filename[0], class_to_print),
+                    indent=4,
+                    sort_keys=True,
+                ),
+            )
+        else:
+            print('reached else')
+            # Starts interactive session.
+            print('has diff', hasattr(args, 'diff'))
+            if hasattr(args, 'diff') and args.diff == True:
+                print('reached inner if')
+                # Show changes
+                if len(args.filename) == 2:
+                    audit.compare_baselines(args.filename[0], args.filename[1])
+            else:
+                print('reached inner else')
+                # Label secrets
+                print('auditing baseline')
+                audit.audit_baseline(args.filename[0])
+    except InvalidBaselineError:
+        pass
 
 
 if __name__ == '__main__':

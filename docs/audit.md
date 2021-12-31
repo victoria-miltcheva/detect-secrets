@@ -3,15 +3,16 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
--   [What Is It?](#what-is-it)
--   [How to Audit a Baseline](#how-to-audit-a-baseline)
-    -   [Windows Powershell and cmd](#windows-powershell-and-cmd)
-    -   [Windows git bash](#windows-git-bash)
-    -   [MacOS & Linux](#macos--linux)
--   [Manually Labelling Secrets](#manually-labelling-secrets)
-    -   [Handling Developer Secrets](#handling-developer-secrets)
--   [What to do after marking an potential secret as a valid secret?](#what-to-do-after-marking-an-potential-secret-as-a-valid-secret)
--   [Comparing Baselines](#comparing-baselines)
+- [What Is It?](#what-is-it)
+- [How to Audit a Baseline](#how-to-audit-a-baseline)
+  - [Windows Powershell and cmd](#windows-powershell-and-cmd)
+  - [Windows git bash](#windows-git-bash)
+  - [MacOS & Linux](#macos--linux)
+- [Manually Labelling Secrets](#manually-labelling-secrets)
+  - [Handling Developer Secrets](#handling-developer-secrets)
+- [What to do after marking an potential secret as a valid secret?](#what-to-do-after-marking-an-potential-secret-as-a-valid-secret)
+- [Comparing Baselines](#comparing-baselines)
+- [Report generation](#report-generation)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -155,3 +156,126 @@ $ detect-secrets scan --string 'Base64HighEntropyString' --base64-limit 4
 Base64HighEntropyString: True  (4.089)
 ...
 ```
+
+## Report generation
+
+Maybe, you need to generate a full report with all the detect-secrets findings. You can generate
+one with the `--report` flag:
+
+'''bash
+$ detect-secrets audit --report .secret.baseline
+[
+{
+"category": "VERIFIED_TRUE",
+"filename": "test.properties",
+"lines": {
+"1": "secret=value",
+"6": "password=value"
+},
+"secrets": "value",
+"types": [
+"Secret Keyword"
+]
+},
+{
+"category": "UNVERIFIED",
+"filename": "test.properties",
+"lines": {
+"2": "password=changeit",
+"5": "password=changeit"
+},
+"secrets": "changeit",
+"types": [
+"Secret Keyword"
+]
+},
+{
+"category": "VERIFIED_TRUE",
+"filename": "test.properties",
+"lines": {
+"3": "password=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.",
+"4": "test=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ."
+},
+"secrets": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.",
+"types": [
+"Secret Keyword",
+"JSON Web Token"
+]
+},
+{
+"category": "VERIFIED_FALSE",
+"filename": "test.properties",
+"lines": {
+"7": "password=faketest"
+},
+"secrets": "faketest",
+"types": [
+"Secret Keyword"
+]
+}
+]
+'''
+
+You can also select only the real secrets with the option `--only-real`:
+
+'''bash
+$ detect-secrets audit --report --only-real .secret.baseline
+[
+{
+"category": "VERIFIED_TRUE",
+"filename": "test.properties",
+"lines": {
+"1": "secret=value",
+"6": "password=value"
+},
+"secrets": "value",
+"types": [
+"Secret Keyword"
+]
+},
+{
+"category": "UNVERIFIED",
+"filename": "test.properties",
+"lines": {
+"2": "password=changeit",
+"5": "password=changeit"
+},
+"secrets": "changeit",
+"types": [
+"Secret Keyword"
+]
+},
+{
+"category": "VERIFIED_TRUE",
+"filename": "test.properties",
+"lines": {
+"3": "password=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.",
+"4": "test=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ."
+},
+"secrets": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.",
+"types": [
+"JSON Web Token",
+"Secret Keyword"
+]
+}
+]
+'''
+
+Or include only the false positives with `--only-false`:
+
+'''bash
+$ detect-secrets audit --report --only-false .secret.baseline
+[
+{
+"category": "VERIFIED_FALSE",
+"filename": "test.properties",
+"lines": {
+"7": "password=faketest"
+},
+"secrets": "faketest",
+"types": [
+"Secret Keyword"
+]
+}
+]
+'''

@@ -1,4 +1,7 @@
 import hashlib
+from typing import Any
+from typing import Dict
+from typing import Union
 
 
 class PotentialSecret:
@@ -89,6 +92,35 @@ class PotentialSecret:
         :rtype: string
         """
         return hashlib.sha1(secret.encode('utf-8')).hexdigest()
+
+    @classmethod
+    def load_secret_from_dict(cls, data: Dict[str, Union[str, int, bool]]) -> 'PotentialSecret':
+        """Custom JSON decoder"""
+        kwargs: Dict[str, Any] = {
+            'typ': str(data['type']),
+            'filename': str(data['filename']),
+            'secret': 'will be replaced',
+        }
+
+        print('data before', data)
+        # Optional parameters
+        for parameter in {
+            'lineno',
+            'is_secret',
+            'is_verified',
+        }:
+            if parameter in data:
+                kwargs[parameter] = data[parameter]
+
+        print('kwargs is', kwargs)
+        print('data after', data)
+        print('cls is', cls)
+        output = cls(**kwargs)
+        output.secret_value = None
+        output.secret_hash = str(data['hashed_secret'])
+        print('output is', output)
+
+        return output
 
     def json(self):
         """Custom JSON encoder"""
