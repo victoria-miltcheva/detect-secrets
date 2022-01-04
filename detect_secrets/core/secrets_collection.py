@@ -409,19 +409,28 @@ class SecretsCollection:
 
         return output
 
-    def json(self):
+    # def json(self):
+    #     """Custom JSON encoder"""
+    #     output = {}
+    #     for filename in self.data:
+    #         output[filename] = []
+
+    #         for secret_hash in self.data[filename]:
+    #             tmp = self.data[filename][secret_hash].json()
+    #             del tmp['filename']  # Because filename will map to the secrets
+
+    #             output[filename].append(tmp)
+
+    #     return output
+
+    def json(self) -> Dict[str, Any]:
         """Custom JSON encoder"""
-        output = {}
-        for filename in self.data:
-            output[filename] = []
+        output = defaultdict(list)
+        print('\noutput is', output)
+        for filename, secret in self:
+            output[filename].append(secret.json())
 
-            for secret_hash in self.data[filename]:
-                tmp = self.data[filename][secret_hash].json()
-                del tmp['filename']  # Because filename will map to the secrets
-
-                output[filename].append(tmp)
-
-        return output
+        return dict(output)
 
     def __str__(self):  # pragma: no cover
         return json.dumps(
