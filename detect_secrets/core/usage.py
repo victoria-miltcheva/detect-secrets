@@ -287,6 +287,14 @@ class AuditOptions:
             ),
         )
 
+        action_parser.add_argument(
+            '--report',
+            action='store_true',
+            help=(
+                'Displays a report with the secrets detected'
+            ),
+        )
+
         return self
 
 
