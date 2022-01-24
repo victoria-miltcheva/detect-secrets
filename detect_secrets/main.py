@@ -78,8 +78,17 @@ def main(argv=None):
             audit.audit_baseline(args.filename[0])
             return 0
 
+        # TODO: save filename to var
         if args.report:
-            print('report flag included')
+            if args.fail_on_non_audited:
+                audit.fail_on_non_audited(args.filename[0])
+
+            if args.fail_on_live_secret:
+                audit.fail_on_live_secret(args.filename[0])
+
+            if args.fail_on_audited_true:
+                audit.fail_on_audited_true(args.filename[0])
+
             return 0
 
         if args.display_results:

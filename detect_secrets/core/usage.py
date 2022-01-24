@@ -265,7 +265,7 @@ class AuditOptions:
             ),
         )
 
-        report_parser = parser.add_mutually_exclusive_group()
+        report_parser = parser.add_argument_group()
 
         report_parser.add_argument(
             '--fail-on-non-audited',

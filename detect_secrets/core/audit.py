@@ -729,3 +729,33 @@ def get_raw_secret_value(
             return plugin_secret.secret_value
 
     raise SecretNotFoundOnSpecifiedLineError(secret['line_number'])
+
+# TODO: move all_secrets to function if func doesn't already exist
+# TODO: write tests
+
+
+def fail_on_non_audited(baseline_filename):
+    baseline = _get_baseline_from_file(baseline_filename)
+    all_secrets = list(_secret_generator(baseline))
+
+    for _, secret in all_secrets:
+        if 'is_secret' not in secret:
+            return 1
+
+
+def fail_on_live_secret(baseline_filename):
+    baseline = _get_baseline_from_file(baseline_filename)
+    all_secrets = list(_secret_generator(baseline))
+
+    for _, secret in all_secrets:
+        if 'is_verified' in secret and secret['is_verified'] is True:
+            return 1
+
+
+def fail_on_audited_true(baseline_filename):
+    baseline = _get_baseline_from_file(baseline_filename)
+    all_secrets = list(_secret_generator(baseline))
+
+    for _, secret in all_secrets:
+        if 'is_secret' in secret and secret['is_secret'] is True:
+            return 1
