@@ -256,6 +256,52 @@ class AuditOptions:
             'audit',
         )
 
+    def _add_report_module(self):
+        parser = self.parser.add_argument_group(
+            title='reporting',
+            description=(
+                'Display a report with all the findings and the made decisions. '
+                'To be used with the report mode (--report).'
+            ),
+        )
+
+        report_parser = parser.add_mutually_exclusive_group()
+
+        report_parser.add_argument(
+            '--fail-on-non-audited',
+            action='store_true',
+            help=(
+                'This condition is met when there are potential secrets'
+                ' in the baseline file which have not been audited yet.'
+                ' To pass this check, run detect-secrets audit .secrets.baseline to'
+                ' audit any unmarked secrets.'
+            ),
+        )
+
+        report_parser.add_argument(
+            '--fail-on-live-secret',
+            action='store_true',
+            help=(
+                'This condition is met when a secret has been verified'
+                ' to be live. To pass this check, make sure that any'
+                ' secrets in the baseline file with a property of'
+                ' is_verified: true have been remediated, afterwards re-scan.'
+            ),
+        )
+
+        report_parser.add_argument(
+            '--fail-on-audited-true',
+            action='store_true',
+            help=(
+                'This condition is met when the baseline file contains'
+                ' one or more secrets which have been marked as actual'
+                ' secrets during the auditing stage. Secrets with a'
+                ' property of is_secret: true meet this condition.'
+                ' To pass this check, remove those secrets from your'
+                ' code and re-scan so that they will be removed from your baseline.'
+            ),
+        )
+
     def add_arguments(self):
         self.parser.add_argument(
             'filename',
@@ -294,6 +340,8 @@ class AuditOptions:
                 'Displays a report with the secrets detected'
             ),
         )
+
+        self._add_report_module()
 
         return self
 
