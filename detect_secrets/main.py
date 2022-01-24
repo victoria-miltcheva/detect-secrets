@@ -73,8 +73,13 @@ def main(argv=None):
                 )
 
     elif args.action == 'audit':
-        if not args.diff and not args.display_results:
+
+        if not args.diff and not args.display_results and not args.report:
             audit.audit_baseline(args.filename[0])
+            return 0
+
+        if args.report:
+            print('report flag included')
             return 0
 
         if args.display_results:
