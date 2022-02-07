@@ -193,7 +193,16 @@ class TestAuditBaseline:
         )
 
     def test_non_audited_pass_case(self):
-        return 0
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_secret'] = False
+        modified_baseline['results']['filenameA'][1]['is_secret'] = False
+        modified_baseline['results']['filenameB'][0]['is_secret'] = False
+
+        with self.mock_env(baseline=modified_baseline):
+            (return_code, secrets) = audit.fail_on_non_audited('will_be_mocked')
+
+        assert return_code == 0
+        assert len(secrets) == 0
 
     def test_non_audited_fail_case(self, mock_printer):
         modified_baseline = deepcopy(self.baseline)
@@ -202,25 +211,58 @@ class TestAuditBaseline:
         modified_baseline['results']['filenameB'][0]['is_secret'] = None
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets_failing_case) = audit.fail_on_non_audited('will_be_mocked')
+            (return_code, secrets) = audit.fail_on_non_audited('will_be_mocked')
 
         assert return_code == 1
-        assert len(secrets_failing_case) == 3
+        assert len(secrets) == 3
 
     def test_live_secret_pass_case(self):
-        return 0
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_verified'] = False
+        modified_baseline['results']['filenameA'][1]['is_verified'] = False
+        modified_baseline['results']['filenameB'][0]['is_verified'] = False
+
+        with self.mock_env(baseline=modified_baseline):
+            (return_code, secrets) = audit.fail_on_live_secret('will_be_mocked')
+
+        assert return_code == 0
+        assert len(secrets) == 0
 
     def test_live_secret_fail_case(self):
-        return 0
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_verified'] = True
+        modified_baseline['results']['filenameA'][1]['is_verified'] = True
+        modified_baseline['results']['filenameB'][0]['is_verified'] = True
+
+        with self.mock_env(baseline=modified_baseline):
+            (return_code, secrets) = audit.fail_on_live_secret('will_be_mocked')
+
+        assert return_code == 1
+        assert len(secrets) == 3
 
     def test_audited_true_pass_case(self):
-        return 0
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_secret'] = False
+        modified_baseline['results']['filenameA'][1]['is_secret'] = False
+        modified_baseline['results']['filenameB'][0]['is_secret'] = False
+
+        with self.mock_env(baseline=modified_baseline):
+            (return_code, secrets) = audit.fail_on_audited_true('will_be_mocked')
+
+        assert return_code == 0
+        assert len(secrets) == 0
 
     def test_audited_true_fail_case(self):
-        return 0
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_secret'] = True
+        modified_baseline['results']['filenameA'][1]['is_secret'] = True
+        modified_baseline['results']['filenameB'][0]['is_secret'] = True
 
-    def test_altogether_fail_case(self):
-        return 0
+        with self.mock_env(baseline=modified_baseline):
+            (return_code, secrets) = audit.fail_on_audited_true('will_be_mocked')
+
+        assert return_code == 1
+        assert len(secrets) == 3
 
     @contextmanager
     def run_logic(self, inputs, modified_baseline=None, input_baseline=None):
