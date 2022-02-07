@@ -53,3 +53,11 @@ POTENTIAL_SECRET_DETECTED_NOTE = (
     ' removed from the file, and another scan has been run,'
     ' its entry will be removed from the baseline file.'
 )
+
+# TODO: find a better place for this? better name?
+
+
+class ReportSecretType(Enum):
+    AUDITED_TRUE = 1
+    AUDITED_FALSE = 2
+    VERIFIED_TRUE = 3

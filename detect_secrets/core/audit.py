@@ -731,31 +731,73 @@ def get_raw_secret_value(
     raise SecretNotFoundOnSpecifiedLineError(secret['line_number'])
 
 # TODO: move all_secrets to function if func doesn't already exist
-# TODO: write tests
+# TODO: write unit tests
 
 
 def fail_on_non_audited(baseline_filename):
     baseline = _get_baseline_from_file(baseline_filename)
     all_secrets = list(_secret_generator(baseline))
 
+    non_audited_secrets = []
+
+    # TODO: extend this behavior by collecting all the secrets that fail
+    # this scenario in a list additional label field
     for _, secret in all_secrets:
         if 'is_secret' not in secret:
-            return 1
+            # secret.category = ReportSecretType.AUDITED_FALSE
+            non_audited_secrets.append(secret)
+
+    non_audited_secrets_json = json.dumps(non_audited_secrets, indent=4)
+
+    if len(non_audited_secrets) > 0:
+        return(1, non_audited_secrets_json)
+
+    return (0, [])
 
 
 def fail_on_live_secret(baseline_filename):
     baseline = _get_baseline_from_file(baseline_filename)
     all_secrets = list(_secret_generator(baseline))
 
+    live_secrets = []
+
+    # TODO: extend this behavior by collecting all the secrets that fail
+    # # this scenario in a list and additional label field
     for _, secret in all_secrets:
         if 'is_verified' in secret and secret['is_verified'] is True:
-            return 1
+            # setattr(secret, 'category', ReportSecretType.VERIFIED_TRUE)
+            # TODO: create new class / type for secret?
+            # Filename: ReportedSecret[]
+            # ReportedSecret
+            # marked_as_secret: boolean, is_live: boolean, line_number,
+            #   type is Enum(Secret Type), failed_condition:
+            #   Enum(ReportSecretType), is_live_result: ? (same thing)
+            live_secrets.append(secret)
+
+    live_secrets_json = json.dumps(live_secrets, indent=4)
+
+    if len(live_secrets) > 0:
+        return(1, live_secrets_json)
+
+    return (0, [])
 
 
 def fail_on_audited_true(baseline_filename):
     baseline = _get_baseline_from_file(baseline_filename)
     all_secrets = list(_secret_generator(baseline))
 
+    audited_true_secrets = []
+
+    # TODO: extend this behavior by collecting all the secrets that fail
+    # this scenario in a list and add an additional label field
     for _, secret in all_secrets:
         if 'is_secret' in secret and secret['is_secret'] is True:
-            return 1
+            # secret.category = ReportSecretType.AUDITED_TRUE
+            audited_true_secrets.append(secret)
+
+    audited_true_secrets_json = json.dumps(audited_true_secrets, indent=4)
+
+    if len(audited_true_secrets) > 0:
+        return(1, audited_true_secrets_json)
+
+    return (0, [])

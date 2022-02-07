@@ -81,15 +81,29 @@ def main(argv=None):
         # TODO: save filename to var
         if args.report:
             if args.fail_on_non_audited:
-                audit.fail_on_non_audited(args.filename[0])
+                (non_audited_return_code, non_audited_secrets_json) =\
+                    audit.fail_on_non_audited(args.filename[0])
 
             if args.fail_on_live_secret:
-                audit.fail_on_live_secret(args.filename[0])
+                (live_secret_return_code, live_secrets_json) =\
+                    audit.fail_on_live_secret(args.filename[0])
 
             if args.fail_on_audited_true:
-                audit.fail_on_audited_true(args.filename[0])
+                (audited_true_return_code, audited_true_secrets_json) =\
+                    audit.fail_on_audited_true(args.filename[0])
 
-            return 0
+            if non_audited_return_code != 0:
+                print('Unaudited secrets were found:\n', non_audited_secrets_json)
+            if live_secret_return_code != 0:
+                print('Live secrets were found:\n', live_secrets_json)
+            if audited_true_return_code != 0:
+                print('Audited true secrets were found:\n', audited_true_secrets_json)
+
+            if non_audited_return_code == live_secret_return_code == audited_true_return_code == 0:
+                print('passed checks!')
+                return 0
+            else:
+                sys.exit(1)
 
         if args.display_results:
             audit.print_audit_results(args.filename[0])
