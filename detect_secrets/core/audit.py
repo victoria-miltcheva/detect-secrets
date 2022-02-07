@@ -730,9 +730,6 @@ def get_raw_secret_value(
 
     raise SecretNotFoundOnSpecifiedLineError(secret['line_number'])
 
-# TODO: move all_secrets to function if func doesn't already exist
-# TODO: write unit tests
-
 
 def fail_on_non_audited(baseline_filename):
     baseline = _get_baseline_from_file(baseline_filename)
