@@ -1176,30 +1176,6 @@ class TestGetUserDecision:
             assert m.message == expected_output
 
 
-# class TestReporting:
-
-#     def test_non_audited_pass_case():
-#         return 0
-
-#     def test_non_audited_fail_case():
-#         return 0
-
-#     def test_live_secret_pass_case():
-#         return 0
-
-#     def test_live_secret_fail_case():
-#         return 0
-
-#     def test_audited_true_pass_case():
-#         return 0
-
-#     def test_audited_true_fail_case():
-#         return 0
-
-#     def test_altogether_fail_case():
-#         return 0
-
-
 @pytest.fixture
 def mock_printer():
     with mock_printer_base(audit) as shim:
