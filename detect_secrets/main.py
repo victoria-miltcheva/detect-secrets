@@ -78,7 +78,6 @@ def main(argv=None):
             audit.audit_baseline(args.filename[0])
             return 0
 
-        # TODO: save filename to var
         if args.report:
             if args.fail_on_non_audited:
                 (non_audited_return_code, non_audited_secrets_json) =\
@@ -93,11 +92,20 @@ def main(argv=None):
                     audit.fail_on_audited_true(args.filename[0])
 
             if non_audited_return_code != 0:
-                print('Unaudited secrets were found:\n', non_audited_secrets_json)
+                print(
+                    'Unaudited secrets were found:\n',
+                    json.dumps(non_audited_secrets_json, indent=4),
+                )
             if live_secret_return_code != 0:
-                print('Live secrets were found:\n', live_secrets_json)
+                print(
+                    'Live secrets were found:\n',
+                    json.dumps(live_secrets_json, indent=4),
+                )
             if audited_true_return_code != 0:
-                print('Audited true secrets were found:\n', audited_true_secrets_json)
+                print(
+                    'Audited true secrets were found:\n',
+                    json.dumps(audited_true_secrets_json, indent=4),
+                )
 
             if non_audited_return_code == live_secret_return_code == audited_true_return_code == 0:
                 print('passed checks!')

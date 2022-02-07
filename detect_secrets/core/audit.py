@@ -743,14 +743,12 @@ def fail_on_non_audited(baseline_filename):
     # TODO: extend this behavior by collecting all the secrets that fail
     # this scenario in a list additional label field
     for _, secret in all_secrets:
-        if 'is_secret' not in secret:
+        if 'is_secret' not in secret or secret['is_secret'] is None:
             # secret.category = ReportSecretType.AUDITED_FALSE
             non_audited_secrets.append(secret)
 
-    non_audited_secrets_json = json.dumps(non_audited_secrets, indent=4)
-
     if len(non_audited_secrets) > 0:
-        return(1, non_audited_secrets_json)
+        return(1, non_audited_secrets)
 
     return (0, [])
 
@@ -774,10 +772,8 @@ def fail_on_live_secret(baseline_filename):
             #   Enum(ReportSecretType), is_live_result: ? (same thing)
             live_secrets.append(secret)
 
-    live_secrets_json = json.dumps(live_secrets, indent=4)
-
     if len(live_secrets) > 0:
-        return(1, live_secrets_json)
+        return(1, live_secrets)
 
     return (0, [])
 
@@ -795,9 +791,7 @@ def fail_on_audited_true(baseline_filename):
             # secret.category = ReportSecretType.AUDITED_TRUE
             audited_true_secrets.append(secret)
 
-    audited_true_secrets_json = json.dumps(audited_true_secrets, indent=4)
-
     if len(audited_true_secrets) > 0:
-        return(1, audited_true_secrets_json)
+        return(1, audited_true_secrets)
 
     return (0, [])

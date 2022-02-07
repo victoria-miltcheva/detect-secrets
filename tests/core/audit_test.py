@@ -192,6 +192,36 @@ class TestAuditBaseline:
             input_baseline=self.leapfrog_baseline,
         )
 
+    def test_non_audited_pass_case(self):
+        return 0
+
+    def test_non_audited_fail_case(self, mock_printer):
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_secret'] = None
+        modified_baseline['results']['filenameA'][1]['is_secret'] = None
+        modified_baseline['results']['filenameB'][0]['is_secret'] = None
+
+        with self.mock_env(baseline=modified_baseline):
+            (return_code, secrets_failing_case) = audit.fail_on_non_audited('will_be_mocked')
+
+        assert return_code == 1
+        assert len(secrets_failing_case) == 3
+
+    def test_live_secret_pass_case(self):
+        return 0
+
+    def test_live_secret_fail_case(self):
+        return 0
+
+    def test_audited_true_pass_case(self):
+        return 0
+
+    def test_audited_true_fail_case(self):
+        return 0
+
+    def test_altogether_fail_case(self):
+        return 0
+
     @contextmanager
     def run_logic(self, inputs, modified_baseline=None, input_baseline=None):
         with self.mock_env(
@@ -1102,6 +1132,30 @@ class TestGetUserDecision:
             audit._get_user_decision(prompt_secret_decision=prompt_secret_decision)
 
             assert m.message == expected_output
+
+
+# class TestReporting:
+
+#     def test_non_audited_pass_case():
+#         return 0
+
+#     def test_non_audited_fail_case():
+#         return 0
+
+#     def test_live_secret_pass_case():
+#         return 0
+
+#     def test_live_secret_fail_case():
+#         return 0
+
+#     def test_audited_true_pass_case():
+#         return 0
+
+#     def test_audited_true_fail_case():
+#         return 0
+
+#     def test_altogether_fail_case():
+#         return 0
 
 
 @pytest.fixture
