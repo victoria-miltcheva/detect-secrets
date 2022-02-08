@@ -3,6 +3,8 @@ import sys
 
 from detect_secrets.core import audit
 from detect_secrets.core import baseline
+from detect_secrets.core.color import AnsiColor
+from detect_secrets.core.color import colorize
 from detect_secrets.core.common import write_baseline_to_file
 from detect_secrets.core.log import log
 from detect_secrets.core.secrets_collection import SecretsCollection
@@ -93,26 +95,50 @@ def main(argv=None):
 
             if non_audited_return_code != 0:
                 print(
-                    'Unaudited secrets were found:\n',
-                    json.dumps(non_audited_secrets_json, indent=4),
-                )
-            if live_secret_return_code != 0:
-                print(
-                    'Live secrets were found:\n',
-                    json.dumps(live_secrets_json, indent=4),
-                )
-            if audited_true_return_code != 0:
-                print(
-                    'Audited true secrets were found:\n',
-                    json.dumps(audited_true_secrets_json, indent=4),
+                    '{}\n {}'.format(
+                        colorize('Unaudited secrets were found:', AnsiColor.RED),
+                        json.dumps(non_audited_secrets_json, indent=4),
+                    ),
                 )
 
+                # TODO: include remediation instructions
+            if live_secret_return_code != 0:
+                print(
+                    '{}\n {}'.format(
+                        colorize('Live secrets were found:', AnsiColor.RED),
+                        json.dumps(live_secrets_json, indent=4),
+                    ),
+                )
+
+                # TODO: include remediation instructions
+            if audited_true_return_code != 0:
+                print(
+                    '{}\n {}'.format(
+                        colorize('Audited true secrets were found:', AnsiColor.RED),
+                        json.dumps(audited_true_secrets_json, indent=4),
+                    ),
+                )
+
+                # TODO: include remediation instructions
+
             if non_audited_return_code == live_secret_return_code == audited_true_return_code == 0:
-                print('passed checks!')
+                print('{}'.format(colorize('Passed checks!', AnsiColor.LIGHT_GREEN)))
                 return 0
             else:
                 sys.exit(1)
 
+    # print(
+    #     '{} {} {} {}\n{} {}\n{} {}'.format(
+    #         colorize('Secret:     ', AnsiColor.BOLD),
+    #         colorize(str(count), AnsiColor.PURPLE),
+    #         colorize('of', AnsiColor.BOLD),
+    #         colorize(str(total), AnsiColor.PURPLE),
+    #         colorize('Filename:   ', AnsiColor.BOLD),
+    #         colorize(filename, AnsiColor.PURPLE),
+    #         colorize('Secret Type:', AnsiColor.BOLD),
+    #         colorize(secret['type'], AnsiColor.PURPLE),
+    #     ),
+    # )
         if args.display_results:
             audit.print_audit_results(args.filename[0])
             return 0
