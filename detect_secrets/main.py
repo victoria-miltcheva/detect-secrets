@@ -93,6 +93,7 @@ def main(argv=None):
                 (audited_true_return_code, audited_true_secrets_json) =\
                     audit.fail_on_audited_true(args.filename[0])
 
+            # TODO: move to print functions in audit.py
             if non_audited_return_code != 0:
                 print(
                     '{}\n {}'.format(
@@ -101,7 +102,6 @@ def main(argv=None):
                     ),
                 )
 
-                # TODO: include remediation instructions
             if live_secret_return_code != 0:
                 print(
                     '{}\n {}'.format(
@@ -110,7 +110,6 @@ def main(argv=None):
                     ),
                 )
 
-                # TODO: include remediation instructions
             if audited_true_return_code != 0:
                 print(
                     '{}\n {}'.format(
@@ -119,26 +118,12 @@ def main(argv=None):
                     ),
                 )
 
-                # TODO: include remediation instructions
-
             if non_audited_return_code == live_secret_return_code == audited_true_return_code == 0:
-                print('{}'.format(colorize('Passed checks!', AnsiColor.LIGHT_GREEN)))
+                print('{}'.format(colorize('Passed all checks!', AnsiColor.LIGHT_GREEN)))
                 return 0
             else:
                 sys.exit(1)
 
-    # print(
-    #     '{} {} {} {}\n{} {}\n{} {}'.format(
-    #         colorize('Secret:     ', AnsiColor.BOLD),
-    #         colorize(str(count), AnsiColor.PURPLE),
-    #         colorize('of', AnsiColor.BOLD),
-    #         colorize(str(total), AnsiColor.PURPLE),
-    #         colorize('Filename:   ', AnsiColor.BOLD),
-    #         colorize(filename, AnsiColor.PURPLE),
-    #         colorize('Secret Type:', AnsiColor.BOLD),
-    #         colorize(secret['type'], AnsiColor.PURPLE),
-    #     ),
-    # )
         if args.display_results:
             audit.print_audit_results(args.filename[0])
             return 0

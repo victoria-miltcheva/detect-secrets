@@ -19,6 +19,8 @@ from .color import AnsiColor
 from .color import colorize
 from .common import write_baseline_to_file
 from detect_secrets.core.constants import POTENTIAL_SECRET_DETECTED_NOTE
+# from detect_secrets.core.reporting import ReportedSecret
+# from pprint import pprint
 
 
 class SecretNotFoundOnSpecifiedLineError(Exception):
@@ -737,11 +739,15 @@ def fail_on_non_audited(baseline_filename):
 
     non_audited_secrets = []
 
-    # TODO: extend this behavior by collecting all the secrets that fail
-    # this scenario in a list additional label field
+    # test_secret = ReportedSecret('Live',
+    # 'detect_secrets/plugins/private_key.py', 46, 'Private key')
+
+    # pprint(vars(test_secret))
     for _, secret in all_secrets:
         if 'is_secret' not in secret or secret['is_secret'] is None:
             # secret.category = ReportSecretType.AUDITED_FALSE
+            # reported_secret = ReportedSecret('Unaudited', 'TODO: filename', 12, 'test')
+            # non_audited_secrets.append(reported_secret)
             non_audited_secrets.append(secret)
 
     if len(non_audited_secrets) > 0:
@@ -756,17 +762,8 @@ def fail_on_live_secret(baseline_filename):
 
     live_secrets = []
 
-    # TODO: extend this behavior by collecting all the secrets that fail
-    # # this scenario in a list and additional label field
     for _, secret in all_secrets:
         if 'is_verified' in secret and secret['is_verified'] is True:
-            # setattr(secret, 'category', ReportSecretType.VERIFIED_TRUE)
-            # TODO: create new class / type for secret?
-            # Filename: ReportedSecret[]
-            # ReportedSecret
-            # marked_as_secret: boolean, is_live: boolean, line_number,
-            #   type is Enum(Secret Type), failed_condition:
-            #   Enum(ReportSecretType), is_live_result: ? (same thing)
             live_secrets.append(secret)
 
     if len(live_secrets) > 0:
@@ -781,11 +778,8 @@ def fail_on_audited_true(baseline_filename):
 
     audited_true_secrets = []
 
-    # TODO: extend this behavior by collecting all the secrets that fail
-    # this scenario in a list and add an additional label field
     for _, secret in all_secrets:
         if 'is_secret' in secret and secret['is_secret'] is True:
-            # secret.category = ReportSecretType.AUDITED_TRUE
             audited_true_secrets.append(secret)
 
     if len(audited_true_secrets) > 0:
