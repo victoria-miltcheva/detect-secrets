@@ -93,6 +93,10 @@ def main(argv=None):
                 (audited_true_return_code, audited_true_secrets_json) =\
                     audit.fail_on_audited_true(args.filename[0])
 
+            # TODO: get and print stats
+            # stats = audit.stats(non_audited_secrets_json,
+            # live_secrets_json, audited_true_secrets_json, args.filename[0])
+
             # TODO: move to print functions in audit.py
             if non_audited_return_code != 0:
                 print(

@@ -786,3 +786,27 @@ def fail_on_audited_true(baseline_filename):
         return(1, audited_true_secrets)
 
     return (0, [])
+
+
+def stats(live_secrets, non_audited_secrets, audited_true_secrets, total_results):
+    return 0
+
+# TODO: create printing methods that will format the report
+# for both JSON output and table
+# use https://pypi.org/project/tabulate/
+# use https://docs.python.org/3/library/json.html
+
+
+# TODO: combine list params into one?
+def report_json(live_secrets, non_audited_secrets, audited_true_secrets):
+    # all_secrets = []  # TODO
+
+    # TODO: convert each secret to a json objects, include stats
+
+    return 0
+
+# TODO: combine list params into one?
+
+
+def report_table(live_secrets, non_audited_secrets, audited_true_secrets):
+    return 0
