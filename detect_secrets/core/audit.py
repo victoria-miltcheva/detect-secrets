@@ -19,8 +19,6 @@ from .color import AnsiColor
 from .color import colorize
 from .common import write_baseline_to_file
 from detect_secrets.core.constants import POTENTIAL_SECRET_DETECTED_NOTE
-# from detect_secrets.core.reporting import ReportedSecret
-# from pprint import pprint
 
 
 class SecretNotFoundOnSpecifiedLineError(Exception):
@@ -738,17 +736,16 @@ def fail_on_non_audited(baseline_filename):
     all_secrets = list(_secret_generator(baseline))
 
     non_audited_secrets = []
-
-    # test_secret = ReportedSecret('Live',
-    # 'detect_secrets/plugins/private_key.py', 46, 'Private key')
-
-    # pprint(vars(test_secret))
-    for _, secret in all_secrets:
+    for filename, secret in all_secrets:
         if 'is_secret' not in secret or secret['is_secret'] is None:
-            # secret.category = ReportSecretType.AUDITED_FALSE
-            # reported_secret = ReportedSecret('Unaudited', 'TODO: filename', 12, 'test')
-            # non_audited_secrets.append(reported_secret)
-            non_audited_secrets.append(secret)
+            unaudited_secret = {
+                'failed_condition': 'Unaudited',
+                'filename': filename,
+                'line': secret['line_number'],
+                'type': secret['type'],
+            }
+
+            non_audited_secrets.append(unaudited_secret)
 
     if len(non_audited_secrets) > 0:
         return(1, non_audited_secrets)
@@ -762,9 +759,15 @@ def fail_on_live_secret(baseline_filename):
 
     live_secrets = []
 
-    for _, secret in all_secrets:
+    for filename, secret in all_secrets:
         if 'is_verified' in secret and secret['is_verified'] is True:
-            live_secrets.append(secret)
+            live_secret = {
+                'failed_condition': 'Live',
+                'filename': filename,
+                'line': secret['line_number'],
+                'type': secret['type'],
+            }
+            live_secrets.append(live_secret)
 
     if len(live_secrets) > 0:
         return(1, live_secrets)
@@ -778,9 +781,15 @@ def fail_on_audited_true(baseline_filename):
 
     audited_true_secrets = []
 
-    for _, secret in all_secrets:
+    for filename, secret in all_secrets:
         if 'is_secret' in secret and secret['is_secret'] is True:
-            audited_true_secrets.append(secret)
+            audited_true_secret = {
+                'failed_condition': 'Audited as real',
+                'filename': filename,
+                'line': secret['line_number'],
+                'type': secret['type'],
+            }
+            audited_true_secrets.append(audited_true_secret)
 
     if len(audited_true_secrets) > 0:
         return(1, audited_true_secrets)

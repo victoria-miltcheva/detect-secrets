@@ -100,21 +100,18 @@ def main(argv=None):
                 audited_true_secrets, args.filename[0],
             )
 
-            # TODO: combine JSON stats with secrets array
-
             # TODO: move to print functions in audit.py
-
-            # TODO: combine all secrets into one JSON array w/ key secrets
             secrets = numpy.concatenate((
-                non_audited_secrets, live_secrets,
+                non_audited_secrets,
+                live_secrets,
                 audited_true_secrets,
             )).tolist()
 
-            combined = {'stats': stats, 'secrets': secrets}
-            json_dump = json.dumps(combined, indent=4)
+            json_dump = json.dumps({'stats': stats, 'secrets': secrets}, indent=4)
 
             if (args.json):
                 print(json_dump)
+                # print('temp')
             else:
                 if non_audited_return_code != 0:
                     print(
