@@ -54,8 +54,6 @@ POTENTIAL_SECRET_DETECTED_NOTE = (
     ' its entry will be removed from the baseline file.'
 )
 
-# TODO: find a better place for this? better name?
-
 
 class ReportSecretType(Enum):
     AUDITED_REAL = 'Audited as real'

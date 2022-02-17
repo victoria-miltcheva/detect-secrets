@@ -800,6 +800,7 @@ def fail_on_audited_true(baseline_filename):
     return (0, [])
 
 
+# TODO: write unit tests
 def stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_filename):
     baseline = _get_baseline_from_file(baseline_filename)
     all_secrets = list(_secret_generator(baseline))
@@ -817,6 +818,7 @@ def stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_filena
     return stats
 
 
+# TODO: write unit tests
 def report_json(self, live_secrets, unaudited_secrets, audited_real_secrets, baseline_filename):
     stats = self.stats(
         live_secrets,
@@ -834,5 +836,6 @@ def report_json(self, live_secrets, unaudited_secrets, audited_real_secrets, bas
     return json.dumps({'stats': stats, 'secrets': secrets}, indent=4)
 
 
+# TODO: implement
 def report_table(live_secrets, non_audited_secrets, audited_true_secrets):
     return 0
