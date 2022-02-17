@@ -111,7 +111,6 @@ def main(argv=None):
 
             if (args.json):
                 print(json_dump)
-                # print('temp')
             else:
                 if non_audited_return_code != 0:
                     print(

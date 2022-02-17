@@ -19,6 +19,7 @@ from .color import AnsiColor
 from .color import colorize
 from .common import write_baseline_to_file
 from detect_secrets.core.constants import POTENTIAL_SECRET_DETECTED_NOTE
+from detect_secrets.core.constants import ReportSecretType
 
 
 class SecretNotFoundOnSpecifiedLineError(Exception):
@@ -739,7 +740,7 @@ def fail_on_non_audited(baseline_filename):
     for filename, secret in all_secrets:
         if 'is_secret' not in secret or secret['is_secret'] is None:
             unaudited_secret = {
-                'failed_condition': 'Unaudited',
+                'failed_condition': ReportSecretType.UNAUDITED.value,
                 'filename': filename,
                 'line': secret['line_number'],
                 'type': secret['type'],
@@ -762,7 +763,7 @@ def fail_on_live_secret(baseline_filename):
     for filename, secret in all_secrets:
         if 'is_verified' in secret and secret['is_verified'] is True:
             live_secret = {
-                'failed_condition': 'Live',
+                'failed_condition': ReportSecretType.LIVE.value,
                 'filename': filename,
                 'line': secret['line_number'],
                 'type': secret['type'],
@@ -784,7 +785,7 @@ def fail_on_audited_true(baseline_filename):
     for filename, secret in all_secrets:
         if 'is_secret' in secret and secret['is_secret'] is True:
             audited_true_secret = {
-                'failed_condition': 'Audited as real',
+                'failed_condition': ReportSecretType.AUDITED_REAL.value,
                 'filename': filename,
                 'line': secret['line_number'],
                 'type': secret['type'],

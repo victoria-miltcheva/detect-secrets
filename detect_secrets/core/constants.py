@@ -58,6 +58,6 @@ POTENTIAL_SECRET_DETECTED_NOTE = (
 
 
 class ReportSecretType(Enum):
-    AUDITED_TRUE = 1
-    AUDITED_FALSE = 2
-    VERIFIED_TRUE = 3
+    AUDITED_REAL = 'Audited as real'
+    UNAUDITED = 'Unaudited'
+    LIVE = 'Live'
