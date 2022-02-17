@@ -80,17 +80,17 @@ def main(argv=None):
             return 0
 
         if args.report:
-            if args.fail_on_non_audited:
+            if args.fail_on_unaudited:
                 (non_audited_return_code, non_audited_secrets) =\
-                    audit.fail_on_non_audited(args.filename[0])
+                    audit.fail_on_unaudited(args.filename[0])
 
-            if args.fail_on_live_secret:
+            if args.fail_on_live:
                 (live_secret_return_code, live_secrets) =\
-                    audit.fail_on_live_secret(args.filename[0])
+                    audit.fail_on_live(args.filename[0])
 
-            if args.fail_on_audited_true:
+            if args.fail_on_audited_real:
                 (audited_true_return_code, audited_true_secrets) =\
-                    audit.fail_on_audited_true(args.filename[0])
+                    audit.fail_on_audited_real(args.filename[0])
 
             if (args.json):
                 print(

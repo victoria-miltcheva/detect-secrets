@@ -192,74 +192,74 @@ class TestAuditBaseline:
             input_baseline=self.leapfrog_baseline,
         )
 
-    def test_non_audited_pass_case(self):
+    def test_unaudited_pass_case(self):
         modified_baseline = deepcopy(self.baseline)
         modified_baseline['results']['filenameA'][0]['is_secret'] = False
         modified_baseline['results']['filenameA'][1]['is_secret'] = False
         modified_baseline['results']['filenameB'][0]['is_secret'] = False
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_non_audited('will_be_mocked')
+            (return_code, secrets) = audit.fail_on_unaudited('will_be_mocked')
 
         assert return_code == 0
         assert len(secrets) == 0
 
-    def test_non_audited_fail_case(self, mock_printer):
+    def test_unaudited_fail_case(self, mock_printer):
         modified_baseline = deepcopy(self.baseline)
         modified_baseline['results']['filenameA'][0]['is_secret'] = None
         modified_baseline['results']['filenameA'][1]['is_secret'] = None
         modified_baseline['results']['filenameB'][0]['is_secret'] = None
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_non_audited('will_be_mocked')
+            (return_code, secrets) = audit.fail_on_unaudited('will_be_mocked')
 
         assert return_code == 1
         assert len(secrets) == 3
 
-    def test_live_secret_pass_case(self):
+    def test_live_pass_case(self):
         modified_baseline = deepcopy(self.baseline)
         modified_baseline['results']['filenameA'][0]['is_verified'] = False
         modified_baseline['results']['filenameA'][1]['is_verified'] = False
         modified_baseline['results']['filenameB'][0]['is_verified'] = False
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_live_secret('will_be_mocked')
+            (return_code, secrets) = audit.fail_on_live('will_be_mocked')
 
         assert return_code == 0
         assert len(secrets) == 0
 
-    def test_live_secret_fail_case(self):
+    def test_live_fail_case(self):
         modified_baseline = deepcopy(self.baseline)
         modified_baseline['results']['filenameA'][0]['is_verified'] = True
         modified_baseline['results']['filenameA'][1]['is_verified'] = True
         modified_baseline['results']['filenameB'][0]['is_verified'] = True
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_live_secret('will_be_mocked')
+            (return_code, secrets) = audit.fail_on_live('will_be_mocked')
 
         assert return_code == 1
         assert len(secrets) == 3
 
-    def test_audited_true_pass_case(self):
+    def test_audited_real_pass_case(self):
         modified_baseline = deepcopy(self.baseline)
         modified_baseline['results']['filenameA'][0]['is_secret'] = False
         modified_baseline['results']['filenameA'][1]['is_secret'] = False
         modified_baseline['results']['filenameB'][0]['is_secret'] = False
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_audited_true('will_be_mocked')
+            (return_code, secrets) = audit.fail_on_audited_real('will_be_mocked')
 
         assert return_code == 0
         assert len(secrets) == 0
 
-    def test_audited_true_fail_case(self):
+    def test_audited_real_fail_case(self):
         modified_baseline = deepcopy(self.baseline)
         modified_baseline['results']['filenameA'][0]['is_secret'] = True
         modified_baseline['results']['filenameA'][1]['is_secret'] = True
         modified_baseline['results']['filenameB'][0]['is_secret'] = True
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_audited_true('will_be_mocked')
+            (return_code, secrets) = audit.fail_on_audited_real('will_be_mocked')
 
         assert return_code == 1
         assert len(secrets) == 3

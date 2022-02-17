@@ -735,7 +735,7 @@ def get_raw_secret_value(
     raise SecretNotFoundOnSpecifiedLineError(secret['line_number'])
 
 
-def fail_on_non_audited(baseline_filename):
+def fail_on_unaudited(baseline_filename):
     baseline = _get_baseline_from_file(baseline_filename)
     all_secrets = list(_secret_generator(baseline))
 
@@ -757,7 +757,7 @@ def fail_on_non_audited(baseline_filename):
     return (0, [])
 
 
-def fail_on_live_secret(baseline_filename):
+def fail_on_live(baseline_filename):
     baseline = _get_baseline_from_file(baseline_filename)
     all_secrets = list(_secret_generator(baseline))
 
@@ -779,7 +779,7 @@ def fail_on_live_secret(baseline_filename):
     return (0, [])
 
 
-def fail_on_audited_true(baseline_filename):
+def fail_on_audited_real(baseline_filename):
     baseline = _get_baseline_from_file(baseline_filename)
     all_secrets = list(_secret_generator(baseline))
 

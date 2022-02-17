@@ -3,26 +3,26 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [Scan](#scan)
-  - [Generate baseline](#generate-baseline)
-  - [Re-scan and update baseline](#re-scan-and-update-baseline)
-  - [Scan without verifying tokens](#scan-without-verifying-tokens)
-  - [Choose plugins to use](#choose-plugins-to-use)
-  - [Choose files to scan](#choose-files-to-scan)
-  - [Ad-hoc scan on a single string](#ad-hoc-scan-on-a-single-string)
-  - [Exclude something from the scan](#exclude-something-from-the-scan)
-  - [Customize the entropy limit](#customize-the-entropy-limit)
-- [Audit](#audit)
-  - [Audit the baseline file](#audit-the-baseline-file)
-  - [Display audit results](#display-audit-results)
-- [pre-commit hook](#pre-commit-hook)
-  - [Python pre-commit framework](#python-pre-commit-framework)
-    - [Update baseline](#update-baseline)
-    - [Update baseline with all plugins](#update-baseline-with-all-plugins)
-    - [Update baseline while skipping some plugins](#update-baseline-while-skipping-some-plugins)
-    - [Fail pre-commit if there are non-audited entries](#fail-pre-commit-if-there-are-non-audited-entries)
-  - [Husky](#husky)
-  - [CLI](#cli)
+-   [Scan](#scan)
+    -   [Generate baseline](#generate-baseline)
+    -   [Re-scan and update baseline](#re-scan-and-update-baseline)
+    -   [Scan without verifying tokens](#scan-without-verifying-tokens)
+    -   [Choose plugins to use](#choose-plugins-to-use)
+    -   [Choose files to scan](#choose-files-to-scan)
+    -   [Ad-hoc scan on a single string](#ad-hoc-scan-on-a-single-string)
+    -   [Exclude something from the scan](#exclude-something-from-the-scan)
+    -   [Customize the entropy limit](#customize-the-entropy-limit)
+-   [Audit](#audit)
+    -   [Audit the baseline file](#audit-the-baseline-file)
+    -   [Display audit results](#display-audit-results)
+-   [pre-commit hook](#pre-commit-hook)
+    -   [Python pre-commit framework](#python-pre-commit-framework)
+        -   [Update baseline](#update-baseline)
+        -   [Update baseline with all plugins](#update-baseline-with-all-plugins)
+        -   [Update baseline while skipping some plugins](#update-baseline-while-skipping-some-plugins)
+        -   [Fail pre-commit if there are non-audited entries](#fail-pre-commit-if-there-are-non-audited-entries)
+    -   [Husky](#husky)
+    -   [CLI](#cli)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -186,7 +186,7 @@ Fail pre-commit if there are non-auditied entries in baseline file, even if the 
                 --baseline,
                 .secrets.baseline,
                 --use-all-plugins,
-                --fail-on-non-audited,
+                --fail-on-unaudited,
             ]
 ```
 
