@@ -788,8 +788,27 @@ def fail_on_audited_true(baseline_filename):
     return (0, [])
 
 
-def stats(live_secrets, non_audited_secrets, audited_true_secrets, total_results):
-    return 0
+def stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_filename):
+    baseline = _get_baseline_from_file(baseline_filename)
+    all_secrets = list(_secret_generator(baseline))
+
+    reviewed = len(all_secrets)
+    live = len(live_secrets)
+    unaudited = len(unaudited_secrets)
+    audited_real = len(audited_real_secrets)
+
+    stats = {
+        'stats':
+        {
+            'reviewed': reviewed, 'live': live,
+            'unaudited': unaudited, 'audited_real': audited_real,
+        },
+    }
+
+    return stats
+    # json_dump = json.dumps(stats, indent=4)
+
+    # print(json_dump)
 
 # TODO: create printing methods that will format the report
 # for both JSON output and table

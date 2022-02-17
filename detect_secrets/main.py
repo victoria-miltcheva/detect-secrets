@@ -1,6 +1,8 @@
 import json
 import sys
 
+import numpy
+
 from detect_secrets.core import audit
 from detect_secrets.core import baseline
 from detect_secrets.core.color import AnsiColor
@@ -82,43 +84,55 @@ def main(argv=None):
 
         if args.report:
             if args.fail_on_non_audited:
-                (non_audited_return_code, non_audited_secrets_json) =\
+                (non_audited_return_code, non_audited_secrets) =\
                     audit.fail_on_non_audited(args.filename[0])
 
             if args.fail_on_live_secret:
-                (live_secret_return_code, live_secrets_json) =\
+                (live_secret_return_code, live_secrets) =\
                     audit.fail_on_live_secret(args.filename[0])
 
             if args.fail_on_audited_true:
-                (audited_true_return_code, audited_true_secrets_json) =\
+                (audited_true_return_code, audited_true_secrets) =\
                     audit.fail_on_audited_true(args.filename[0])
 
-            # TODO: get and print stats
-            # stats = audit.stats(non_audited_secrets_json,
-            # live_secrets_json, audited_true_secrets_json, args.filename[0])
+            stats = audit.stats(
+                non_audited_secrets, live_secrets,
+                audited_true_secrets, args.filename[0],
+            )
+
+            # TODO: combine JSON stats with secrets array
 
             # TODO: move to print functions in audit.py
+
+            # TODO: combine all secrets into one JSON array w/ key secrets
+            secrets = numpy.concatenate((
+                non_audited_secrets, live_secrets,
+                audited_true_secrets,
+            )).tolist()
+
+            combined = {'stats': stats, 'secrets': secrets}
+            json_dump = json.dumps(combined, indent=4)
+            print(json_dump)
+
+            # secrets = { "secrets": [ ] }
             if non_audited_return_code != 0:
                 print(
-                    '{}\n {}'.format(
-                        colorize('Unaudited secrets were found:', AnsiColor.RED),
-                        json.dumps(non_audited_secrets_json, indent=4),
+                    '{}\n'.format(
+                        colorize('Unaudited secrets were found', AnsiColor.RED),
                     ),
                 )
 
             if live_secret_return_code != 0:
                 print(
-                    '{}\n {}'.format(
-                        colorize('Live secrets were found:', AnsiColor.RED),
-                        json.dumps(live_secrets_json, indent=4),
+                    '{}\n'.format(
+                        colorize('Live secrets were found', AnsiColor.RED),
                     ),
                 )
 
             if audited_true_return_code != 0:
                 print(
-                    '{}\n {}'.format(
-                        colorize('Audited true secrets were found:', AnsiColor.RED),
-                        json.dumps(audited_true_secrets_json, indent=4),
+                    '{}\n'.format(
+                        colorize('Audited true secrets were found', AnsiColor.RED),
                     ),
                 )
 
