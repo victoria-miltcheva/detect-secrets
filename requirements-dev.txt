@@ -19,3 +19,4 @@ boxsdk[jwt]
 pyahocorasick
 safety
 numpy
+tabulate

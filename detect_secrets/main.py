@@ -75,7 +75,6 @@ def main(argv=None):
                 )
 
     elif args.action == 'audit':
-
         if not args.diff and not args.display_results and not args.report:
             audit.audit_baseline(args.filename[0])
             return 0
@@ -104,26 +103,31 @@ def main(argv=None):
                     ),
                 )
             else:
-                if non_audited_return_code != 0:
-                    print(
-                        '{}\n'.format(
-                            colorize('Unaudited secrets were found', AnsiColor.RED),
-                        ),
-                    )
+                print()
+                audit.report_table(live_secrets, non_audited_secrets, audited_true_secrets)
+                print()
 
-                if live_secret_return_code != 0:
-                    print(
-                        '{}\n'.format(
-                            colorize('Live secrets were found', AnsiColor.RED),
-                        ),
-                    )
+                # TODO: fix formatting and move to audit.py
+                # if non_audited_return_code != 0:
+                #     print(
+                #         '{}\n'.format(
+                #             colorize('Unaudited secrets were found', AnsiColor.RED),
+                #         ),
+                #     )
 
-                if audited_true_return_code != 0:
-                    print(
-                        '{}\n'.format(
-                            colorize('Audited true secrets were found', AnsiColor.RED),
-                        ),
-                    )
+                # if live_secret_return_code != 0:
+                #     print(
+                #         '{}\n'.format(
+                #             colorize('Live secrets were found', AnsiColor.RED),
+                #         ),
+                #     )
+
+                # if audited_true_return_code != 0:
+                #     print(
+                #         '{}\n'.format(
+                #             colorize('Audited true secrets were found', AnsiColor.RED),
+                #         ),
+                #     )
 
             if non_audited_return_code == live_secret_return_code == audited_true_return_code == 0:
                 if not args.json:

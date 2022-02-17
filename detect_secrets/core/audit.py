@@ -9,6 +9,7 @@ from copy import deepcopy
 from functools import lru_cache
 
 import numpy
+import tabulate
 
 from ..plugins.common import initialize
 from ..plugins.common.util import get_mapping_from_secret_type_to_class_name
@@ -836,6 +837,24 @@ def report_json(self, live_secrets, unaudited_secrets, audited_real_secrets, bas
     return json.dumps({'stats': stats, 'secrets': secrets}, indent=4)
 
 
-# TODO: implement
 def report_table(live_secrets, non_audited_secrets, audited_true_secrets):
-    return 0
+    secrets = numpy.concatenate((live_secrets, non_audited_secrets, audited_true_secrets)).tolist()
+    table = []
+
+    for secret in secrets:
+        table.append(
+            [
+                secret['failed_condition'],
+                secret['type'],
+                secret['filename'],
+                secret['line'],
+            ],
+        )
+
+    print(
+        tabulate.tabulate(
+            table,
+            headers=['Failed Condition', 'Secret Type', 'Filename', 'Line'],
+            tablefmt='simple',
+        ),
+    )
