@@ -100,26 +100,23 @@ def main(argv=None):
                     args.filename[0],
                 ),
             else:
-                print()
                 audit.print_stats(
                     live_secrets,
                     unaudited_secrets,
                     audited_real_secrets,
                     args.filename[0],
                 )
-                print()
                 audit.report_table(
                     live_secrets,
                     unaudited_secrets,
                     audited_real_secrets,
                 )
-                print()
                 audit.print_failed_conditions(
                     unaudited_return_code,
                     live_return_code,
                     audited_real_return_code,
+                    args.filename[0],
                 )
-                print()
 
             if unaudited_return_code == live_return_code == audited_real_return_code == 0:
                 return 0

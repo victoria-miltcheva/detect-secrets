@@ -870,15 +870,27 @@ def report_table(live_secrets, non_audited_secrets, audited_true_secrets):
 # TODO: write unit tests
 def print_stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_filename):
     baseline = _get_baseline_from_file(baseline_filename)
-    all_secrets = list(_secret_generator(baseline))
+    potential_secrets = list(_secret_generator(baseline))
+    secrets = numpy.concatenate((live_secrets, unaudited_secrets, audited_real_secrets)).tolist()
+
+    if (len(secrets) == 0):
+        print(
+            '{} potential secrets in {} were reviewed.'
+            ' All checks have passed.\n'.format(
+                colorize(len(potential_secrets), AnsiColor.BOLD),
+                colorize(baseline_filename, AnsiColor.BOLD),
+            ),
+        )
+        return
 
     print(
-        '{} potential secrets in the baseline were reviewed.'
+        '{} potential secrets in {} were reviewed.'
         ' Found {} live secret{}, {} unaudited secret{},'
         ' and {} secret{} that {} audited as real.'.format(
-            colorize(len(all_secrets), AnsiColor.BOLD),
+            colorize(len(potential_secrets), AnsiColor.BOLD),
+            colorize(baseline_filename, AnsiColor.BOLD),
             colorize(len(live_secrets), AnsiColor.BOLD),
-            's' if len(live_secrets) > 0 or len(live_secrets) == 0 else '\0',
+            's' if len(live_secrets) > 0 or len(live_secrets) == 0 else '',
             colorize(len(unaudited_secrets), AnsiColor.BOLD),
             's' if len(unaudited_secrets) > 0 or len(unaudited_secrets) == 0 else '',
             colorize(len(audited_real_secrets), AnsiColor.BOLD),
@@ -890,27 +902,64 @@ def print_stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_
 
 
 # TODO: write unit tests
-def print_failed_conditions(unaudited_return_code, live_return_code, audited_real_return_code):
+def print_failed_conditions(
+    unaudited_return_code,
+    live_return_code,
+    audited_real_return_code,
+    baseline_filename,
+):
     if unaudited_return_code == live_return_code == audited_real_return_code == 0:
-        print('{}'.format(colorize('Passed all checks!', AnsiColor.LIGHT_GREEN)))
+        print(
+            '{}\n'.format(
+                colorize('\t- No unaudited secrets were found', AnsiColor.BOLD),
+            ),
+        )
+        print(
+            '{}\n'.format(
+                colorize('\t- No live secrets were found', AnsiColor.BOLD),
+            ),
+        )
+        print(
+            '{}\n'.format(
+                colorize('\t- No secrets that were audited as real were found', AnsiColor.BOLD),
+            ),
+        )
+        return
+
+    print('\nRemediation instructions:')
 
     if unaudited_return_code != 0:
         print(
             '{}\n'.format(
-                colorize('Unaudited secrets were found', AnsiColor.RED),
+                colorize('\n\t- Unaudited secrets were found', AnsiColor.BOLD),
             ),
         )
-
+        print(
+            '\t\tRun detect-secrets audit {}, and audit all potential secrets.'
+            .format(baseline_filename),
+        )
     if live_return_code != 0:
         print(
             '{}\n'.format(
-                colorize('Live secrets were found', AnsiColor.RED),
+                colorize('\n\t- Live secrets were found', AnsiColor.BOLD),
             ),
+        )
+        print(
+            '\t\tRevoke all live secrets and remove them from the codebase.'
+            ' Afterwards, run detect-secrets scan --update {} to re-scan.'
+            .format(baseline_filename),
         )
 
     if audited_real_return_code != 0:
         print(
             '{}\n'.format(
-                colorize('Audited true secrets were found', AnsiColor.RED),
+                colorize('\n\t- Audited true secrets were found', AnsiColor.BOLD),
             ),
         )
+        print(
+            '\t\tRemove secrets meeting this condition from the codebase,'
+            ' and run detect-secrets scan --update {} to re-scan.'
+            .format(baseline_filename),
+        )
+
+    print('\nFor additional help, run detect-secret audit --report --help.')
