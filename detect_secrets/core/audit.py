@@ -798,11 +798,8 @@ def stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_filena
     audited_real = len(audited_real_secrets)
 
     stats = {
-        'stats':
-        {
-            'reviewed': reviewed, 'live': live,
-            'unaudited': unaudited, 'audited_real': audited_real,
-        },
+        'reviewed': reviewed, 'live': live,
+        'unaudited': unaudited, 'audited_real': audited_real,
     }
 
     return stats

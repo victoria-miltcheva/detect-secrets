@@ -112,32 +112,34 @@ def main(argv=None):
 
             combined = {'stats': stats, 'secrets': secrets}
             json_dump = json.dumps(combined, indent=4)
-            print(json_dump)
 
-            # secrets = { "secrets": [ ] }
-            if non_audited_return_code != 0:
-                print(
-                    '{}\n'.format(
-                        colorize('Unaudited secrets were found', AnsiColor.RED),
-                    ),
-                )
+            if (args.json):
+                print(json_dump)
+            else:
+                if non_audited_return_code != 0:
+                    print(
+                        '{}\n'.format(
+                            colorize('Unaudited secrets were found', AnsiColor.RED),
+                        ),
+                    )
 
-            if live_secret_return_code != 0:
-                print(
-                    '{}\n'.format(
-                        colorize('Live secrets were found', AnsiColor.RED),
-                    ),
-                )
+                if live_secret_return_code != 0:
+                    print(
+                        '{}\n'.format(
+                            colorize('Live secrets were found', AnsiColor.RED),
+                        ),
+                    )
 
-            if audited_true_return_code != 0:
-                print(
-                    '{}\n'.format(
-                        colorize('Audited true secrets were found', AnsiColor.RED),
-                    ),
-                )
+                if audited_true_return_code != 0:
+                    print(
+                        '{}\n'.format(
+                            colorize('Audited true secrets were found', AnsiColor.RED),
+                        ),
+                    )
 
             if non_audited_return_code == live_secret_return_code == audited_true_return_code == 0:
-                print('{}'.format(colorize('Passed all checks!', AnsiColor.LIGHT_GREEN)))
+                if not args.json:
+                    print('{}'.format(colorize('Passed all checks!', AnsiColor.LIGHT_GREEN)))
                 return 0
             else:
                 sys.exit(1)

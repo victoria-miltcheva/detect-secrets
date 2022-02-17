@@ -302,6 +302,15 @@ class AuditOptions:
             ),
         )
 
+        report_parser.add_argument(
+            '--json',
+            action='store_true',
+            help=(
+                'Providing this flag will cause the report'
+                ' output to be formatted as JSON.'
+            ),
+        )
+
     def add_arguments(self):
         self.parser.add_argument(
             'filename',
