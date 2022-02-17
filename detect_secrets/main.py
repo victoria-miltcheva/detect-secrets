@@ -1,8 +1,6 @@
 import json
 import sys
 
-import numpy
-
 from detect_secrets.core import audit
 from detect_secrets.core import baseline
 from detect_secrets.core.color import AnsiColor
@@ -95,22 +93,16 @@ def main(argv=None):
                 (audited_true_return_code, audited_true_secrets) =\
                     audit.fail_on_audited_true(args.filename[0])
 
-            stats = audit.stats(
-                non_audited_secrets, live_secrets,
-                audited_true_secrets, args.filename[0],
-            )
-
-            # TODO: move to print functions in audit.py
-            secrets = numpy.concatenate((
-                non_audited_secrets,
-                live_secrets,
-                audited_true_secrets,
-            )).tolist()
-
-            json_dump = json.dumps({'stats': stats, 'secrets': secrets}, indent=4)
-
             if (args.json):
-                print(json_dump)
+                print(
+                    audit.report_json(
+                        audit,
+                        live_secrets,
+                        non_audited_secrets,
+                        audited_true_secrets,
+                        args.filename[0],
+                    ),
+                )
             else:
                 if non_audited_return_code != 0:
                     print(

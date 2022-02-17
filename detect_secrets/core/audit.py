@@ -8,6 +8,8 @@ from collections import defaultdict
 from copy import deepcopy
 from functools import lru_cache
 
+import numpy
+
 from ..plugins.common import initialize
 from ..plugins.common.util import get_mapping_from_secret_type_to_class_name
 from ..util import get_git_remotes
@@ -813,25 +815,23 @@ def stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_filena
     }
 
     return stats
-    # json_dump = json.dumps(stats, indent=4)
-
-    # print(json_dump)
-
-# TODO: create printing methods that will format the report
-# for both JSON output and table
-# use https://pypi.org/project/tabulate/
-# use https://docs.python.org/3/library/json.html
 
 
-# TODO: combine list params into one?
-def report_json(live_secrets, non_audited_secrets, audited_true_secrets):
-    # all_secrets = []  # TODO
+def report_json(self, live_secrets, unaudited_secrets, audited_real_secrets, baseline_filename):
+    stats = self.stats(
+        live_secrets,
+        unaudited_secrets,
+        audited_real_secrets,
+        baseline_filename,
+    )
 
-    # TODO: convert each secret to a json objects, include stats
+    secrets = numpy.concatenate((
+        live_secrets,
+        unaudited_secrets,
+        audited_real_secrets,
+    )).tolist()
 
-    return 0
-
-# TODO: combine list params into one?
+    return json.dumps({'stats': stats, 'secrets': secrets}, indent=4)
 
 
 def report_table(live_secrets, non_audited_secrets, audited_true_secrets):
