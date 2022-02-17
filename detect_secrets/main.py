@@ -3,8 +3,6 @@ import sys
 
 from detect_secrets.core import audit
 from detect_secrets.core import baseline
-from detect_secrets.core.color import AnsiColor
-from detect_secrets.core.color import colorize
 from detect_secrets.core.common import write_baseline_to_file
 from detect_secrets.core.log import log
 from detect_secrets.core.secrets_collection import SecretsCollection
@@ -79,59 +77,51 @@ def main(argv=None):
             audit.audit_baseline(args.filename[0])
             return 0
 
+        # TODO: store return code values in an enum
         if args.report:
             if args.fail_on_unaudited:
-                (non_audited_return_code, non_audited_secrets) =\
+                (unaudited_return_code, unaudited_secrets) =\
                     audit.fail_on_unaudited(args.filename[0])
 
             if args.fail_on_live:
-                (live_secret_return_code, live_secrets) =\
+                (live_return_code, live_secrets) =\
                     audit.fail_on_live(args.filename[0])
 
             if args.fail_on_audited_real:
-                (audited_true_return_code, audited_true_secrets) =\
+                (audited_real_return_code, audited_real_secrets) =\
                     audit.fail_on_audited_real(args.filename[0])
 
             if (args.json):
-                print(
-                    audit.report_json(
-                        audit,
-                        live_secrets,
-                        non_audited_secrets,
-                        audited_true_secrets,
-                        args.filename[0],
-                    ),
-                )
+                audit.report_json(
+                    audit,
+                    live_secrets,
+                    unaudited_secrets,
+                    audited_real_secrets,
+                    args.filename[0],
+                ),
             else:
                 print()
-                audit.report_table(live_secrets, non_audited_secrets, audited_true_secrets)
+                audit.print_stats(
+                    live_secrets,
+                    unaudited_secrets,
+                    audited_real_secrets,
+                    args.filename[0],
+                )
+                print()
+                audit.report_table(
+                    live_secrets,
+                    unaudited_secrets,
+                    audited_real_secrets,
+                )
+                print()
+                audit.print_failed_conditions(
+                    unaudited_return_code,
+                    live_return_code,
+                    audited_real_return_code,
+                )
                 print()
 
-                # TODO: fix formatting and move to audit.py
-                # if non_audited_return_code != 0:
-                #     print(
-                #         '{}\n'.format(
-                #             colorize('Unaudited secrets were found', AnsiColor.RED),
-                #         ),
-                #     )
-
-                # if live_secret_return_code != 0:
-                #     print(
-                #         '{}\n'.format(
-                #             colorize('Live secrets were found', AnsiColor.RED),
-                #         ),
-                #     )
-
-                # if audited_true_return_code != 0:
-                #     print(
-                #         '{}\n'.format(
-                #             colorize('Audited true secrets were found', AnsiColor.RED),
-                #         ),
-                #     )
-
-            if non_audited_return_code == live_secret_return_code == audited_true_return_code == 0:
-                if not args.json:
-                    print('{}'.format(colorize('Passed all checks!', AnsiColor.LIGHT_GREEN)))
+            if unaudited_return_code == live_return_code == audited_real_return_code == 0:
                 return 0
             else:
                 sys.exit(1)

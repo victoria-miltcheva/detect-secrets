@@ -834,11 +834,16 @@ def report_json(self, live_secrets, unaudited_secrets, audited_real_secrets, bas
         audited_real_secrets,
     )).tolist()
 
-    return json.dumps({'stats': stats, 'secrets': secrets}, indent=4)
+    print(json.dumps({'stats': stats, 'secrets': secrets}, indent=4))
 
 
+# TODO: write unit tests
 def report_table(live_secrets, non_audited_secrets, audited_true_secrets):
     secrets = numpy.concatenate((live_secrets, non_audited_secrets, audited_true_secrets)).tolist()
+
+    if len(secrets) == 0:
+        return
+
     table = []
 
     for secret in secrets:
@@ -858,3 +863,52 @@ def report_table(live_secrets, non_audited_secrets, audited_true_secrets):
             tablefmt='simple',
         ),
     )
+
+
+# TODO: write unit tests
+def print_stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_filename):
+    baseline = _get_baseline_from_file(baseline_filename)
+    all_secrets = list(_secret_generator(baseline))
+
+    print(
+        '{} potential secrets in the baseline were reviewed.'
+        ' Found {} live secret{}, {} unaudited secret{},'
+        ' and {} secret{} that {} audited as real.'.format(
+            colorize(len(all_secrets), AnsiColor.BOLD),
+            colorize(len(live_secrets), AnsiColor.BOLD),
+            's' if len(live_secrets) > 0 or len(live_secrets) == 0 else '\0',
+            colorize(len(unaudited_secrets), AnsiColor.BOLD),
+            's' if len(unaudited_secrets) > 0 or len(unaudited_secrets) == 0 else '',
+            colorize(len(audited_real_secrets), AnsiColor.BOLD),
+            's' if len(audited_real_secrets) > 0 or len(audited_real_secrets) == 0 else '',
+            'were' if len(audited_real_secrets) > 0 or len(audited_real_secrets) == 0 else 'was',
+
+        ),
+    )
+
+
+# TODO: write unit tests
+def print_failed_conditions(unaudited_return_code, live_return_code, audited_real_return_code):
+    if unaudited_return_code == live_return_code == audited_real_return_code == 0:
+        print('{}'.format(colorize('Passed all checks!', AnsiColor.LIGHT_GREEN)))
+
+    if unaudited_return_code != 0:
+        print(
+            '{}\n'.format(
+                colorize('Unaudited secrets were found', AnsiColor.RED),
+            ),
+        )
+
+    if live_return_code != 0:
+        print(
+            '{}\n'.format(
+                colorize('Live secrets were found', AnsiColor.RED),
+            ),
+        )
+
+    if audited_real_return_code != 0:
+        print(
+            '{}\n'.format(
+                colorize('Audited true secrets were found', AnsiColor.RED),
+            ),
+        )
