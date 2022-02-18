@@ -311,6 +311,15 @@ class AuditOptions:
             ),
         )
 
+        report_parser.add_argument(
+            '--omit-instructions',
+            action='store_true',
+            help=(
+                'Providing this flag will omit instructions from'
+                ' the report.'
+            ),
+        )
+
     def add_arguments(self):
         self.parser.add_argument(
             'filename',

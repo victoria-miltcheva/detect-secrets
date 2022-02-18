@@ -900,6 +900,8 @@ def print_stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_
         ),
     )
 
+    print('\n')
+
 
 # TODO: write unit tests
 def print_failed_conditions(
@@ -907,7 +909,10 @@ def print_failed_conditions(
     live_return_code,
     audited_real_return_code,
     baseline_filename,
+    omit_instructions=False,
 ):
+    print('\n')
+
     if unaudited_return_code == live_return_code == audited_real_return_code == 0:
         print(
             '{}\n'.format(
@@ -926,7 +931,7 @@ def print_failed_conditions(
         )
         return
 
-    print('\nRemediation instructions:')
+    print('Failed conditions:')
 
     if unaudited_return_code != 0:
         print(
@@ -934,21 +939,23 @@ def print_failed_conditions(
                 colorize('\n\t- Unaudited secrets were found', AnsiColor.BOLD),
             ),
         )
-        print(
-            '\t\tRun detect-secrets audit {}, and audit all potential secrets.'
-            .format(baseline_filename),
-        )
+        if omit_instructions is False:
+            print(
+                '\t\tRun detect-secrets audit {}, and audit all potential secrets.'
+                .format(baseline_filename),
+            )
     if live_return_code != 0:
         print(
             '{}\n'.format(
                 colorize('\n\t- Live secrets were found', AnsiColor.BOLD),
             ),
         )
-        print(
-            '\t\tRevoke all live secrets and remove them from the codebase.'
-            ' Afterwards, run detect-secrets scan --update {} to re-scan.'
-            .format(baseline_filename),
-        )
+        if omit_instructions is False:
+            print(
+                '\t\tRevoke all live secrets and remove them from the codebase.'
+                ' Afterwards, run detect-secrets scan --update {} to re-scan.'
+                .format(baseline_filename),
+            )
 
     if audited_real_return_code != 0:
         print(
@@ -956,10 +963,12 @@ def print_failed_conditions(
                 colorize('\n\t- Audited true secrets were found', AnsiColor.BOLD),
             ),
         )
-        print(
-            '\t\tRemove secrets meeting this condition from the codebase,'
-            ' and run detect-secrets scan --update {} to re-scan.'
-            .format(baseline_filename),
-        )
+        if omit_instructions is False:
+            print(
+                '\t\tRemove secrets meeting this condition from the codebase,'
+                ' and run detect-secrets scan --update {} to re-scan.'
+                .format(baseline_filename),
+            )
 
-    print('\nFor additional help, run detect-secret audit --report --help.')
+    if omit_instructions is False:
+        print('\nFor additional help, run detect-secret audit --report --help.')

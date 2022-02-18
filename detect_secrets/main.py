@@ -116,6 +116,7 @@ def main(argv=None):
                     live_return_code,
                     audited_real_return_code,
                     args.filename[0],
+                    True if args.omit_instructions else False,
                 )
 
             if unaudited_return_code == live_return_code == audited_real_return_code == 0:
