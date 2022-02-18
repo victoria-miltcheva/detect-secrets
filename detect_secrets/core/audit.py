@@ -873,6 +873,8 @@ def print_stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_
     potential_secrets = list(_secret_generator(baseline))
     secrets = numpy.concatenate((live_secrets, unaudited_secrets, audited_real_secrets)).tolist()
 
+    print('\n')
+
     if (len(secrets) == 0):
         print(
             '{} potential secrets in {} were reviewed.'
@@ -972,3 +974,5 @@ def print_failed_conditions(
 
     if omit_instructions is False:
         print('\nFor additional help, run detect-secret audit --report --help.')
+
+    print('\n')
