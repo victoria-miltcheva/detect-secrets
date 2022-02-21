@@ -77,17 +77,30 @@ def main(argv=None):
             audit.audit_baseline(args.filename[0])
             return 0
 
+        # TODO: move this to its own function because it's getting long
         # TODO: store return code values in an enum
         if args.report:
-            if args.fail_on_unaudited:
+            unaudited_secrets = live_secrets = audited_real_secrets = []
+            unaudited_return_code = live_return_code = audited_real_return_code = 0
+            default_conditions = False
+
+            # If no fail conditions provided, run report using all fail conditions, but exit with 0
+            if (
+                args.report and not args.fail_on_unaudited
+                and not args.fail_on_audited_real
+                    and not args.fail_on_live
+            ):
+                default_conditions = True
+
+            if args.fail_on_unaudited or default_conditions:
                 (unaudited_return_code, unaudited_secrets) =\
                     audit.fail_on_unaudited(args.filename[0])
 
-            if args.fail_on_live:
+            if args.fail_on_live or default_conditions:
                 (live_return_code, live_secrets) =\
                     audit.fail_on_live(args.filename[0])
 
-            if args.fail_on_audited_real:
+            if args.fail_on_audited_real or default_conditions:
                 (audited_real_return_code, audited_real_secrets) =\
                     audit.fail_on_audited_real(args.filename[0])
 
@@ -120,6 +133,8 @@ def main(argv=None):
                 )
 
             if unaudited_return_code == live_return_code == audited_real_return_code == 0:
+                return 0
+            elif default_conditions:
                 return 0
             else:
                 sys.exit(1)
