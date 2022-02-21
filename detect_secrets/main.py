@@ -4,6 +4,7 @@ import sys
 from detect_secrets.core import audit
 from detect_secrets.core import baseline
 from detect_secrets.core.common import write_baseline_to_file
+from detect_secrets.core.constants import ReportExitCode
 from detect_secrets.core.log import log
 from detect_secrets.core.secrets_collection import SecretsCollection
 from detect_secrets.core.usage import ParserBuilder
@@ -13,9 +14,7 @@ from detect_secrets.util import version_check
 
 
 def parse_args(argv):
-    return ParserBuilder()\
-        .add_console_use_arguments()\
-        .parse_args(argv)
+    return ParserBuilder().add_console_use_arguments().parse_args(argv)
 
 
 def main(argv=None):
@@ -78,33 +77,36 @@ def main(argv=None):
             return 0
 
         # TODO: move this to its own function because it's getting long
-        # TODO: store return code values in an enum
         if args.report:
             unaudited_secrets = live_secrets = audited_real_secrets = []
-            unaudited_return_code = live_return_code = audited_real_return_code = 0
+            unaudited_return_code = (
+                live_return_code
+            ) = audited_real_return_code = ReportExitCode.PASS.value
             default_conditions = False
 
             # If no fail conditions provided, run report using all fail conditions, but exit with 0
             if (
-                args.report and not args.fail_on_unaudited
+                args.report
+                and not args.fail_on_unaudited
                 and not args.fail_on_audited_real
-                    and not args.fail_on_live
+                and not args.fail_on_live
             ):
                 default_conditions = True
 
             if args.fail_on_unaudited or default_conditions:
-                (unaudited_return_code, unaudited_secrets) =\
-                    audit.fail_on_unaudited(args.filename[0])
+                (unaudited_return_code, unaudited_secrets) = audit.fail_on_unaudited(
+                    args.filename[0],
+                )
 
             if args.fail_on_live or default_conditions:
-                (live_return_code, live_secrets) =\
-                    audit.fail_on_live(args.filename[0])
+                (live_return_code, live_secrets) = audit.fail_on_live(args.filename[0])
 
             if args.fail_on_audited_real or default_conditions:
-                (audited_real_return_code, audited_real_secrets) =\
-                    audit.fail_on_audited_real(args.filename[0])
+                (audited_real_return_code, audited_real_secrets) = audit.fail_on_audited_real(
+                    args.filename[0],
+                )
 
-            if (args.json):
+            if args.json:
                 audit.report_json(
                     audit,
                     live_secrets,
@@ -132,12 +134,17 @@ def main(argv=None):
                     True if args.omit_instructions else False,
                 )
 
-            if unaudited_return_code == live_return_code == audited_real_return_code == 0:
-                return 0
+            if (
+                unaudited_return_code
+                == live_return_code
+                == audited_real_return_code
+                == ReportExitCode.PASS.value
+            ):
+                return ReportExitCode.PASS.value
             elif default_conditions:
-                return 0
+                return ReportExitCode.PASS.value
             else:
-                sys.exit(1)
+                sys.exit(ReportExitCode.FAIL.value)
 
         if args.display_results:
             audit.print_audit_results(args.filename[0])
@@ -154,7 +161,7 @@ def main(argv=None):
             audit.compare_baselines(args.filename[0], args.filename[1])
         except audit.RedundantComparisonError:
             print(
-                'No difference, because it\'s the same file!',
+                "No difference, because it's the same file!",
                 file=sys.stderr,
             )
 
@@ -223,16 +230,10 @@ def _perform_scan(args, plugins, automaton, word_list_hash):
         if not args.exclude_files:
             args.exclude_files = _get_exclude_files(old_baseline)
 
-        if (
-            not args.exclude_lines
-            and old_baseline.get('exclude')
-        ):
+        if not args.exclude_lines and old_baseline.get('exclude'):
             args.exclude_lines = old_baseline['exclude']['lines']
 
-        if (
-            not args.word_list_file
-            and old_baseline.get('word_list')
-        ):
+        if not args.word_list_file and old_baseline.get('word_list'):
             args.word_list_file = old_baseline['word_list']['file']
 
     # If we have knowledge of an existing baseline file, we should use

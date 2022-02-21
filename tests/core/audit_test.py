@@ -9,6 +9,7 @@ import pytest
 
 from detect_secrets.core import audit
 from detect_secrets.core.constants import POTENTIAL_SECRET_DETECTED_NOTE
+from detect_secrets.core.constants import ReportExitCode
 from detect_secrets.core.constants import ReportSecretType
 from testing.factories import potential_secret_factory
 from testing.mocks import mock_open as mock_open_base
@@ -184,7 +185,7 @@ class TestAuditBaseline:
         with self.mock_env(baseline=modified_baseline):
             (return_code, secrets) = audit.fail_on_unaudited('will_be_mocked')
 
-        assert return_code == 0
+        assert return_code == ReportExitCode.PASS.value
         assert len(secrets) == 0
 
     def test_unaudited_fail_case(self, mock_printer):
@@ -217,7 +218,7 @@ class TestAuditBaseline:
             },
         ]
 
-        assert return_code == 1
+        assert return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
         assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
 
@@ -230,7 +231,7 @@ class TestAuditBaseline:
         with self.mock_env(baseline=modified_baseline):
             (return_code, secrets) = audit.fail_on_live('will_be_mocked')
 
-        assert return_code == 0
+        assert return_code == ReportExitCode.PASS.value
         assert len(secrets) == 0
 
     def test_live_fail_case(self):
@@ -263,7 +264,7 @@ class TestAuditBaseline:
         with self.mock_env(baseline=modified_baseline):
             (return_code, secrets) = audit.fail_on_live('will_be_mocked')
 
-        assert return_code == 1
+        assert return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
         assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
 
@@ -276,7 +277,7 @@ class TestAuditBaseline:
         with self.mock_env(baseline=modified_baseline):
             (return_code, secrets) = audit.fail_on_audited_real('will_be_mocked')
 
-        assert return_code == 0
+        assert return_code == ReportExitCode.PASS.value
         assert len(secrets) == 0
 
     def test_audited_real_fail_case(self):
@@ -310,7 +311,7 @@ class TestAuditBaseline:
         with self.mock_env(baseline=modified_baseline):
             (return_code, secrets) = audit.fail_on_audited_real('will_be_mocked')
 
-        assert return_code == 1
+        assert return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
         assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
 
@@ -736,9 +737,9 @@ class TestDetermineAuditResults:
 
         results = audit.determine_audit_results(baseline, '.secrets.baseline')
 
-        for (audited_result, file_to_secrets) in results['plugins'][
-            'HexHighEntropyString'
-        ]['results'].items():
+        for (audited_result, file_to_secrets) in results['plugins']['HexHighEntropyString'][
+            'results'
+        ].items():
             if audited_result == expected_audited_result:
                 assert any(  # pragma: no cover
                     secret['plaintext'] == plaintext_secret

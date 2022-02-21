@@ -22,6 +22,7 @@ from .color import AnsiColor
 from .color import colorize
 from .common import write_baseline_to_file
 from detect_secrets.core.constants import POTENTIAL_SECRET_DETECTED_NOTE
+from detect_secrets.core.constants import ReportExitCode
 from detect_secrets.core.constants import ReportSecretType
 
 
@@ -77,8 +78,7 @@ def audit_baseline(baseline_filename):
 
     all_secrets = list(_secret_generator(original_baseline))
     secrets_with_choices = [
-        (filename, secret) for filename, secret in all_secrets
-        if 'is_secret' not in secret
+        (filename, secret) for filename, secret in all_secrets if 'is_secret' not in secret
     ]
     total_choices = len(secrets_with_choices)
     secret_iterator = BidirectionalIterator(secrets_with_choices)
@@ -294,13 +294,12 @@ def determine_audit_results(baseline, baseline_path):
         audit_results['stats'][audit_result]['files'][filename] += 1
         total += 1
     if total > 0:
-        audit_results['stats']['signal'] = str(
-            (
-                float(audit_results['stats']['true-positives']['count'])
-                /
-                total
-            ) * 100,
-        )[:4] + '%'
+        audit_results['stats']['signal'] = (
+            str(
+                (float(audit_results['stats']['true-positives']['count']) / total) * 100,
+            )[:4]
+            + '%'
+        )
 
     for plugin_config in baseline['plugins_used']:
         plugin_name = plugin_config['name']
@@ -374,6 +373,7 @@ def _get_secrets_to_compare(old_baseline, new_baseline):
         is_secret_removed: bool; has the secret been removed from the
             new baseline?
     """
+
     def _check_string(a, b):
         if a == b:
             return 0
@@ -752,9 +752,9 @@ def fail_on_unaudited(baseline_filename):
             non_audited_secrets.append(unaudited_secret)
 
     if len(non_audited_secrets) > 0:
-        return(1, non_audited_secrets)
+        return (ReportExitCode.FAIL.value, non_audited_secrets)
 
-    return (0, [])
+    return (ReportExitCode.PASS.value, [])
 
 
 def fail_on_live(baseline_filename):
@@ -774,9 +774,9 @@ def fail_on_live(baseline_filename):
             live_secrets.append(live_secret)
 
     if len(live_secrets) > 0:
-        return(1, live_secrets)
+        return (ReportExitCode.FAIL.value, live_secrets)
 
-    return (0, [])
+    return (ReportExitCode.PASS.value, [])
 
 
 def fail_on_audited_real(baseline_filename):
@@ -796,9 +796,9 @@ def fail_on_audited_real(baseline_filename):
             audited_true_secrets.append(audited_true_secret)
 
     if len(audited_true_secrets) > 0:
-        return(1, audited_true_secrets)
+        return (ReportExitCode.FAIL.value, audited_true_secrets)
 
-    return (0, [])
+    return (ReportExitCode.PASS.value, [])
 
 
 # TODO: write unit tests
@@ -830,11 +830,13 @@ def report_json(self, live_secrets, unaudited_secrets, audited_real_secrets, bas
         baseline_filename,
     )
 
-    secrets = numpy.concatenate((
-        live_secrets,
-        unaudited_secrets,
-        audited_real_secrets,
-    )).tolist()
+    secrets = numpy.concatenate(
+        (
+            live_secrets,
+            unaudited_secrets,
+            audited_real_secrets,
+        ),
+    ).tolist()
 
     print(json.dumps({'stats': stats, 'secrets': secrets}, indent=4))
 
@@ -875,7 +877,7 @@ def print_stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_
 
     print('\n')
 
-    if (len(secrets) == 0):
+    if len(secrets) == 0:
         print(
             '{} potential secrets in {} were reviewed.'
             ' All checks have passed.\n'.format(
@@ -898,7 +900,6 @@ def print_stats(live_secrets, unaudited_secrets, audited_real_secrets, baseline_
             colorize(len(audited_real_secrets), AnsiColor.BOLD),
             's' if len(audited_real_secrets) > 0 or len(audited_real_secrets) == 0 else '',
             'were' if len(audited_real_secrets) > 0 or len(audited_real_secrets) == 0 else 'was',
-
         ),
     )
 
@@ -943,8 +944,9 @@ def print_failed_conditions(
         )
         if omit_instructions is False:
             print(
-                '\t\tRun detect-secrets audit {}, and audit all potential secrets.'
-                .format(baseline_filename),
+                '\t\tRun detect-secrets audit {}, and audit all potential secrets.'.format(
+                    baseline_filename,
+                ),
             )
     if live_return_code != 0:
         print(
@@ -955,8 +957,9 @@ def print_failed_conditions(
         if omit_instructions is False:
             print(
                 '\t\tRevoke all live secrets and remove them from the codebase.'
-                ' Afterwards, run detect-secrets scan --update {} to re-scan.'
-                .format(baseline_filename),
+                ' Afterwards, run detect-secrets scan --update {} to re-scan.'.format(
+                    baseline_filename,
+                ),
             )
 
     if audited_real_return_code != 0:
@@ -968,8 +971,7 @@ def print_failed_conditions(
         if omit_instructions is False:
             print(
                 '\t\tRemove secrets meeting this condition from the codebase,'
-                ' and run detect-secrets scan --update {} to re-scan.'
-                .format(baseline_filename),
+                ' and run detect-secrets scan --update {} to re-scan.'.format(baseline_filename),
             )
 
     if omit_instructions is False:
