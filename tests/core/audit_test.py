@@ -4,10 +4,12 @@ from contextlib import contextmanager
 from copy import deepcopy
 
 import mock
+import numpy
 import pytest
 
 from detect_secrets.core import audit
 from detect_secrets.core.constants import POTENTIAL_SECRET_DETECTED_NOTE
+from detect_secrets.core.constants import ReportSecretType
 from testing.factories import potential_secret_factory
 from testing.mocks import mock_open as mock_open_base
 from testing.mocks import mock_printer as mock_printer_base
@@ -20,7 +22,6 @@ def reset_file_cache():
 
 
 class TestAuditBaseline:
-
     def test_no_baseline(self, mock_printer):
         with self.mock_env(baseline='') as m:
             audit.audit_baseline('will_be_mocked')
@@ -34,10 +35,7 @@ class TestAuditBaseline:
 
             assert m.call_args[1]['data'] == self.baseline
 
-        assert mock_printer.message == (
-            'Quitting...\n'
-            'Saving progress...\n'
-        )
+        assert mock_printer.message == ('Quitting...\n' 'Saving progress...\n')
 
     def test_nothing_to_audit(self, mock_printer):
         modified_baseline = deepcopy(self.baseline)
@@ -66,9 +64,7 @@ class TestAuditBaseline:
             modified_baseline=modified_baseline,
         )
 
-        assert mock_printer.message == (
-            'Saving progress...\n'
-        )
+        assert mock_printer.message == ('Saving progress...\n')
 
     def test_quit_half_way(self, mock_printer):
         modified_baseline = deepcopy(self.baseline)
@@ -82,10 +78,7 @@ class TestAuditBaseline:
             modified_baseline=modified_baseline,
         )
 
-        assert mock_printer.message == (
-            'Quitting...\n'
-            'Saving progress...\n'
-        )
+        assert mock_printer.message == ('Quitting...\n' 'Saving progress...\n')
 
     def test_skip_decision(self, mock_printer):
         modified_baseline = deepcopy(self.baseline)
@@ -102,9 +95,7 @@ class TestAuditBaseline:
             modified_baseline=modified_baseline,
         )
 
-        assert mock_printer.message == (
-            'Saving progress...\n'
-        )
+        assert mock_printer.message == ('Saving progress...\n')
 
     def test_go_back_and_change_yes_to_no(self, mock_printer):
         modified_baseline = deepcopy(self.baseline)
@@ -121,9 +112,7 @@ class TestAuditBaseline:
             modified_baseline=modified_baseline,
         )
 
-        assert mock_printer.message == (
-            'Saving progress...\n'
-        )
+        assert mock_printer.message == ('Saving progress...\n')
 
     def test_go_back_and_change_no_to_yes(self, mock_printer):
         modified_baseline = deepcopy(self.baseline)
@@ -140,9 +129,7 @@ class TestAuditBaseline:
             modified_baseline=modified_baseline,
         )
 
-        assert mock_printer.message == (
-            'Saving progress...\n'
-        )
+        assert mock_printer.message == ('Saving progress...\n')
 
     def test_go_back_and_change_yes_to_skip(self, mock_printer):
         modified_baseline = deepcopy(self.baseline)
@@ -159,9 +146,7 @@ class TestAuditBaseline:
             modified_baseline=modified_baseline,
         )
 
-        assert mock_printer.message == (
-            'Saving progress...\n'
-        )
+        assert mock_printer.message == ('Saving progress...\n')
 
     def test_go_back_several_steps(self, mock_printer):
         modified_baseline = deepcopy(self.baseline)
@@ -177,9 +162,7 @@ class TestAuditBaseline:
             modified_baseline=modified_baseline,
         )
 
-        assert mock_printer.message == (
-            'Saving progress...\n'
-        )
+        assert mock_printer.message == ('Saving progress...\n')
 
     def test_leapfrog_decision(self, mock_printer):
         modified_baseline = deepcopy(self.leapfrog_baseline)
@@ -213,8 +196,30 @@ class TestAuditBaseline:
         with self.mock_env(baseline=modified_baseline):
             (return_code, secrets) = audit.fail_on_unaudited('will_be_mocked')
 
+        expected_secrets = [
+            {
+                'failed_condition': ReportSecretType.UNAUDITED.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][0]['line_number'],
+                'type': 'Test Type',
+            },
+            {
+                'failed_condition': ReportSecretType.UNAUDITED.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][1]['line_number'],
+                'type': 'Test Type',
+            },
+            {
+                'failed_condition': ReportSecretType.UNAUDITED.value,
+                'filename': 'filenameB',
+                'line': modified_baseline['results']['filenameB'][0]['line_number'],
+                'type': 'Test Type',
+            },
+        ]
+
         assert return_code == 1
-        assert len(secrets) == 3
+        assert len(secrets) == len(expected_secrets)
+        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
 
     def test_live_pass_case(self):
         modified_baseline = deepcopy(self.baseline)
@@ -234,11 +239,33 @@ class TestAuditBaseline:
         modified_baseline['results']['filenameA'][1]['is_verified'] = True
         modified_baseline['results']['filenameB'][0]['is_verified'] = True
 
+        expected_secrets = [
+            {
+                'failed_condition': ReportSecretType.LIVE.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][0]['line_number'],
+                'type': 'Test Type',
+            },
+            {
+                'failed_condition': ReportSecretType.LIVE.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][1]['line_number'],
+                'type': 'Test Type',
+            },
+            {
+                'failed_condition': ReportSecretType.LIVE.value,
+                'filename': 'filenameB',
+                'line': modified_baseline['results']['filenameB'][0]['line_number'],
+                'type': 'Test Type',
+            },
+        ]
+
         with self.mock_env(baseline=modified_baseline):
             (return_code, secrets) = audit.fail_on_live('will_be_mocked')
 
         assert return_code == 1
-        assert len(secrets) == 3
+        assert len(secrets) == len(expected_secrets)
+        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
 
     def test_audited_real_pass_case(self):
         modified_baseline = deepcopy(self.baseline)
@@ -258,11 +285,42 @@ class TestAuditBaseline:
         modified_baseline['results']['filenameA'][1]['is_secret'] = True
         modified_baseline['results']['filenameB'][0]['is_secret'] = True
 
+        # TODO: get file names dynamically
+        expected_secrets = [
+            {
+                'failed_condition': ReportSecretType.AUDITED_REAL.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][0]['line_number'],
+                'type': 'Test Type',
+            },
+            {
+                'failed_condition': ReportSecretType.AUDITED_REAL.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][1]['line_number'],
+                'type': 'Test Type',
+            },
+            {
+                'failed_condition': ReportSecretType.AUDITED_REAL.value,
+                'filename': 'filenameB',
+                'line': modified_baseline['results']['filenameB'][0]['line_number'],
+                'type': 'Test Type',
+            },
+        ]
+
         with self.mock_env(baseline=modified_baseline):
             (return_code, secrets) = audit.fail_on_audited_real('will_be_mocked')
 
         assert return_code == 1
-        assert len(secrets) == 3
+        assert len(secrets) == len(expected_secrets)
+        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
+
+    # TODO: implement
+    # def test_print_stats():
+    #     return 0
+
+    # TODO: implement
+    # def test_report_table():
+    #     return 0
 
     @contextmanager
     def run_logic(self, inputs, modified_baseline=None, input_baseline=None):
@@ -381,7 +439,6 @@ class TestAuditBaseline:
 
 
 class TestCompareBaselines:
-
     def test_raises_error_if_comparing_same_file(self):
         with pytest.raises(audit.RedundantComparisonError):
             audit.compare_baselines('foo/bar', 'foo/bar')
@@ -407,34 +464,54 @@ class TestCompareBaselines:
                 buffer = ''
 
         # This comes first, because it's found at line 1.
-        assert uncolor(headers[0]) == textwrap.dedent("""
+        assert (
+            uncolor(headers[0])
+            == textwrap.dedent(
+                """
             Secret:      1 of 4
             Filename:    test_data/each_secret.py
             Secret Type: Hex High Entropy String
             Status:      >> ADDED <<
-        """)[1:]
+        """,
+            )[1:]
+        )
 
-        assert uncolor(headers[1]) == textwrap.dedent("""
+        assert (
+            uncolor(headers[1])
+            == textwrap.dedent(
+                """
             Secret:      2 of 4
             Filename:    test_data/each_secret.py
             Secret Type: Base64 High Entropy String
             Status:      >> REMOVED <<
-        """)[1:]
+        """,
+            )[1:]
+        )
 
         # These files come after, because filenames are sorted first
-        assert uncolor(headers[2]) == textwrap.dedent("""
+        assert (
+            uncolor(headers[2])
+            == textwrap.dedent(
+                """
             Secret:      3 of 4
             Filename:    test_data/short_files/first_line.php
             Secret Type: Hex High Entropy String
             Status:      >> REMOVED <<
-        """)[1:]
+        """,
+            )[1:]
+        )
 
-        assert uncolor(headers[3]) == textwrap.dedent("""
+        assert (
+            uncolor(headers[3])
+            == textwrap.dedent(
+                """
             Secret:      4 of 4
             Filename:    test_data/short_files/last_line.ini
             Secret Type: Hex High Entropy String
             Status:      >> ADDED <<
-        """)[1:]
+        """,
+            )[1:]
+        )
 
     def test_compare_quit(self, mock_printer):
         with self.mock_env(user_input=['q']):
@@ -482,7 +559,6 @@ class TestCompareBaselines:
             ],
             'results': {
                 'file_will_be_removed': [],
-
                 # This file is shared, so the code should check each secret
                 'test_data/each_secret.py': [
                     # This secret is removed
@@ -491,7 +567,6 @@ class TestCompareBaselines:
                         'line_number': 3,
                         'type': 'Base64 High Entropy String',
                     },
-
                     # This is the same secret
                     {
                         'hashed_secret': '871deb5e9ff5ce5f777c8d3327511d05f581e755',
@@ -499,7 +574,6 @@ class TestCompareBaselines:
                         'type': 'Hex High Entropy String',
                     },
                 ],
-
                 # This entire file will be "removed"
                 'test_data/short_files/first_line.php': [
                     {
@@ -526,7 +600,6 @@ class TestCompareBaselines:
             ],
             'results': {
                 'file_will_be_removed': [],
-
                 # This file is shared, so the code should check each secret
                 'test_data/each_secret.py': [
                     # This secret is added
@@ -535,7 +608,6 @@ class TestCompareBaselines:
                         'line_number': 1,
                         'type': 'Hex High Entropy String',
                     },
-
                     # This is the same secret
                     {
                         'hashed_secret': '871deb5e9ff5ce5f777c8d3327511d05f581e755',
@@ -543,7 +615,6 @@ class TestCompareBaselines:
                         'type': 'Hex High Entropy String',
                     },
                 ],
-
                 # This entire file will be "added"
                 'test_data/short_files/last_line.ini': [
                     {
@@ -557,7 +628,6 @@ class TestCompareBaselines:
 
 
 class TestDetermineAuditResults:
-
     @pytest.fixture
     def mock_get_raw_secret_value(self):
         with mock.patch.object(
@@ -641,9 +711,7 @@ class TestDetermineAuditResults:
         results = audit.determine_audit_results(baseline, '.secrets.baseline')
 
         assert (
-            results['plugins']['HexHighEntropyString']['config'].items()
-            >=
-            plugins_used[0].items()
+            results['plugins']['HexHighEntropyString']['config'].items() >= plugins_used[0].items()
         )
 
     @pytest.mark.parametrize(
@@ -668,10 +736,9 @@ class TestDetermineAuditResults:
 
         results = audit.determine_audit_results(baseline, '.secrets.baseline')
 
-        for (
-            audited_result,
-            file_to_secrets,
-        ) in results['plugins']['HexHighEntropyString']['results'].items():
+        for (audited_result, file_to_secrets) in results['plugins'][
+            'HexHighEntropyString'
+        ]['results'].items():
             if audited_result == expected_audited_result:
                 assert any(  # pragma: no cover
                     secret['plaintext'] == plaintext_secret
@@ -746,8 +813,7 @@ class TestDetermineAuditResults:
         assert hex_high_results['true-positives']['mocked_file'][0]['plaintext'] is None
 
 
-class TestPrintAuditResults():
-
+class TestPrintAuditResults:
     @contextmanager
     def mock_env(self, baseline):
         with mock.patch.object(
@@ -776,15 +842,16 @@ class TestPrintAuditResults():
         ],
     )
     def test_print_audit_results_none(
-        self, mock_printer, mock_baseline, expected_message,
+        self,
+        mock_printer,
+        mock_baseline,
+        expected_message,
     ):
         """
         This doesn't actually test for correctness; we rely on
         good tests for determine_audit_results.
         """
-        with self.mock_env(
-            baseline=mock_baseline,
-        ), mock.patch.object(
+        with self.mock_env(baseline=mock_baseline), mock.patch.object(
             audit,
             'determine_audit_results',
             return_value={},
@@ -795,7 +862,6 @@ class TestPrintAuditResults():
 
 
 class TestPrintContext:
-
     def run_logic(
         self,
         secret=None,
@@ -853,11 +919,11 @@ class TestPrintContext:
         data = '{}{}{}{}'.format(
             '\n' * (start_line - 1),
             self._make_string_into_individual_lines(
-                string.ascii_letters[:(secret_line - start_line)],
+                string.ascii_letters[: (secret_line - start_line)],
             ),
             line_containing_secret + '\n',
             self._make_string_into_individual_lines(
-                string.ascii_letters[:(end_line - secret_line)][::-1],
+                string.ascii_letters[: (end_line - secret_line)][::-1],
             ),
         )
         return mock_open_base(data, 'detect_secrets.core.audit.codecs.open')
@@ -880,7 +946,10 @@ class TestPrintContext:
         ):
             self.run_logic()
 
-        assert uncolor(mock_printer.message) == textwrap.dedent("""
+        assert (
+            uncolor(mock_printer.message)
+            == textwrap.dedent(
+                """
             Secret:      1 of 2
             Filename:    filenameA
             Secret Type: Private Key
@@ -900,7 +969,9 @@ class TestPrintContext:
             {}
             ----------
 
-        """).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        """,
+            ).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        )
 
     def test_secret_at_top_of_file(self, mock_printer):
         with self.mock_open(
@@ -913,7 +984,8 @@ class TestPrintContext:
                 secret_lineno=1,
             )
 
-        test = textwrap.dedent("""
+        test = textwrap.dedent(
+            """
             Secret:      1 of 2
             Filename:    filenameA
             Secret Type: Private Key
@@ -928,11 +1000,15 @@ class TestPrintContext:
             {}
             ----------
 
-        """).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        """,
+        ).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
 
         print(mock_printer.message)
         print(test)
-        assert uncolor(mock_printer.message) == textwrap.dedent("""
+        assert (
+            uncolor(mock_printer.message)
+            == textwrap.dedent(
+                """
             Secret:      1 of 2
             Filename:    filenameA
             Secret Type: Private Key
@@ -947,7 +1023,9 @@ class TestPrintContext:
             {}
             ----------
 
-        """).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        """,
+            ).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        )
 
     def test_secret_not_found_no_force(self, mock_printer):
         with self.mock_open(), pytest.raises(
@@ -964,7 +1042,10 @@ class TestPrintContext:
                 force=False,
             )
 
-        assert uncolor(mock_printer.message) == textwrap.dedent("""
+        assert (
+            uncolor(mock_printer.message)
+            == textwrap.dedent(
+                """
             Secret:      1 of 2
             Filename:    filenameA
             Secret Type: Private Key
@@ -973,7 +1054,9 @@ class TestPrintContext:
             Try recreating your baseline to fix this issue.
             ----------
 
-        """)[1:-1]
+        """,
+            )[1:-1]
+        )
 
     def test_secret_not_found_force(self, mock_printer):
         with self.mock_open(
@@ -990,7 +1073,10 @@ class TestPrintContext:
                 force=True,
             )
 
-        assert uncolor(mock_printer.message) == textwrap.dedent("""
+        assert (
+            uncolor(mock_printer.message)
+            == textwrap.dedent(
+                """
             Secret:      1 of 2
             Filename:    filenameA
             Secret Type: Private Key
@@ -1010,7 +1096,9 @@ class TestPrintContext:
             {}
             ----------
 
-        """).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        """,
+            ).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        )
 
     def test_hex_high_entropy_secret_in_yaml_file(self, mock_printer):
         with self.mock_open(
@@ -1031,7 +1119,10 @@ class TestPrintContext:
                 ],
             )
 
-        assert uncolor(mock_printer.message) == textwrap.dedent("""
+        assert (
+            uncolor(mock_printer.message)
+            == textwrap.dedent(
+                """
             Secret:      1 of 2
             Filename:    filenameB
             Secret Type: Hex High Entropy String
@@ -1051,7 +1142,9 @@ class TestPrintContext:
             {}
             ----------
 
-        """).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        """,
+            ).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        )
 
     def test_keyword_secret_in_yaml_file(self, mock_printer):
         with self.mock_open(
@@ -1071,7 +1164,10 @@ class TestPrintContext:
                 ],
             )
 
-        assert uncolor(mock_printer.message) == textwrap.dedent("""
+        assert (
+            uncolor(mock_printer.message)
+            == textwrap.dedent(
+                """
             Secret:      1 of 2
             Filename:    filenameB
             Secret Type: Secret Keyword
@@ -1091,7 +1187,9 @@ class TestPrintContext:
             {}
             ----------
 
-        """).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        """,
+            ).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        )
 
     def test_unicode_in_output(self, mock_printer):
         # Instead of mocking open, read from file with
@@ -1111,7 +1209,10 @@ class TestPrintContext:
             ],
         )
 
-        assert uncolor(mock_printer.message) == textwrap.dedent("""
+        assert (
+            uncolor(mock_printer.message)
+            == textwrap.dedent(
+                """
             Secret:      1 of 2
             Filename:    test_data/config.md
             Secret Type: Base64 High Entropy String
@@ -1126,11 +1227,12 @@ class TestPrintContext:
             {}
             ----------
 
-        """).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        """,
+            ).format(POTENTIAL_SECRET_DETECTED_NOTE)[1:-1]
+        )
 
 
 class TestGetUserDecision:
-
     @pytest.mark.parametrize(
         'user_input, expected_value',
         [
@@ -1188,6 +1290,7 @@ def mock_user_input(inputs):
     :type inputs: list
     :param inputs: list of user choices
     """
+
     class InputShim:
         def __init__(self):
             self.message = ''
