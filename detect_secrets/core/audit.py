@@ -841,16 +841,11 @@ def stats(
     """
     secrets = _get_secrets_list_from_file(baseline_filename)
 
-    reviewed = len(secrets)
-    live = len(live_secrets)
-    unaudited = len(unaudited_secrets)
-    audited_real = len(audited_real_secrets)
-
     stats: ReportStats = {
-        'reviewed': reviewed,
-        'live': live,
-        'unaudited': unaudited,
-        'audited_real': audited_real,
+        'reviewed': len(secrets),
+        'live': len(live_secrets),
+        'unaudited': len(unaudited_secrets),
+        'audited_real': len(audited_real_secrets),
     }
 
     return stats
