@@ -34,24 +34,6 @@ class TestReportConditions:
             audit,
             '_get_baseline_from_file',
             return_value=baseline,
-        ), mock.patch.object(
-            # We mock this because we don't really care about clearing
-            # screens for test cases.
-            audit,
-            '_clear_screen',
-        ), mock.patch.object(
-            # Tests for this fall under a different test suite.
-            audit,
-            '_print_context',
-        ), mock.patch.object(
-            # We mock this so we don't modify the baseline.
-            audit,
-            '_remove_nonexistent_files_from_baseline',
-            return_value=False,
-        ), mock.patch.object(
-            # We mock this so we don't need to do any file I/O.
-            audit,
-            'write_baseline_to_file',
         ) as m:
             yield m
 
