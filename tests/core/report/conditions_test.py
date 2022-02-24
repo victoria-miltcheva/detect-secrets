@@ -11,6 +11,7 @@ from detect_secrets.core.report.conditions import fail_on_live
 from detect_secrets.core.report.conditions import fail_on_unaudited
 from detect_secrets.core.report.constants import ReportExitCode
 from detect_secrets.core.report.constants import ReportSecretType
+from testing.fixtures import baseline
 from testing.mocks import mock_printer as mock_printer_base
 
 
@@ -22,12 +23,9 @@ def mock_printer():
 
 class TestReportConditions:
     @contextmanager
-    def mock_env(self, user_inputs=None, baseline=None):
+    def mock_env(self, baseline=None):
         if baseline is None:
             baseline = self.baseline
-
-        if not user_inputs:
-            user_inputs = []
 
         with mock.patch.object(
             # We mock this, so we don't need to do any file I/O.
@@ -39,35 +37,7 @@ class TestReportConditions:
 
     @property
     def baseline(self):
-        return {
-            'generated_at': 'some timestamp',
-            'plugins_used': [
-                {
-                    'name': 'TestPlugin',
-                },
-            ],
-            'results': {
-                'filenameA': [
-                    {
-                        'hashed_secret': 'a',
-                        'line_number': 122,
-                        'type': 'Test Type',
-                    },
-                    {
-                        'hashed_secret': 'b',
-                        'line_number': 123,
-                        'type': 'Test Type',
-                    },
-                ],
-                'filenameB': [
-                    {
-                        'hashed_secret': 'c',
-                        'line_number': 123,
-                        'type': 'Test Type',
-                    },
-                ],
-            },
-        }
+        return baseline
 
     def test_unaudited_pass_case(self):
         modified_baseline = deepcopy(self.baseline)

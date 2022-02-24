@@ -1,5 +1,8 @@
+from typing import List
+
 from detect_secrets.core.audit import get_secrets_list_from_file
 from detect_secrets.core.report.constants import ReportCheckResult
+from detect_secrets.core.report.constants import ReportedSecret
 from detect_secrets.core.report.constants import ReportExitCode
 from detect_secrets.core.report.constants import ReportSecretType
 
@@ -13,7 +16,7 @@ def fail_on_unaudited(baseline_filename: str) -> ReportCheckResult:
     value.
     """
     secrets = get_secrets_list_from_file(baseline_filename)
-    non_audited_secrets = []
+    non_audited_secrets: List[ReportedSecret] = []
 
     for filename, secret in secrets:
         if 'is_secret' not in secret or secret['is_secret'] is None:
@@ -41,7 +44,7 @@ def fail_on_live(baseline_filename: str) -> ReportCheckResult:
     value.
     """
     secrets = get_secrets_list_from_file(baseline_filename)
-    live_secrets = []
+    live_secrets: List[ReportedSecret] = []
 
     for filename, secret in secrets:
         if 'is_verified' in secret and secret['is_verified'] is True:
@@ -68,7 +71,7 @@ def fail_on_audited_real(baseline_filename: str) -> ReportCheckResult:
     value.
     """
     secrets = get_secrets_list_from_file(baseline_filename)
-    audited_true_secrets = []
+    audited_true_secrets: List[ReportedSecret] = []
 
     for filename, secret in secrets:
         if 'is_secret' in secret and secret['is_secret'] is True:

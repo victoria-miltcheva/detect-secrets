@@ -11,8 +11,6 @@ from detect_secrets.core.report.constants import ReportedSecret
 from detect_secrets.core.report.constants import ReportJson
 from detect_secrets.core.report.constants import ReportStats
 
-# TODO: write unit tests
-
 
 def get_stats(
     live_secrets: List[ReportedSecret],
@@ -35,7 +33,6 @@ def get_stats(
     return stats
 
 
-# TODO: write unit tests
 def print_json_report(
     live_secrets: List[ReportedSecret],
     unaudited_secrets: List[ReportedSecret],
@@ -64,7 +61,6 @@ def print_json_report(
     print(json.dumps(ReportJson({'stats': stats, 'secrets': secrets}), indent=4))
 
 
-# TODO: write unit tests
 def print_table_report(
     live_secrets: List[ReportedSecret],
     non_audited_secrets: List[ReportedSecret],
@@ -103,7 +99,6 @@ def print_table_report(
     )
 
 
-# TODO: write unit tests
 def print_stats(
     live_secrets: List[ReportedSecret],
     unaudited_secrets: List[ReportedSecret],
@@ -151,7 +146,6 @@ def print_stats(
     print('\n')
 
 
-# TODO: write unit tests
 def print_summary(
     unaudited_return_code: int,
     live_return_code: int,
