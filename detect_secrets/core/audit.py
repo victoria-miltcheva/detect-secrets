@@ -752,7 +752,8 @@ def fail_on_unaudited(baseline_filename: str) -> ReportCheckResult:
     Given a baseline filename, checks if that baseline contains
     any secret results which have not been audited yet.
 
-    It returns a tuple: (exit code, list of unaudited secrets)
+    If so, the list of unaudited secrets is included in the return
+    value.
     """
     secrets = _get_secrets_list_from_file(baseline_filename)
     non_audited_secrets = []
@@ -779,7 +780,8 @@ def fail_on_live(baseline_filename: str) -> ReportCheckResult:
     Given a baseline filename, checks if that baseline contains
     any active verified secrets.
 
-    It returns a tuple: (exit code, list of live secrets)
+    If so, the list of verified secrets is included in the return
+    value.
     """
     secrets = _get_secrets_list_from_file(baseline_filename)
     live_secrets = []
@@ -805,7 +807,8 @@ def fail_on_audited_real(baseline_filename: str) -> ReportCheckResult:
     Given a baseline filename, checks if that baseline contains
     any secrets which have been marked as real during the auditing process.
 
-    It returns a tuple: (exit code, list of secrets audited as real)
+    If so, the list of audited real secrets is included in the return
+    value.
     """
     secrets = _get_secrets_list_from_file(baseline_filename)
     audited_true_secrets = []
