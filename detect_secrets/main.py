@@ -140,15 +140,15 @@ def main(argv=None):
                 == audited_real_return_code
                 == ReportExitCode.PASS.value
             ):
-                return ReportExitCode.PASS.value
+                sys.exit(ReportExitCode.PASS.value)
             elif default_conditions:
-                return ReportExitCode.PASS.value
+                sys.exit(ReportExitCode.PASS.value)
             else:
                 sys.exit(ReportExitCode.FAIL.value)
 
         if args.display_results:
             audit.print_audit_results(args.filename[0])
-            return 0
+            return ReportExitCode.PASS.value
 
         if len(args.filename) != 2:
             print(

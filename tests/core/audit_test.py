@@ -286,7 +286,6 @@ class TestAuditBaseline:
         modified_baseline['results']['filenameA'][1]['is_secret'] = True
         modified_baseline['results']['filenameB'][0]['is_secret'] = True
 
-        # TODO: get file names dynamically
         expected_secrets = [
             {
                 'failed_condition': ReportSecretType.AUDITED_REAL.value,
@@ -307,6 +306,8 @@ class TestAuditBaseline:
                 'type': 'Test Type',
             },
         ]
+
+        print('expected_secrets', expected_secrets)
 
         with self.mock_env(baseline=modified_baseline):
             (return_code, secrets) = audit.fail_on_audited_real('will_be_mocked')
