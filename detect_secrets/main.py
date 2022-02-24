@@ -4,8 +4,8 @@ import sys
 from detect_secrets.core import audit
 from detect_secrets.core import baseline
 from detect_secrets.core.common import write_baseline_to_file
-from detect_secrets.core.constants import ReportExitCode
 from detect_secrets.core.log import log
+from detect_secrets.core.report import report
 from detect_secrets.core.secrets_collection import SecretsCollection
 from detect_secrets.core.usage import ParserBuilder
 from detect_secrets.plugins.common import initialize
@@ -76,79 +76,12 @@ def main(argv=None):
             audit.audit_baseline(args.filename[0])
             return 0
 
-        # TODO: move this to its own function because it's getting long
         if args.report:
-            unaudited_secrets = live_secrets = audited_real_secrets = []
-            unaudited_return_code = (
-                live_return_code
-            ) = audited_real_return_code = ReportExitCode.PASS.value
-            default_conditions = False
-
-            # If no fail conditions provided, run report using all fail conditions, but exit with 0
-            if (
-                args.report
-                and not args.fail_on_unaudited
-                and not args.fail_on_audited_real
-                and not args.fail_on_live
-            ):
-                default_conditions = True
-
-            if args.fail_on_unaudited or default_conditions:
-                (unaudited_return_code, unaudited_secrets) = audit.fail_on_unaudited(
-                    args.filename[0],
-                )
-
-            if args.fail_on_live or default_conditions:
-                (live_return_code, live_secrets) = audit.fail_on_live(args.filename[0])
-
-            if args.fail_on_audited_real or default_conditions:
-                (audited_real_return_code, audited_real_secrets) = audit.fail_on_audited_real(
-                    args.filename[0],
-                )
-
-            if args.json:
-                audit.report_json(
-                    audit,
-                    live_secrets,
-                    unaudited_secrets,
-                    audited_real_secrets,
-                    args.filename[0],
-                ),
-            else:
-                audit.print_stats(
-                    live_secrets,
-                    unaudited_secrets,
-                    audited_real_secrets,
-                    args.filename[0],
-                )
-                audit.report_table(
-                    live_secrets,
-                    unaudited_secrets,
-                    audited_real_secrets,
-                )
-                audit.print_failed_conditions(
-                    unaudited_return_code,
-                    live_return_code,
-                    audited_real_return_code,
-                    args.filename[0],
-                    True if args.omit_instructions else False,
-                )
-
-            if (
-                unaudited_return_code
-                == live_return_code
-                == audited_real_return_code
-                == ReportExitCode.PASS.value
-            ):
-                sys.exit(ReportExitCode.PASS.value)
-            elif default_conditions:
-                sys.exit(ReportExitCode.PASS.value)
-            else:
-                sys.exit(ReportExitCode.FAIL.value)
+            report.execute(args)
 
         if args.display_results:
             audit.print_audit_results(args.filename[0])
-            return ReportExitCode.PASS.value
+            return 0
 
         if len(args.filename) != 2:
             print(

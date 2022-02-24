@@ -27,20 +27,16 @@ def version_check():
         current_version = parse(VERSION)
         if current_version < latest_version:
             print(
-                yellow +
-                'WARNING: You are running an outdated version of detect-secrets.\n',
+                yellow + 'WARNING: You are running an outdated version of detect-secrets.\n',
                 'Your version: %s\n' % current_version,
                 'Latest version: %s\n' % latest_version,
                 'See upgrade guide at',
-                'https://ibm.biz/detect-secrets-how-to-upgrade\n' +
-                end_yellow,
+                'https://ibm.biz/detect-secrets-how-to-upgrade\n' + end_yellow,
                 file=sys.stderr,
             )
     except Exception:
         print(
-            yellow +
-            'Failed to check for newer version of detect-secrets.\n' +
-            end_yellow,
+            yellow + 'Failed to check for newer version of detect-secrets.\n' + end_yellow,
             file=sys.stderr,
         )
 
@@ -115,11 +111,15 @@ def get_git_sha(path):
     """
     try:
         with open(os.devnull, 'w') as fnull:
-            return subprocess.check_output(
-                ['git', 'rev-parse', '--verify', 'HEAD'],
-                stderr=fnull,
-                cwd=path,
-            ).decode('utf-8').split()[0]
+            return (
+                subprocess.check_output(
+                    ['git', 'rev-parse', '--verify', 'HEAD'],
+                    stderr=fnull,
+                    cwd=path,
+                )
+                .decode('utf-8')
+                .split()[0]
+            )
     except (subprocess.CalledProcessError, OSError, IndexError):  # pragma: no cover
         return None
 
@@ -136,16 +136,21 @@ def get_git_remotes(path):
     """
     try:
         with open(os.devnull, 'w') as fnull:
-            git_remotes = subprocess.check_output(
-                ['git', 'remote', '-v'],
-                stderr=fnull,
-                cwd=path,
-            ).decode('utf-8').split('\n')
-            return list({
-                git_remote.split()[1]
-                for git_remote
-                in git_remotes
-                if len(git_remote) > 2  # split('\n') produces an empty list
-            })
+            git_remotes = (
+                subprocess.check_output(
+                    ['git', 'remote', '-v'],
+                    stderr=fnull,
+                    cwd=path,
+                )
+                .decode('utf-8')
+                .split('\n')
+            )
+            return list(
+                {
+                    git_remote.split()[1]
+                    for git_remote in git_remotes
+                    if len(git_remote) > 2  # split('\n') produces an empty list
+                },
+            )
     except (subprocess.CalledProcessError, OSError):  # pragma: no cover
         return None

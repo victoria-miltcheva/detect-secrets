@@ -7,10 +7,6 @@ from builtins import input
 from collections import defaultdict
 from copy import deepcopy
 from functools import lru_cache
-from typing import List
-
-import numpy
-import tabulate
 
 from ..plugins.common import initialize
 from ..plugins.common.util import get_mapping_from_secret_type_to_class_name
@@ -23,12 +19,6 @@ from .color import AnsiColor
 from .color import colorize
 from .common import write_baseline_to_file
 from detect_secrets.core.constants import POTENTIAL_SECRET_DETECTED_NOTE
-from detect_secrets.core.constants import ReportCheckResult
-from detect_secrets.core.constants import ReportedSecret
-from detect_secrets.core.constants import ReportExitCode
-from detect_secrets.core.constants import ReportJson
-from detect_secrets.core.constants import ReportSecretType
-from detect_secrets.core.constants import ReportStats
 
 
 class SecretNotFoundOnSpecifiedLineError(Exception):
@@ -344,6 +334,13 @@ def print_audit_results(baseline_filename):
     )
 
 
+def get_secrets_list_from_file(baseline_filename: str) -> list:
+    baseline = _get_baseline_from_file(baseline_filename)
+    secrets = list(_secret_generator(baseline))
+
+    return secrets
+
+
 def _get_baseline_from_file(filename):  # pragma: no cover
     try:
         with open(filename) as f:
@@ -367,13 +364,6 @@ def _secret_generator(baseline):
     for filename, secrets in baseline['results'].items():
         for secret in secrets:
             yield filename, secret
-
-
-def _get_secrets_list_from_file(baseline_filename: str) -> list:
-    baseline = _get_baseline_from_file(baseline_filename)
-    secrets = list(_secret_generator(baseline))
-
-    return secrets
 
 
 def _get_secrets_to_compare(old_baseline, new_baseline):
@@ -745,304 +735,3 @@ def get_raw_secret_value(
             return plugin_secret.secret_value
 
     raise SecretNotFoundOnSpecifiedLineError(secret['line_number'])
-
-
-def fail_on_unaudited(baseline_filename: str) -> ReportCheckResult:
-    """
-    Given a baseline filename, checks if that baseline contains
-    any secret results which have not been audited yet.
-
-    If so, the list of unaudited secrets is included in the return
-    value.
-    """
-    secrets = _get_secrets_list_from_file(baseline_filename)
-    non_audited_secrets = []
-
-    for filename, secret in secrets:
-        if 'is_secret' not in secret or secret['is_secret'] is None:
-            unaudited_secret = {
-                'failed_condition': ReportSecretType.UNAUDITED.value,
-                'filename': filename,
-                'line': secret['line_number'],
-                'type': secret['type'],
-            }
-
-            non_audited_secrets.append(unaudited_secret)
-
-    if len(non_audited_secrets) > 0:
-        return ReportCheckResult(ReportExitCode.FAIL.value, non_audited_secrets)
-
-    return ReportCheckResult(ReportExitCode.PASS.value, [])
-
-
-def fail_on_live(baseline_filename: str) -> ReportCheckResult:
-    """
-    Given a baseline filename, checks if that baseline contains
-    any active verified secrets.
-
-    If so, the list of verified secrets is included in the return
-    value.
-    """
-    secrets = _get_secrets_list_from_file(baseline_filename)
-    live_secrets = []
-
-    for filename, secret in secrets:
-        if 'is_verified' in secret and secret['is_verified'] is True:
-            live_secret = {
-                'failed_condition': ReportSecretType.LIVE.value,
-                'filename': filename,
-                'line': secret['line_number'],
-                'type': secret['type'],
-            }
-            live_secrets.append(live_secret)
-
-    if len(live_secrets) > 0:
-        return ReportCheckResult(ReportExitCode.FAIL.value, live_secrets)
-
-    return ReportCheckResult(ReportExitCode.PASS.value, [])
-
-
-def fail_on_audited_real(baseline_filename: str) -> ReportCheckResult:
-    """
-    Given a baseline filename, checks if that baseline contains
-    any secrets which have been marked as real during the auditing process.
-
-    If so, the list of audited real secrets is included in the return
-    value.
-    """
-    secrets = _get_secrets_list_from_file(baseline_filename)
-    audited_true_secrets = []
-
-    for filename, secret in secrets:
-        if 'is_secret' in secret and secret['is_secret'] is True:
-            audited_true_secret = {
-                'failed_condition': ReportSecretType.AUDITED_REAL.value,
-                'filename': filename,
-                'line': secret['line_number'],
-                'type': secret['type'],
-            }
-            audited_true_secrets.append(audited_true_secret)
-
-    if len(audited_true_secrets) > 0:
-        return ReportCheckResult(ReportExitCode.FAIL.value, audited_true_secrets)
-
-    return ReportCheckResult(ReportExitCode.PASS.value, [])
-
-
-# TODO: write unit tests
-def stats(
-    live_secrets: List[ReportedSecret],
-    unaudited_secrets: List[ReportedSecret],
-    audited_real_secrets: List[ReportedSecret],
-    baseline_filename: str,
-) -> ReportStats:
-    """
-    Returns a dictionary containing aggregate stats, to be used in a report.
-    """
-    secrets = _get_secrets_list_from_file(baseline_filename)
-
-    stats: ReportStats = {
-        'reviewed': len(secrets),
-        'live': len(live_secrets),
-        'unaudited': len(unaudited_secrets),
-        'audited_real': len(audited_real_secrets),
-    }
-
-    return stats
-
-
-# TODO: write unit tests
-def report_json(
-    self,
-    live_secrets: List[ReportedSecret],
-    unaudited_secrets: List[ReportedSecret],
-    audited_real_secrets: List[ReportedSecret],
-    baseline_filename: str,
-) -> None:
-    """
-    Prints a JSON report summarizing information about secrets
-    which failed certain conditions.
-    """
-    stats = self.stats(
-        live_secrets,
-        unaudited_secrets,
-        audited_real_secrets,
-        baseline_filename,
-    )
-
-    secrets = numpy.concatenate(
-        (
-            live_secrets,
-            unaudited_secrets,
-            audited_real_secrets,
-        ),
-    ).tolist()
-
-    print(json.dumps(ReportJson({'stats': stats, 'secrets': secrets}), indent=4))
-
-
-# TODO: write unit tests
-def report_table(
-    live_secrets: List[ReportedSecret],
-    non_audited_secrets: List[ReportedSecret],
-    audited_true_secrets: List[ReportedSecret],
-) -> None:
-    """
-    Prints a report table summarizing information about secrets
-    which failed certain conditions.
-
-    If all lists are empty, nothing is printed and the
-    function is exited.
-    """
-    secrets = numpy.concatenate((live_secrets, non_audited_secrets, audited_true_secrets)).tolist()
-
-    if len(secrets) == 0:
-        return
-
-    table = []
-
-    for secret in secrets:
-        table.append(
-            [
-                secret['failed_condition'],
-                secret['type'],
-                secret['filename'],
-                secret['line'],
-            ],
-        )
-
-    print(
-        tabulate.tabulate(
-            table,
-            headers=['Failed Condition', 'Secret Type', 'Filename', 'Line'],
-            tablefmt='simple',
-        ),
-    )
-
-
-# TODO: write unit tests
-def print_stats(
-    live_secrets: List[ReportedSecret],
-    unaudited_secrets: List[ReportedSecret],
-    audited_real_secrets: List[ReportedSecret],
-    baseline_filename: str,
-) -> None:
-    """
-    Given lists of secrets which failed certain conditions and a baseline file name,
-    print a sentence summarizing aggregate stats.
-    """
-    secrets = _get_secrets_list_from_file(baseline_filename)
-
-    secrets_failing_conditions = numpy.concatenate(
-        (live_secrets, unaudited_secrets, audited_real_secrets),
-    ).tolist()
-
-    print('\n')
-
-    if len(secrets_failing_conditions) == 0:
-        print(
-            '{} potential secrets in {} were reviewed.'
-            ' All checks have passed.\n'.format(
-                colorize(len(secrets), AnsiColor.BOLD),
-                colorize(baseline_filename, AnsiColor.BOLD),
-            ),
-        )
-        return
-
-    print(
-        '{} potential secrets in {} were reviewed.'
-        ' Found {} live secret{}, {} unaudited secret{},'
-        ' and {} secret{} that {} audited as real.'.format(
-            colorize(len(secrets), AnsiColor.BOLD),
-            colorize(baseline_filename, AnsiColor.BOLD),
-            colorize(len(live_secrets), AnsiColor.BOLD),
-            's' if len(live_secrets) > 0 or len(live_secrets) == 0 else '',
-            colorize(len(unaudited_secrets), AnsiColor.BOLD),
-            's' if len(unaudited_secrets) > 0 or len(unaudited_secrets) == 0 else '',
-            colorize(len(audited_real_secrets), AnsiColor.BOLD),
-            's' if len(audited_real_secrets) > 0 or len(audited_real_secrets) == 0 else '',
-            'were' if len(audited_real_secrets) > 0 or len(audited_real_secrets) == 0 else 'was',
-        ),
-    )
-
-    print('\n')
-
-
-# TODO: write unit tests
-def print_failed_conditions(
-    unaudited_return_code: int,
-    live_return_code: int,
-    audited_real_return_code: int,
-    baseline_filename: str,
-    omit_instructions=False,
-) -> None:
-    """
-    Prints information about failed checks in a report,
-    as well as how to remediate them.
-
-    Instructions can optionally be omitted.
-    """
-    print('\n')
-
-    if unaudited_return_code == live_return_code == audited_real_return_code == 0:
-        print(
-            '{}\n'.format(
-                colorize('\t- No unaudited secrets were found', AnsiColor.BOLD),
-            ),
-        )
-        print(
-            '{}\n'.format(
-                colorize('\t- No live secrets were found', AnsiColor.BOLD),
-            ),
-        )
-        print(
-            '{}\n'.format(
-                colorize('\t- No secrets that were audited as real were found', AnsiColor.BOLD),
-            ),
-        )
-        return
-
-    print('Failed conditions:')
-
-    if unaudited_return_code != 0:
-        print(
-            '{}\n'.format(
-                colorize('\n\t- Unaudited secrets were found', AnsiColor.BOLD),
-            ),
-        )
-        if omit_instructions is False:
-            print(
-                '\t\tRun detect-secrets audit {}, and audit all potential secrets.'.format(
-                    baseline_filename,
-                ),
-            )
-    if live_return_code != 0:
-        print(
-            '{}\n'.format(
-                colorize('\n\t- Live secrets were found', AnsiColor.BOLD),
-            ),
-        )
-        if omit_instructions is False:
-            print(
-                '\t\tRevoke all live secrets and remove them from the codebase.'
-                ' Afterwards, run detect-secrets scan --update {} to re-scan.'.format(
-                    baseline_filename,
-                ),
-            )
-
-    if audited_real_return_code != 0:
-        print(
-            '{}\n'.format(
-                colorize('\n\t- Audited true secrets were found', AnsiColor.BOLD),
-            ),
-        )
-        if omit_instructions is False:
-            print(
-                '\t\tRemove secrets meeting this condition from the codebase,'
-                ' and run detect-secrets scan --update {} to re-scan.'.format(baseline_filename),
-            )
-
-    if omit_instructions is False:
-        print('\nFor additional help, run detect-secret audit --report --help.')
-
-    print('\n')

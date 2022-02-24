@@ -4,13 +4,10 @@ from contextlib import contextmanager
 from copy import deepcopy
 
 import mock
-import numpy
 import pytest
 
 from detect_secrets.core import audit
 from detect_secrets.core.constants import POTENTIAL_SECRET_DETECTED_NOTE
-from detect_secrets.core.constants import ReportExitCode
-from detect_secrets.core.constants import ReportSecretType
 from testing.factories import potential_secret_factory
 from testing.mocks import mock_open as mock_open_base
 from testing.mocks import mock_printer as mock_printer_base
@@ -175,154 +172,6 @@ class TestAuditBaseline:
             modified_baseline=modified_baseline,
             input_baseline=self.leapfrog_baseline,
         )
-
-    def test_unaudited_pass_case(self):
-        modified_baseline = deepcopy(self.baseline)
-        modified_baseline['results']['filenameA'][0]['is_secret'] = False
-        modified_baseline['results']['filenameA'][1]['is_secret'] = False
-        modified_baseline['results']['filenameB'][0]['is_secret'] = False
-
-        with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_unaudited('will_be_mocked')
-
-        assert return_code == ReportExitCode.PASS.value
-        assert len(secrets) == 0
-
-    def test_unaudited_fail_case(self, mock_printer):
-        modified_baseline = deepcopy(self.baseline)
-        modified_baseline['results']['filenameA'][0]['is_secret'] = None
-        modified_baseline['results']['filenameA'][1]['is_secret'] = None
-        modified_baseline['results']['filenameB'][0]['is_secret'] = None
-
-        with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_unaudited('will_be_mocked')
-
-        expected_secrets = [
-            {
-                'failed_condition': ReportSecretType.UNAUDITED.value,
-                'filename': 'filenameA',
-                'line': modified_baseline['results']['filenameA'][0]['line_number'],
-                'type': 'Test Type',
-            },
-            {
-                'failed_condition': ReportSecretType.UNAUDITED.value,
-                'filename': 'filenameA',
-                'line': modified_baseline['results']['filenameA'][1]['line_number'],
-                'type': 'Test Type',
-            },
-            {
-                'failed_condition': ReportSecretType.UNAUDITED.value,
-                'filename': 'filenameB',
-                'line': modified_baseline['results']['filenameB'][0]['line_number'],
-                'type': 'Test Type',
-            },
-        ]
-
-        assert return_code == ReportExitCode.FAIL.value
-        assert len(secrets) == len(expected_secrets)
-        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
-
-    def test_live_pass_case(self):
-        modified_baseline = deepcopy(self.baseline)
-        modified_baseline['results']['filenameA'][0]['is_verified'] = False
-        modified_baseline['results']['filenameA'][1]['is_verified'] = False
-        modified_baseline['results']['filenameB'][0]['is_verified'] = False
-
-        with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_live('will_be_mocked')
-
-        assert return_code == ReportExitCode.PASS.value
-        assert len(secrets) == 0
-
-    def test_live_fail_case(self):
-        modified_baseline = deepcopy(self.baseline)
-        modified_baseline['results']['filenameA'][0]['is_verified'] = True
-        modified_baseline['results']['filenameA'][1]['is_verified'] = True
-        modified_baseline['results']['filenameB'][0]['is_verified'] = True
-
-        expected_secrets = [
-            {
-                'failed_condition': ReportSecretType.LIVE.value,
-                'filename': 'filenameA',
-                'line': modified_baseline['results']['filenameA'][0]['line_number'],
-                'type': 'Test Type',
-            },
-            {
-                'failed_condition': ReportSecretType.LIVE.value,
-                'filename': 'filenameA',
-                'line': modified_baseline['results']['filenameA'][1]['line_number'],
-                'type': 'Test Type',
-            },
-            {
-                'failed_condition': ReportSecretType.LIVE.value,
-                'filename': 'filenameB',
-                'line': modified_baseline['results']['filenameB'][0]['line_number'],
-                'type': 'Test Type',
-            },
-        ]
-
-        with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_live('will_be_mocked')
-
-        assert return_code == ReportExitCode.FAIL.value
-        assert len(secrets) == len(expected_secrets)
-        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
-
-    def test_audited_real_pass_case(self):
-        modified_baseline = deepcopy(self.baseline)
-        modified_baseline['results']['filenameA'][0]['is_secret'] = False
-        modified_baseline['results']['filenameA'][1]['is_secret'] = False
-        modified_baseline['results']['filenameB'][0]['is_secret'] = False
-
-        with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_audited_real('will_be_mocked')
-
-        assert return_code == ReportExitCode.PASS.value
-        assert len(secrets) == 0
-
-    def test_audited_real_fail_case(self):
-        modified_baseline = deepcopy(self.baseline)
-        modified_baseline['results']['filenameA'][0]['is_secret'] = True
-        modified_baseline['results']['filenameA'][1]['is_secret'] = True
-        modified_baseline['results']['filenameB'][0]['is_secret'] = True
-
-        expected_secrets = [
-            {
-                'failed_condition': ReportSecretType.AUDITED_REAL.value,
-                'filename': 'filenameA',
-                'line': modified_baseline['results']['filenameA'][0]['line_number'],
-                'type': 'Test Type',
-            },
-            {
-                'failed_condition': ReportSecretType.AUDITED_REAL.value,
-                'filename': 'filenameA',
-                'line': modified_baseline['results']['filenameA'][1]['line_number'],
-                'type': 'Test Type',
-            },
-            {
-                'failed_condition': ReportSecretType.AUDITED_REAL.value,
-                'filename': 'filenameB',
-                'line': modified_baseline['results']['filenameB'][0]['line_number'],
-                'type': 'Test Type',
-            },
-        ]
-
-        print('expected_secrets', expected_secrets)
-
-        with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = audit.fail_on_audited_real('will_be_mocked')
-
-        assert return_code == ReportExitCode.FAIL.value
-        assert len(secrets) == len(expected_secrets)
-        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
-
-    # TODO: implement
-    # def test_print_stats():
-    #     return 0
-
-    # TODO: implement
-    # def test_report_table():
-    #     return 0
 
     @contextmanager
     def run_logic(self, inputs, modified_baseline=None, input_baseline=None):
