@@ -115,11 +115,9 @@ def print_stats(
         (live_secrets, unaudited_secrets, audited_real_secrets),
     ).tolist()
 
-    print('\n')
-
     if len(secrets_failing_conditions) == 0:
         print(
-            '{} potential secrets in {} were reviewed.'
+            '\n{} potential secrets in {} were reviewed.'
             ' All checks have passed.\n'.format(
                 colorize(len(secrets), AnsiColor.BOLD),
                 colorize(baseline_filename, AnsiColor.BOLD),
@@ -128,9 +126,9 @@ def print_stats(
         return
 
     print(
-        '{} potential secrets in {} were reviewed.'
+        '\n{} potential secrets in {} were reviewed.'
         ' Found {} live secret{}, {} unaudited secret{},'
-        ' and {} secret{} that {} audited as real.'.format(
+        ' and {} secret{} that {} audited as real.\n'.format(
             colorize(len(secrets), AnsiColor.BOLD),
             colorize(baseline_filename, AnsiColor.BOLD),
             colorize(len(live_secrets), AnsiColor.BOLD),
@@ -143,7 +141,7 @@ def print_stats(
         ),
     )
 
-    print('\n')
+    # print("\n")
 
 
 def print_summary(

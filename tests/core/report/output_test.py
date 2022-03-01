@@ -4,9 +4,12 @@ from typing import List
 import mock
 
 from detect_secrets.core import audit
+from detect_secrets.core.color import AnsiColor
+from detect_secrets.core.color import colorize
 from detect_secrets.core.report.constants import ReportedSecret
 from detect_secrets.core.report.constants import ReportSecretType
 from detect_secrets.core.report.output import get_stats
+from detect_secrets.core.report.output import print_stats
 from testing.fixtures import baseline
 
 
@@ -48,7 +51,6 @@ class TestReportOutput:
             'audited_real': len(audited_real_secrets),
         }
 
-    # TODO
     def test_get_stats_failed_conditions(self):
         baseline_filename: List[ReportedSecret] = 'will_be_mocked'
         live_secrets = [
@@ -92,11 +94,29 @@ class TestReportOutput:
             'audited_real': len(audited_real_secrets),
         }
 
-    # TODO
-    def test_print_stats_no_failed_conditions(self):
-        assert True
+    def test_print_stats_no_failed_conditions(self, capsys):
+        baseline_filename: List[ReportedSecret] = 'will_be_mocked'
+        live_secrets = unaudited_secrets = audited_real_secrets = []
 
-    # TODO
+        with self.mock_env():
+            print_stats(
+                live_secrets,
+                unaudited_secrets,
+                audited_real_secrets,
+                baseline_filename,
+            )
+            secrets = audit.get_secrets_list_from_file(baseline_filename)
+
+        captured = capsys.readouterr()
+
+        assert (
+            captured.out == '\n{} potential secrets in {} were reviewed.'
+            ' All checks have passed.\n\n'.format(
+                colorize(len(secrets), AnsiColor.BOLD),
+                colorize(baseline_filename, AnsiColor.BOLD),
+            )
+        )
+
     def test_print_stats_failed_conditions(self):
         assert True
 
