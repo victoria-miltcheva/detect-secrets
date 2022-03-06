@@ -685,9 +685,6 @@ class TestMain:
             assert printer_shim.message.strip() == ("No difference, because it's the same file!")
 
 
-# TODO: test reporting argument combinations
-
-
 @contextmanager
 def mock_stdin(response=None):
     if not response:

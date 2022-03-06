@@ -11,7 +11,8 @@ from detect_secrets.core.report.conditions import fail_on_live
 from detect_secrets.core.report.conditions import fail_on_unaudited
 from detect_secrets.core.report.constants import ReportExitCode
 from detect_secrets.core.report.constants import ReportSecretType
-from testing.fixtures import baseline
+from testing.baseline import baseline
+from testing.baseline import baseline_filename
 from testing.mocks import mock_printer as mock_printer_base
 
 
@@ -46,19 +47,19 @@ class TestReportConditions:
         modified_baseline['results']['filenameB'][0]['is_secret'] = False
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = fail_on_unaudited('will_be_mocked')
+            (return_code, secrets) = fail_on_unaudited(baseline_filename)
 
         assert return_code == ReportExitCode.PASS.value
         assert len(secrets) == 0
 
-    def test_unaudited_fail_case(self, mock_printer):
+    def test_unaudited_fail_case(self):
         modified_baseline = deepcopy(self.baseline)
         modified_baseline['results']['filenameA'][0]['is_secret'] = None
         modified_baseline['results']['filenameA'][1]['is_secret'] = None
         modified_baseline['results']['filenameB'][0]['is_secret'] = None
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = fail_on_unaudited('will_be_mocked')
+            (return_code, secrets) = fail_on_unaudited(baseline_filename)
 
         expected_secrets = [
             {
@@ -92,7 +93,7 @@ class TestReportConditions:
         modified_baseline['results']['filenameB'][0]['is_verified'] = False
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = fail_on_live('will_be_mocked')
+            (return_code, secrets) = fail_on_live(baseline_filename)
 
         assert return_code == ReportExitCode.PASS.value
         assert len(secrets) == 0
@@ -125,7 +126,7 @@ class TestReportConditions:
         ]
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = fail_on_live('will_be_mocked')
+            (return_code, secrets) = fail_on_live(baseline_filename)
 
         assert return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
@@ -138,7 +139,7 @@ class TestReportConditions:
         modified_baseline['results']['filenameB'][0]['is_secret'] = False
 
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = fail_on_audited_real('will_be_mocked')
+            (return_code, secrets) = fail_on_audited_real(baseline_filename)
 
         assert return_code == ReportExitCode.PASS.value
         assert len(secrets) == 0
@@ -170,10 +171,8 @@ class TestReportConditions:
             },
         ]
 
-        print('expected_secrets', expected_secrets)
-
         with self.mock_env(baseline=modified_baseline):
-            (return_code, secrets) = fail_on_audited_real('will_be_mocked')
+            (return_code, secrets) = fail_on_audited_real(baseline_filename)
 
         assert return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)

@@ -5,13 +5,10 @@ from detect_secrets.plugins.common.util import import_plugins
 
 
 class TestPluginOptions:
-
     @staticmethod
     def parse_args(argument_string=''):
         # PluginOptions are added in pre-commit hook
-        return ParserBuilder()\
-            .add_pre_commit_arguments()\
-            .parse_args(argument_string.split())
+        return ParserBuilder().add_pre_commit_arguments().parse_args(argument_string.split())
 
     def test_added_by_default(self):
         # This is what happens with unrecognized arguments
@@ -24,21 +21,20 @@ class TestPluginOptions:
         """Everything enabled by default, with default values"""
         args = self.parse_args()
 
-        regex_based_plugins = {
-            key: {}
-            for key in import_plugins()
-        }
-        regex_based_plugins.update({
-            'HexHighEntropyString': {
-                'hex_limit': 3,
+        regex_based_plugins = {key: {} for key in import_plugins()}
+        regex_based_plugins.update(
+            {
+                'HexHighEntropyString': {
+                    'hex_limit': 3,
+                },
+                'Base64HighEntropyString': {
+                    'base64_limit': 4.5,
+                },
+                'KeywordDetector': {
+                    'keyword_exclude': None,
+                },
             },
-            'Base64HighEntropyString': {
-                'base64_limit': 4.5,
-            },
-            'KeywordDetector': {
-                'keyword_exclude': None,
-            },
-        })
+        )
         assert not hasattr(args, 'no_private_key_scan')
 
     def test_consolidates_removes_disabled_plugins(self):
@@ -73,11 +69,7 @@ class TestPluginOptions:
         if expected_value is not None:
             args = self.parse_args(argument_string)
 
-            assert (
-                args.plugins['HexHighEntropyString']['hex_limit']
-
-                == expected_value
-            )
+            assert args.plugins['HexHighEntropyString']['hex_limit'] == expected_value
         else:
             with pytest.raises(SystemExit):
                 self.parse_args(argument_string)

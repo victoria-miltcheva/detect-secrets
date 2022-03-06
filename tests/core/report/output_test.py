@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from copy import deepcopy
 from typing import List
 
 import mock
@@ -9,8 +10,12 @@ from detect_secrets.core.color import colorize
 from detect_secrets.core.report.constants import ReportedSecret
 from detect_secrets.core.report.constants import ReportSecretType
 from detect_secrets.core.report.output import get_stats
+from detect_secrets.core.report.output import print_json_report
 from detect_secrets.core.report.output import print_stats
-from testing.fixtures import baseline
+from detect_secrets.core.report.output import print_summary
+from detect_secrets.core.report.output import print_table_report
+from testing.baseline import baseline
+from testing.baseline import baseline_filename
 
 
 class TestReportOutput:
@@ -31,115 +36,483 @@ class TestReportOutput:
     def baseline(self):
         return baseline
 
-    def test_get_stats_no_failed_conditions(self):
-        live_secrets = unaudited_secrets = audited_real_secrets = []
-        baseline_filename = 'will_be_mocked'
-
+    def test_get_stats_no_failed_conditions(
+        self,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
         with self.mock_env():
             stats = get_stats(
-                live_secrets,
-                unaudited_secrets,
-                audited_real_secrets,
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
                 baseline_filename,
             )
             secrets = audit.get_secrets_list_from_file(baseline_filename)
 
         assert stats == {
             'reviewed': len(secrets),
-            'live': len(live_secrets),
-            'unaudited': len(unaudited_secrets),
-            'audited_real': len(audited_real_secrets),
+            'live': len(live_secrets_fixture),
+            'unaudited': len(unaudited_secrets_fixture),
+            'audited_real': len(audited_real_secrets_fixture),
         }
 
-    def test_get_stats_failed_conditions(self):
-        baseline_filename: List[ReportedSecret] = 'will_be_mocked'
-        live_secrets = [
-            {
-                'failed_condition': ReportSecretType.LIVE.value,
-                'filename': baseline_filename,
-                'line': 123,
-                'type': 'Private key',
-            },
-        ]
-        unaudited_secrets: List[ReportedSecret] = [
-            {
-                'failed_condition': ReportSecretType.UNAUDITED.value,
-                'filename': baseline_filename,
-                'line': 123,
-                'type': 'Hex High Entropy String',
-            },
-        ]
-        audited_real_secrets: List[ReportedSecret] = [
-            {
-                'failed_condition': ReportSecretType.AUDITED_REAL.value,
-                'filename': baseline_filename,
-                'line': 123,
-                'type': 'Hex High Entropy String',
-            },
-        ]
+    def test_get_stats_failed_conditions(
+        self,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
 
         with self.mock_env():
             stats = get_stats(
-                live_secrets,
-                unaudited_secrets,
-                audited_real_secrets,
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
                 baseline_filename,
             )
             secrets = audit.get_secrets_list_from_file(baseline_filename)
 
         assert stats == {
             'reviewed': len(secrets),
-            'live': len(live_secrets),
-            'unaudited': len(unaudited_secrets),
-            'audited_real': len(audited_real_secrets),
+            'live': len(live_secrets_fixture),
+            'unaudited': len(unaudited_secrets_fixture),
+            'audited_real': len(audited_real_secrets_fixture),
         }
 
-    def test_print_stats_no_failed_conditions(self, capsys):
-        baseline_filename: List[ReportedSecret] = 'will_be_mocked'
-        live_secrets = unaudited_secrets = audited_real_secrets = []
+    def test_print_stats_no_failed_conditions(
+        self,
+        capsys,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+        live_secrets_fixture = unaudited_secrets_fixture = audited_real_secrets_fixture = []
 
         with self.mock_env():
             print_stats(
-                live_secrets,
-                unaudited_secrets,
-                audited_real_secrets,
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
                 baseline_filename,
             )
             secrets = audit.get_secrets_list_from_file(baseline_filename)
 
         captured = capsys.readouterr()
 
-        assert (
-            captured.out == '\n{} potential secrets in {} were reviewed.'
+        assert captured.out == (
+            '\n{} potential secrets in {} were reviewed.'
             ' All checks have passed.\n\n'.format(
                 colorize(len(secrets), AnsiColor.BOLD),
                 colorize(baseline_filename, AnsiColor.BOLD),
             )
         )
 
-    def test_print_stats_failed_conditions(self):
-        assert True
+    def test_print_stats_failed_conditions_one_secret_per_condition(
+        self,
+        capsys,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_secret'] = True
+        modified_baseline['results']['filenameA'][1]['is_secret'] = None
+        modified_baseline['results']['filenameB'][0]['is_verified'] = True
 
-    # TODO
-    def test_print_report_table_no_failed_conditions(self):
-        assert True
+        with self.mock_env(baseline=modified_baseline):
+            print_stats(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+            )
+            secrets = audit.get_secrets_list_from_file(baseline_filename)
 
-    # TODO
-    def test_print_report_table_failed_conditions(self):
-        assert True
+        captured = capsys.readouterr()
 
-    # TODO
-    def test_print_json_report_no_failed_conditions(self):
-        assert True
+        assert captured.out == '\n{} potential secrets in {} were reviewed.'.format(
+            colorize(len(secrets), AnsiColor.BOLD),
+            colorize(baseline_filename, AnsiColor.BOLD),
+        ) + ' Found {} live secret, {} unaudited secret,'.format(
+            colorize(len(live_secrets_fixture), AnsiColor.BOLD),
+            colorize(len(unaudited_secrets_fixture), AnsiColor.BOLD),
+        ) + ' and {} secret that was audited as real.\n\n'.format(
+            colorize(len(audited_real_secrets_fixture), AnsiColor.BOLD),
+        )
 
-    # TODO
-    def test_print_json_report_failed_conditions(self):
-        assert True
+    def test_print_stats_failed_conditions_multiple_secrets_per_condition(
+        self,
+        capsys,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_secret'] = True
+        modified_baseline['results']['filenameA'][1]['is_secret'] = None
+        modified_baseline['results']['filenameA'].append(
+            {
+                'hashed_secret': 'd',
+                'line_number': 150,
+                'type': 'Private key',
+                'is_secret': None,
+            },
+        )
+        modified_baseline['results']['filenameB'][0]['is_verified'] = True
+        modified_baseline['results']['filenameB'].append(
+            {
+                'hashed_secret': 'e',
+                'line_number': 185,
+                'type': 'Hex High Entropy String',
+                'is_verified': True,
+            },
+        )
+        modified_baseline['results']['filenameB'].append(
+            {
+                'hashed_secret': 'f',
+                'line_number': 200,
+                'type': 'Hex High Entropy String',
+                'is_secret': True,
+            },
+        )
 
-    # TODO
-    def test_print_summary_no_failed_conditions(self):
-        assert True
+        live_secrets_fixture.append(
+            {
+                'failed_condition': ReportSecretType.LIVE.value,
+                'filename': baseline_filename,
+                'line': 180,
+                'type': 'Private key',
+            },
+        )
+        unaudited_secrets_fixture.append(
+            {
+                'failed_condition': ReportSecretType.UNAUDITED.value,
+                'filename': baseline_filename,
+                'line': 150,
+                'type': 'Hex High Entropy String',
+            },
+        )
+        audited_real_secrets_fixture.append(
+            {
+                'failed_condition': ReportSecretType.AUDITED_REAL.value,
+                'filename': baseline_filename,
+                'line': 200,
+                'type': 'Hex High Entropy String',
+            },
+        )
 
-    # TODO
-    def test_print_summary_failed_conditions(self):
-        assert True
+        with self.mock_env(baseline=modified_baseline):
+            print_stats(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+            )
+            secrets = audit.get_secrets_list_from_file(baseline_filename)
+
+        captured = capsys.readouterr()
+
+        assert captured.out == '\n{} potential secrets in {} were reviewed.'.format(
+            colorize(len(secrets), AnsiColor.BOLD),
+            colorize(baseline_filename, AnsiColor.BOLD),
+        ) + ' Found {} live secrets, {} unaudited secrets,'.format(
+            colorize(len(live_secrets_fixture), AnsiColor.BOLD),
+            colorize(len(unaudited_secrets_fixture), AnsiColor.BOLD),
+        ) + ' and {} secrets that were audited as real.\n\n'.format(
+            colorize(len(audited_real_secrets_fixture), AnsiColor.BOLD),
+        )
+
+    def test_print_stats_failed_conditions_zero_and_multiple_secrets_per_condition(
+        self,
+        capsys,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_secret'] = False
+        modified_baseline['results']['filenameA'][1]['is_secret'] = False
+        modified_baseline['results']['filenameB'][0]['is_verified'] = True
+
+        unaudited_secrets_fixture = audited_real_secrets_fixture = []
+
+        with self.mock_env(baseline=modified_baseline):
+            print_stats(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+            )
+            secrets = audit.get_secrets_list_from_file(baseline_filename)
+
+        captured = capsys.readouterr()
+
+        assert captured.out == '\n{} potential secrets in {} were reviewed.'.format(
+            colorize(len(secrets), AnsiColor.BOLD),
+            colorize(baseline_filename, AnsiColor.BOLD),
+        ) + ' Found {} live secret, {} unaudited secrets,'.format(
+            colorize(len(live_secrets_fixture), AnsiColor.BOLD),
+            colorize(len(unaudited_secrets_fixture), AnsiColor.BOLD),
+        ) + ' and {} secrets that were audited as real.\n\n'.format(
+            colorize(len(audited_real_secrets_fixture), AnsiColor.BOLD),
+        )
+
+    def test_print_report_table_no_failed_conditions(
+        self,
+        capsys,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+        live_secrets_fixture = unaudited_secrets_fixture = audited_real_secrets_fixture = []
+
+        print_table_report(
+            live_secrets_fixture,
+            unaudited_secrets_fixture,
+            audited_real_secrets_fixture,
+        )
+
+        captured = capsys.readouterr()
+
+        assert captured.out == ''
+
+    def test_print_report_table_failed_conditions(self, capsys):
+        live_secrets_fixture: List[ReportedSecret] = [
+            {
+                'failed_condition': ReportSecretType.LIVE.value,
+                'filename': 'filenameA',
+                'line': 90,
+                'type': 'Test Type',
+            },
+        ]
+        unaudited_secrets_fixture: List[ReportedSecret] = [
+            {
+                'failed_condition': ReportSecretType.UNAUDITED.value,
+                'filename': 'filenameA',
+                'line': 120,
+                'type': 'Test Type',
+            },
+        ]
+        audited_real_secrets_fixture: List[ReportedSecret] = [
+            {
+                'failed_condition': ReportSecretType.AUDITED_REAL.value,
+                'filename': 'filenameB',
+                'line': 60,
+                'type': 'Test Type',
+            },
+        ]
+
+        print_table_report(
+            live_secrets_fixture,
+            unaudited_secrets_fixture,
+            audited_real_secrets_fixture,
+        )
+
+        captured = capsys.readouterr()
+
+        assert (
+            captured.out
+            == """Failed Condition    Secret Type    Filename      Line
+------------------  -------------  ----------  ------
+Live                Test Type      filenameA       90
+Unaudited           Test Type      filenameA      120
+Audited as real     Test Type      filenameB       60\n"""
+        )
+
+    def test_print_json_report_no_failed_conditions(
+        self,
+        capsys,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+        live_secrets_fixture = unaudited_secrets_fixture = audited_real_secrets_fixture = []
+
+        with self.mock_env():
+            print_json_report(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+            )
+
+        captured = capsys.readouterr()
+
+        assert (
+            captured.out
+            == """{
+    "stats": {
+        "reviewed": 3,
+        "live": 0,
+        "unaudited": 0,
+        "audited_real": 0
+    },
+    "secrets": []
+}\n"""
+        )
+
+    def test_print_json_report_failed_conditions(
+        self,
+        capsys,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+        with self.mock_env():
+            print_json_report(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+            )
+
+        captured = capsys.readouterr()
+
+        print('lengths')
+        print('live_secrets_fixture', len(live_secrets_fixture))
+        print('unaudited_secrets_fixture', len(unaudited_secrets_fixture))
+        print('audited_real_secrets_fixture', len(audited_real_secrets_fixture))
+
+        assert (
+            captured.out
+            == """{
+    "stats": {
+        "reviewed": 3,
+        "live": 1,
+        "unaudited": 1,
+        "audited_real": 1
+    },
+    "secrets": [
+        {
+            "failed_condition": "Live",
+            "filename": "will_be_mocked",
+            "line": 90,
+            "type": "Private key"
+        },
+        {
+            "failed_condition": "Unaudited",
+            "filename": "will_be_mocked",
+            "line": 120,
+            "type": "Hex High Entropy String"
+        },
+        {
+            "failed_condition": "Audited as real",
+            "filename": "will_be_mocked",
+            "line": 60,
+            "type": "Hex High Entropy String"
+        }
+    ]
+}\n"""
+        )
+
+    def test_print_summary_no_failed_conditions(self, capsys):
+        unaudited_return_code = live_return_code = audited_real_return_code = 0
+
+        print_summary(
+            unaudited_return_code,
+            live_return_code,
+            audited_real_return_code,
+            baseline_filename,
+        )
+
+        captured = capsys.readouterr()
+
+        assert captured.out == '\n\n{}\n\n{}\n\n{}\n\n'.format(
+            colorize('\t- No unaudited secrets were found', AnsiColor.BOLD),
+            colorize('\t- No live secrets were found', AnsiColor.BOLD),
+            colorize('\t- No secrets that were audited as real were found', AnsiColor.BOLD),
+        )
+
+    def test_print_summary_no_failed_conditions_omit_instructions(self, capsys):
+        unaudited_return_code = live_return_code = audited_real_return_code = 0
+
+        print_summary(
+            unaudited_return_code,
+            live_return_code,
+            audited_real_return_code,
+            baseline_filename,
+            True,
+        )
+
+        captured = capsys.readouterr()
+
+        assert captured.out == '\n\n{}\n\n'.format(
+            colorize('\t- No unaudited secrets were found', AnsiColor.BOLD),
+        ) + '{}\n\n'.format(
+            colorize('\t- No live secrets were found', AnsiColor.BOLD),
+        ) + '{}\n\n'.format(
+            colorize('\t- No secrets that were audited as real were found', AnsiColor.BOLD),
+        )
+
+    def test_print_summary_failed_conditions(self, capsys):
+        unaudited_return_code = live_return_code = audited_real_return_code = 1
+
+        print_summary(
+            unaudited_return_code,
+            live_return_code,
+            audited_real_return_code,
+            baseline_filename,
+        )
+
+        captured = capsys.readouterr()
+
+        print('"{}"'.format(captured.out))
+
+        print(
+            '\n\nFailed conditions:\n{}\n{}\n{}\n{}\n{}\n{}\n{}'.format(
+                colorize('\n\t- Unaudited secrets were found', AnsiColor.BOLD),
+                '\n\t\tRun detect-secrets audit {}, and audit all potential secrets.'.format(
+                    baseline_filename,
+                ),
+                colorize('\n\t- Live secrets were found', AnsiColor.BOLD),
+                '\n\t\tRevoke all live secrets and remove them from the codebase.'
+                ' Afterwards, run detect-secrets scan --update {} to re-scan.'.format(
+                    baseline_filename,
+                ),
+                colorize('\n\t- Audited true secrets were found', AnsiColor.BOLD),
+                '\n\t\tRemove secrets meeting this condition from the codebase,'
+                ' and run detect-secrets scan --update {} to re-scan.'.format(
+                    baseline_filename,
+                ),
+                '\nFor additional help, run detect-secret audit --report --help',
+            ),
+        )
+
+        assert captured.out == '\n\nFailed conditions:\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n\n\n'.format(
+            colorize('\n\t- Unaudited secrets were found', AnsiColor.BOLD),
+            '\n\t\tRun detect-secrets audit {}, and audit all potential secrets.'.format(
+                baseline_filename,
+            ),
+            colorize('\n\t- Live secrets were found', AnsiColor.BOLD),
+            '\n\t\tRevoke all live secrets and remove them from the codebase.'
+            ' Afterwards, run detect-secrets scan --update {} to re-scan.'.format(
+                baseline_filename,
+            ),
+            colorize('\n\t- Audited true secrets were found', AnsiColor.BOLD),
+            '\n\t\tRemove secrets meeting this condition from the codebase,'
+            ' and run detect-secrets scan --update {} to re-scan.'.format(
+                baseline_filename,
+            ),
+            '\nFor additional help, run detect-secret audit --report --help.',
+        )
+
+    def test_print_summary_failed_conditions_omit_instructions(self, capsys):
+        unaudited_return_code = live_return_code = audited_real_return_code = 1
+
+        print_summary(
+            unaudited_return_code,
+            live_return_code,
+            audited_real_return_code,
+            baseline_filename,
+            True,
+        )
+
+        captured = capsys.readouterr()
+
+        assert captured.out == '\n\nFailed conditions:\n{}\n\n{}\n\n{}\n\n\n\n'.format(
+            colorize('\n\t- Unaudited secrets were found', AnsiColor.BOLD),
+            colorize('\n\t- Live secrets were found', AnsiColor.BOLD),
+            colorize('\n\t- Audited true secrets were found', AnsiColor.BOLD),
+        )

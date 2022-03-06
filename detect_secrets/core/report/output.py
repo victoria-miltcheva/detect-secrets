@@ -132,16 +132,14 @@ def print_stats(
             colorize(len(secrets), AnsiColor.BOLD),
             colorize(baseline_filename, AnsiColor.BOLD),
             colorize(len(live_secrets), AnsiColor.BOLD),
-            's' if len(live_secrets) > 0 or len(live_secrets) == 0 else '',
+            's' if len(live_secrets) > 1 or len(live_secrets) == 0 else '',
             colorize(len(unaudited_secrets), AnsiColor.BOLD),
-            's' if len(unaudited_secrets) > 0 or len(unaudited_secrets) == 0 else '',
+            's' if len(unaudited_secrets) > 1 or len(unaudited_secrets) == 0 else '',
             colorize(len(audited_real_secrets), AnsiColor.BOLD),
-            's' if len(audited_real_secrets) > 0 or len(audited_real_secrets) == 0 else '',
-            'were' if len(audited_real_secrets) > 0 or len(audited_real_secrets) == 0 else 'was',
+            's' if len(audited_real_secrets) > 1 or len(audited_real_secrets) == 0 else '',
+            'were' if len(audited_real_secrets) > 1 or len(audited_real_secrets) == 0 else 'was',
         ),
     )
-
-    # print("\n")
 
 
 def print_summary(
