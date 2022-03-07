@@ -54,6 +54,7 @@ class ParserBuilder(object):
 
     def __init__(self):
         self.parser = argparse.ArgumentParser()
+        self.subparser = None
 
         self.add_default_arguments()
 
@@ -76,12 +77,12 @@ class ParserBuilder(object):
         return self
 
     def add_console_use_arguments(self):
-        subparser = self.parser.add_subparsers(
+        self.subparser = self.parser.add_subparsers(
             dest='action',
         )
 
         for action_parser in (ScanOptions, AuditOptions):
-            action_parser(subparser).add_arguments()
+            action_parser(self.subparser).add_arguments()
 
         return self
 

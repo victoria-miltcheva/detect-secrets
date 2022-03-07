@@ -1,4 +1,5 @@
 import sys
+from argparse import ArgumentParser
 
 from detect_secrets.core.report.conditions import fail_on_audited_real
 from detect_secrets.core.report.conditions import fail_on_live
@@ -100,3 +101,51 @@ def execute(args) -> None:
         sys.exit(ReportExitCode.PASS.value)
     else:
         sys.exit(ReportExitCode.FAIL.value)
+
+
+def validate_args(args, auditParser: ArgumentParser) -> None:
+    if not args.report:
+        if args.fail_on_unaudited:
+            auditParser.print_usage()
+            print(
+                'audit: error: argument --fail-on-unaudited:',
+                ' not allowed without argument --report',
+                file=sys.stderr,
+            )
+            sys.exit(ReportExitCode.FAIL.value)
+
+        if args.fail_on_live:
+            auditParser.print_usage()
+            print(
+                'audit: error: argument --fail-on-live:',
+                ' not allowed without argument --report',
+                file=sys.stderr,
+            )
+            sys.exit(ReportExitCode.FAIL.value)
+
+        if args.fail_on_audited_real:
+            auditParser.print_usage()
+            print(
+                'audit: error: argument --fail-on-audited-real:',
+                ' not allowed without argument --report',
+                file=sys.stderr,
+            )
+            sys.exit(ReportExitCode.FAIL.value)
+
+        if args.omit_instructions:
+            auditParser.print_usage()
+            print(
+                'audit: error: argument --omit-instructions:',
+                ' not allowed without argument --report',
+                file=sys.stderr,
+            )
+            sys.exit(ReportExitCode.FAIL.value)
+
+        if args.json:
+            auditParser.print_usage()
+            print(
+                'audit: error: argument --json:',
+                ' not allowed without argument --report',
+                file=sys.stderr,
+            )
+            sys.exit(ReportExitCode.FAIL.value)

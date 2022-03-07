@@ -13,8 +13,8 @@ from detect_secrets.util import build_automaton
 from detect_secrets.util import version_check
 
 
-def parse_args(argv):
-    return ParserBuilder().add_console_use_arguments().parse_args(argv)
+def parse_args(argv, parserBuilder):
+    return parserBuilder.add_console_use_arguments().parse_args(argv)
 
 
 def main(argv=None):
@@ -24,7 +24,8 @@ def main(argv=None):
     if len(sys.argv) == 1:  # pragma: no cover
         sys.argv.append('-h')
 
-    args = parse_args(argv)
+    parserBuilder = ParserBuilder()
+    args = parse_args(argv, parserBuilder)
     if args.verbose:  # pragma: no cover
         log.set_debug_level(args.verbose)
 
@@ -72,12 +73,14 @@ def main(argv=None):
                 )
 
     elif args.action == 'audit':
-        if not args.diff and not args.display_results and not args.report:
-            audit.audit_baseline(args.filename[0])
-            return 0
-
         if args.report:
             report.execute(args)
+
+        report.validate_args(args, parserBuilder.subparser.choices['audit'])
+
+        if not args.diff and not args.display_results:
+            audit.audit_baseline(args.filename[0])
+            return 0
 
         if args.display_results:
             audit.print_audit_results(args.filename[0])
