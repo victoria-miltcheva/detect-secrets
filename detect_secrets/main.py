@@ -26,6 +26,7 @@ def main(argv=None):
 
     parserBuilder = ParserBuilder()
     args = parse_args(argv, parserBuilder)
+
     if args.verbose:  # pragma: no cover
         log.set_debug_level(args.verbose)
 

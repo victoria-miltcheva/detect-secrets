@@ -105,53 +105,35 @@ def execute(args) -> None:
 
 def validate_args(args, auditParser: ArgumentParser) -> None:
     """
-    argsparse does not have an in-built option for dealing with inclusive arguments,
+    argsparse does not have a built-in option for mutually inclusive arguments,
     so we have to do the additional report argument validation ourselves.
     Specifically, there is no way to use argsparse to allow the report-specific.
     arguments to only be used when --report is included.
     """
-    if not args.report:
-        if args.fail_on_unaudited:
-            auditParser.print_usage()
-            print(
-                'audit: error: argument --fail-on-unaudited:',
-                ' not allowed without argument --report',
-                file=sys.stderr,
-            )
-            sys.exit(ReportExitCode.FAIL.value)
+    if args.report:
+        return
 
-        if args.fail_on_live:
-            auditParser.print_usage()
-            print(
-                'audit: error: argument --fail-on-live:',
-                ' not allowed without argument --report',
-                file=sys.stderr,
-            )
-            sys.exit(ReportExitCode.FAIL.value)
+    if args.fail_on_unaudited:
+        auditParser.error(
+            'argument --fail-on-unaudited: not allowed without argument --report',
+        )
 
-        if args.fail_on_audited_real:
-            auditParser.print_usage()
-            print(
-                'audit: error: argument --fail-on-audited-real:',
-                ' not allowed without argument --report',
-                file=sys.stderr,
-            )
-            sys.exit(ReportExitCode.FAIL.value)
+    if args.fail_on_live:
+        auditParser.error(
+            'argument --fail-on-live: not allowed without argument --report',
+        )
 
-        if args.omit_instructions:
-            auditParser.print_usage()
-            print(
-                'audit: error: argument --omit-instructions:',
-                ' not allowed without argument --report',
-                file=sys.stderr,
-            )
-            sys.exit(ReportExitCode.FAIL.value)
+    if args.fail_on_audited_real:
+        auditParser.error(
+            'argument --fail-on-audited-real: not allowed without argument --report',
+        )
 
-        if args.json:
-            auditParser.print_usage()
-            print(
-                'audit: error: argument --json:',
-                ' not allowed without argument --report',
-                file=sys.stderr,
-            )
-            sys.exit(ReportExitCode.FAIL.value)
+    if args.omit_instructions:
+        auditParser.error(
+            'argument --omit-instructions: not allowed without argument --report',
+        )
+
+    if args.json:
+        auditParser.error(
+            'argument --json: not allowed without argument --report',
+        )

@@ -51,7 +51,6 @@ def add_output_verified_false_flag(parser):
 
 
 class ParserBuilder(object):
-
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         self.subparser = None
@@ -59,16 +58,15 @@ class ParserBuilder(object):
         self.add_default_arguments()
 
     def add_default_arguments(self):
-        self._add_verbosity_argument()\
-            ._add_version_argument()
+        self._add_verbosity_argument()._add_version_argument()
 
     def add_pre_commit_arguments(self):
         self._add_filenames_argument()\
             ._add_set_baseline_argument()\
             ._add_exclude_lines_argument()\
-            ._add_word_list_argument()\
-            ._add_use_all_plugins_argument()\
-            ._add_no_verify_flag() \
+            ._add_word_list_argument().\
+            _add_use_all_plugins_argument()\
+            ._add_no_verify_flag()\
             ._add_output_verified_false_flag()\
             ._add_fail_on_unaudited_flag()
 
@@ -157,9 +155,8 @@ class ParserBuilder(object):
 
 
 class ScanOptions:
-
     def __init__(self, subparser):
-        self.parser = subparser.add_parser(
+        self.parser: argparse.ArgumentParser = subparser.add_parser(
             'scan',
         )
 
@@ -230,10 +227,7 @@ class ScanOptions:
             '--string',
             nargs='?',
             const=True,
-            help=(
-                'Scans an individual string, and displays configured '
-                'plugins\' verdict.'
-            ),
+            help=('Scans an individual string, and displays configured ' 'plugins\' verdict.'),
         )
         return self
 
@@ -251,10 +245,18 @@ class ScanOptions:
 
 
 class AuditOptions:
-
     def __init__(self, subparser):
-        self.parser = subparser.add_parser(
+        # Override the default audit parser usage message since the arguments within
+        # the _add_report_module group should only be permitted when the --report
+        # arg is included. argparse does not have built-in mutual inclusion functionality,
+        # so we had to add our own custom validation function, validate_args,
+        # in detect-secrets/core/report/report.py.
+        # docs: https://docs.python.org/3/library/argparse.html#usage
+        self.parser: argparse.ArgumentParser = subparser.add_parser(
             'audit',
+            usage='%(prog)s [-h] [--diff |  --display-results | --report [--fail-on-unaudited]'
+            """ [--fail-on-live] [--fail-on-audited-real] [--json | --omit-instructions]]
+                     filename [filename ...]""",
         )
 
     def _add_report_module(self):
@@ -348,9 +350,7 @@ class AuditOptions:
         action_parser.add_argument(
             '--report',
             action='store_true',
-            help=(
-                'Displays a report with the secrets detected'
-            ),
+            help=('Displays a report with the secrets detected'),
         )
 
         self._add_report_module()
@@ -364,13 +364,10 @@ class PluginDescriptor(
         [
             # Classname of plugin; used for initialization
             'classname',
-
             # Flag to disable plugin. e.g. `--no-hex-string-scan`
             'flag_text',
-
             # Description for disable flag.
             'help_text',
-
             # type: list
             # Allows the bundling of all related command line provided
             # arguments together, under one plugin name.
@@ -383,19 +380,13 @@ class PluginDescriptor(
             # Therefore, only populate the default value upon consolidation
             # (rather than relying on argparse default).
             'related_args',
-
             # The name of the plugin file
             'filename',
         ],
     ),
 ):
-
     def __new__(cls, related_args=None, **kwargs):
-        return super(PluginDescriptor, cls).__new__(
-            cls,
-            related_args=related_args or [],
-            **kwargs
-        )
+        return super(PluginDescriptor, cls).__new__(cls, related_args=related_args or [], **kwargs)
 
     @classmethod
     def from_plugin_class(cls, plugin, name):
@@ -407,10 +398,12 @@ class PluginDescriptor(
         if plugin.default_options:
             related_args = []
             for arg_name, value in plugin.default_options.items():
-                related_args.append((
-                    '--{}'.format(arg_name.replace('_', '-')),
-                    value,
-                ))
+                related_args.append(
+                    (
+                        '--{}'.format(arg_name.replace('_', '-')),
+                        value,
+                    ),
+                )
 
         return cls(
             classname=name,
@@ -665,9 +658,11 @@ class PluginOptions:
                     related_args[arg_name] = default_value
                     is_using_default_value[arg_name] = True
 
-            active_plugins.update({
-                plugin.classname: related_args,
-            })
+            active_plugins.update(
+                {
+                    plugin.classname: related_args,
+                },
+            )
 
         for plugin in PluginOptions.all_plugins:
             if getattr(plugin, 'classname') in list(active_plugins):
