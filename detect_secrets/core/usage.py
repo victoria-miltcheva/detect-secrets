@@ -301,23 +301,18 @@ class AuditOptions:
                 ' code and re-scan so that they will be removed from your baseline.'
             ),
         )
+        report_parser_exclusive = report_parser.add_mutually_exclusive_group()
 
-        report_parser.add_argument(
+        report_parser_exclusive.add_argument(
             '--json',
             action='store_true',
-            help=(
-                'Providing this flag will cause the report'
-                ' output to be formatted as JSON.'
-            ),
+            help=('Providing this flag will cause the report output to be formatted as JSON.'),
         )
 
-        report_parser.add_argument(
+        report_parser_exclusive.add_argument(
             '--omit-instructions',
             action='store_true',
-            help=(
-                'Providing this flag will omit instructions from'
-                ' the report.'
-            ),
+            help=('Providing this flag will omit instructions from the report.'),
         )
 
     def add_arguments(self):
