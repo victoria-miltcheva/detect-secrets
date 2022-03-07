@@ -257,15 +257,13 @@ class AuditOptions:
         )
 
     def _add_report_module(self):
-        parser = self.parser.add_argument_group(
+        report_parser = self.parser.add_argument_group(
             title='reporting',
             description=(
                 'Display a report with all the findings and the made decisions. '
                 'To be used with the report mode (--report).'
             ),
         )
-
-        report_parser = parser.add_argument_group()
 
         report_parser.add_argument(
             '--fail-on-unaudited',
