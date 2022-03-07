@@ -104,6 +104,12 @@ def execute(args) -> None:
 
 
 def validate_args(args, auditParser: ArgumentParser) -> None:
+    """
+    argsparse does not have an in-built option for dealing with inclusive arguments,
+    so we have to do the additional report argument validation ourselves.
+    Specifically, there is no way to use argsparse to allow the report-specific.
+    arguments to only be used when --report is included.
+    """
     if not args.report:
         if args.fail_on_unaudited:
             auditParser.print_usage()
