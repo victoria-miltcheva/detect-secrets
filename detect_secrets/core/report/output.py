@@ -155,7 +155,6 @@ def print_summary(
 
     Instructions can optionally be omitted.
     """
-    print('\n')
 
     if unaudited_return_code == live_return_code == audited_real_return_code == 0:
         print(
@@ -175,7 +174,7 @@ def print_summary(
         )
         return
 
-    print('Failed conditions:')
+    print('\nFailed conditions:')
 
     if unaudited_return_code != 0:
         print(
@@ -216,6 +215,4 @@ def print_summary(
             )
 
     if omit_instructions is False:
-        print('\nFor additional help, run detect-secret audit --report --help.')
-
-    print('\n')
+        print('\nFor additional help, run detect-secret audit --report --help.\n')

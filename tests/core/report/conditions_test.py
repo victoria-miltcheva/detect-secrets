@@ -177,3 +177,5 @@ class TestReportConditions:
         assert return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
         assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
+
+# TODO: test same secret failing on multiple conditions
