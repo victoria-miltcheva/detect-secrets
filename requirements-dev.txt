@@ -18,5 +18,5 @@ ibm_db
 boxsdk[jwt]
 pyahocorasick
 safety
-numpy
+numpy>=1.22
 tabulate
