@@ -263,7 +263,7 @@ class AuditOptions:
         report_parser = self.parser.add_argument_group(
             title='reporting',
             description=(
-                'Display a report with all the findings and the made decisions. '
+                'Displays a report with the secrets detected which fail certain conditions. '
                 'To be used with the report mode (--report).'
             ),
         )
@@ -275,7 +275,7 @@ class AuditOptions:
                 'This condition is met when there are potential secrets'
                 ' in the baseline file which have not been audited yet.'
                 ' To pass this check, run detect-secrets audit .secrets.baseline to'
-                ' audit any unmarked secrets.'
+                ' audit any unaudited secrets.'
             ),
         )
 
