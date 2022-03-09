@@ -530,5 +530,3 @@ Audited as real     Test Type      filenameB       60\n"""
             colorize('\n\t- Live secrets were found', AnsiColor.BOLD),
             colorize('\n\t- Audited true secrets were found', AnsiColor.BOLD),
         )
-
-# TODO: test same secret failing on multiple conditions

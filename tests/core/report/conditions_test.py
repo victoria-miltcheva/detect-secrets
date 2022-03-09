@@ -178,4 +178,66 @@ class TestReportConditions:
         assert len(secrets) == len(expected_secrets)
         assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
 
-# TODO: test same secret failing on multiple conditions
+    def test_fail_live_and_audited_real_conditions_with_same_secret(self):
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_secret'] = True
+        modified_baseline['results']['filenameA'][0]['is_verified'] = True
+
+        expected_secrets = [
+            {
+                'failed_condition': ReportSecretType.LIVE.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][0]['line_number'],
+                'type': 'Test Type',
+            },
+            {
+                'failed_condition': ReportSecretType.AUDITED_REAL.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][0]['line_number'],
+                'type': 'Test Type',
+            },
+
+        ]
+
+        with self.mock_env(baseline=modified_baseline):
+            (live_return_code, live_secrets) = fail_on_live(baseline_filename)
+            (audited_real_return_code, audited_real_secrets) =\
+                fail_on_audited_real(baseline_filename)
+
+        secrets = numpy.concatenate((live_secrets, audited_real_secrets)).tolist()
+
+        assert audited_real_return_code == live_return_code == ReportExitCode.FAIL.value
+        assert len(secrets) == len(expected_secrets)
+        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
+
+    def test_fail_live_and_unaudited_conditions_with_same_secret(self):
+        modified_baseline = deepcopy(self.baseline)
+        modified_baseline['results']['filenameA'][0]['is_secret'] = None
+        modified_baseline['results']['filenameA'][0]['is_verified'] = True
+        modified_baseline['results']['filenameA'][1]['is_secret'] = False
+        modified_baseline['results']['filenameB'][0]['is_secret'] = False
+
+        expected_secrets = [
+            {
+                'failed_condition': ReportSecretType.LIVE.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][0]['line_number'],
+                'type': 'Test Type',
+            },
+            {
+                'failed_condition': ReportSecretType.UNAUDITED.value,
+                'filename': 'filenameA',
+                'line': modified_baseline['results']['filenameA'][0]['line_number'],
+                'type': 'Test Type',
+            },
+        ]
+
+        with self.mock_env(baseline=modified_baseline):
+            (live_return_code, live_secrets) = fail_on_live(baseline_filename)
+            (unaudited_return_code, unaudited_secrets) = fail_on_unaudited(baseline_filename)
+
+        secrets = numpy.concatenate((live_secrets, unaudited_secrets)).tolist()
+
+        assert unaudited_return_code == live_return_code == ReportExitCode.FAIL.value
+        assert len(secrets) == len(expected_secrets)
+        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
