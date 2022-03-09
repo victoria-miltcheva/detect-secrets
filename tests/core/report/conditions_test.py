@@ -2,7 +2,6 @@ from contextlib import contextmanager
 from copy import deepcopy
 
 import mock
-import numpy
 import pytest
 
 from detect_secrets.core import audit
@@ -84,7 +83,7 @@ class TestReportConditions:
 
         assert return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
-        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
+        assert [i for i in secrets if i not in expected_secrets] == []
 
     def test_live_pass_case(self):
         modified_baseline = deepcopy(self.baseline)
@@ -130,7 +129,7 @@ class TestReportConditions:
 
         assert return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
-        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
+        assert [i for i in secrets if i not in expected_secrets] == []
 
     def test_audited_real_pass_case(self):
         modified_baseline = deepcopy(self.baseline)
@@ -176,7 +175,7 @@ class TestReportConditions:
 
         assert return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
-        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
+        assert [i for i in secrets if i not in expected_secrets] == []
 
     def test_fail_live_and_audited_real_conditions_with_same_secret(self):
         modified_baseline = deepcopy(self.baseline)
@@ -204,11 +203,11 @@ class TestReportConditions:
             (audited_real_return_code, audited_real_secrets) =\
                 fail_on_audited_real(baseline_filename)
 
-        secrets = numpy.concatenate((live_secrets, audited_real_secrets)).tolist()
+        secrets = live_secrets + audited_real_secrets
 
         assert audited_real_return_code == live_return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
-        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
+        assert [i for i in secrets if i not in expected_secrets] == []
 
     def test_fail_live_and_unaudited_conditions_with_same_secret(self):
         modified_baseline = deepcopy(self.baseline)
@@ -236,8 +235,8 @@ class TestReportConditions:
             (live_return_code, live_secrets) = fail_on_live(baseline_filename)
             (unaudited_return_code, unaudited_secrets) = fail_on_unaudited(baseline_filename)
 
-        secrets = numpy.concatenate((live_secrets, unaudited_secrets)).tolist()
+        secrets = live_secrets + unaudited_secrets
 
         assert unaudited_return_code == live_return_code == ReportExitCode.FAIL.value
         assert len(secrets) == len(expected_secrets)
-        assert (numpy.array(expected_secrets) == numpy.array(secrets)).all()
+        assert [i for i in secrets if i not in expected_secrets] == []

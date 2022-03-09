@@ -1,7 +1,6 @@
 import json
 from typing import List
 
-import numpy
 import tabulate
 
 from detect_secrets.core import audit
@@ -50,13 +49,7 @@ def print_json_report(
         baseline_filename,
     )
 
-    secrets = numpy.concatenate(
-        (
-            live_secrets,
-            unaudited_secrets,
-            audited_real_secrets,
-        ),
-    ).tolist()
+    secrets = live_secrets + unaudited_secrets + audited_real_secrets
 
     print(json.dumps(ReportJson({'stats': stats, 'secrets': secrets}), indent=4))
 
@@ -73,7 +66,7 @@ def print_table_report(
     If all lists are empty, nothing is printed and the
     function is exited.
     """
-    secrets = numpy.concatenate((live_secrets, non_audited_secrets, audited_true_secrets)).tolist()
+    secrets = live_secrets + non_audited_secrets + audited_true_secrets
 
     if len(secrets) == 0:
         return
@@ -111,9 +104,7 @@ def print_stats(
     """
     secrets = audit.get_secrets_list_from_file(baseline_filename)
 
-    secrets_failing_conditions = numpy.concatenate(
-        (live_secrets, unaudited_secrets, audited_real_secrets),
-    ).tolist()
+    secrets_failing_conditions = live_secrets + unaudited_secrets + audited_real_secrets
 
     if len(secrets_failing_conditions) == 0:
         print(
