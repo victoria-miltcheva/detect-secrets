@@ -5,7 +5,7 @@ from detect_secrets.core import audit
 from detect_secrets.core import baseline
 from detect_secrets.core.common import write_baseline_to_file
 from detect_secrets.core.log import log
-from detect_secrets.core.report import report
+import detect_secrets.core.report.report as report 
 from detect_secrets.core.secrets_collection import SecretsCollection
 from detect_secrets.core.usage import ParserBuilder
 from detect_secrets.plugins.common import initialize
