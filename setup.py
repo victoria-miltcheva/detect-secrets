@@ -21,12 +21,13 @@ setup(
         '<https://github.com/IBM/detect-secrets>`_!'
     ),
     url='hhttps://github.com/IBM/detect-secrets',
-    keywords=['secret-management', 'pre-commit', 'security', 'entropy-checks', 'tabulate'],
+    keywords=['secret-management', 'pre-commit', 'security', 'entropy-checks'],
     install_requires=[
         'pyyaml',
         'requests',
         'boxsdk[jwt]',
         'packaging',
+        'tabulate',
     ],
     extras_require={
         'word_list': [
