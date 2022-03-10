@@ -203,4 +203,4 @@ def print_summary(
             )
 
     if omit_instructions is False:
-        print('\nFor additional help, run detect-secrets audit --report --help.\n')
+        print('\nFor additional help, run detect-secrets audit --help.\n')
