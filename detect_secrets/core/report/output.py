@@ -6,23 +6,20 @@ import tabulate
 from detect_secrets.core import audit
 from detect_secrets.core.color import AnsiColor
 from detect_secrets.core.color import colorize
-from detect_secrets.core.report.constants import ReportedSecret
-from detect_secrets.core.report.constants import ReportJson
-from detect_secrets.core.report.constants import ReportStats
 
 
 def get_stats(
-    live_secrets: List[ReportedSecret],
-    unaudited_secrets: List[ReportedSecret],
-    audited_real_secrets: List[ReportedSecret],
+    live_secrets: List,
+    unaudited_secrets: List,
+    audited_real_secrets: List,
     baseline_filename: str,
-) -> ReportStats:
+):
     """
     Returns a dictionary containing aggregate stats, to be used in a report.
     """
     secrets = audit.get_secrets_list_from_file(baseline_filename)
 
-    stats: ReportStats = {
+    stats = {
         'reviewed': len(secrets),
         'live': len(live_secrets),
         'unaudited': len(unaudited_secrets),
@@ -33,9 +30,9 @@ def get_stats(
 
 
 def print_json_report(
-    live_secrets: List[ReportedSecret],
-    unaudited_secrets: List[ReportedSecret],
-    audited_real_secrets: List[ReportedSecret],
+    live_secrets: List,
+    unaudited_secrets: List,
+    audited_real_secrets: List,
     baseline_filename: str,
 ) -> None:
     """
@@ -51,13 +48,13 @@ def print_json_report(
 
     secrets = live_secrets + unaudited_secrets + audited_real_secrets
 
-    print(json.dumps(ReportJson({'stats': stats, 'secrets': secrets}), indent=4))
+    print(json.dumps({'stats': stats, 'secrets': secrets}, indent=4))
 
 
 def print_table_report(
-    live_secrets: List[ReportedSecret],
-    non_audited_secrets: List[ReportedSecret],
-    audited_true_secrets: List[ReportedSecret],
+    live_secrets: List,
+    unaudited_secrets: List,
+    audited_real_secrets: List,
 ) -> None:
     """
     Prints a report table summarizing information about secrets
@@ -66,7 +63,7 @@ def print_table_report(
     If all lists are empty, nothing is printed and the
     function is exited.
     """
-    secrets = live_secrets + non_audited_secrets + audited_true_secrets
+    secrets = live_secrets + unaudited_secrets + audited_real_secrets
 
     if len(secrets) == 0:
         return
@@ -93,9 +90,9 @@ def print_table_report(
 
 
 def print_stats(
-    live_secrets: List[ReportedSecret],
-    unaudited_secrets: List[ReportedSecret],
-    audited_real_secrets: List[ReportedSecret],
+    live_secrets: List,
+    unaudited_secrets: List,
+    audited_real_secrets: List,
     baseline_filename: str,
 ) -> None:
     """

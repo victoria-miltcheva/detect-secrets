@@ -8,7 +8,6 @@ import pytest
 from detect_secrets.core import audit
 from detect_secrets.core.color import AnsiColor
 from detect_secrets.core.color import colorize
-from detect_secrets.core.report.constants import ReportedSecret
 from detect_secrets.core.report.constants import ReportSecretType
 from detect_secrets.core.report.output import get_stats
 from detect_secrets.core.report.output import print_json_report
@@ -21,7 +20,7 @@ from testing.baseline import baseline_filename
 
 @pytest.fixture
 def live_secrets_fixture():
-    live_secrets: List[ReportedSecret] = [
+    live_secrets = [
         {
             'failed_condition': ReportSecretType.LIVE.value,
             'filename': baseline_filename,
@@ -34,7 +33,7 @@ def live_secrets_fixture():
 
 @pytest.fixture
 def unaudited_secrets_fixture():
-    unaudited_secrets: List[ReportedSecret] = [
+    unaudited_secrets = [
         {
             'failed_condition': ReportSecretType.UNAUDITED.value,
             'filename': baseline_filename,
@@ -47,7 +46,7 @@ def unaudited_secrets_fixture():
 
 @pytest.fixture
 def audited_real_secrets_fixture():
-    audited_real_secrets: List[ReportedSecret] = [
+    audited_real_secrets = [
         {
             'failed_condition': ReportSecretType.AUDITED_REAL.value,
             'filename': baseline_filename,
@@ -320,7 +319,7 @@ class TestReportOutput:
         assert captured.out == ''
 
     def test_print_report_table_failed_conditions(self, capsys):
-        live_secrets_fixture: List[ReportedSecret] = [
+        live_secrets_fixture = [
             {
                 'failed_condition': ReportSecretType.LIVE.value,
                 'filename': 'filenameA',
@@ -328,7 +327,7 @@ class TestReportOutput:
                 'type': 'Test Type',
             },
         ]
-        unaudited_secrets_fixture: List[ReportedSecret] = [
+        unaudited_secrets_fixture = [
             {
                 'failed_condition': ReportSecretType.UNAUDITED.value,
                 'filename': 'filenameA',
@@ -336,7 +335,7 @@ class TestReportOutput:
                 'type': 'Test Type',
             },
         ]
-        audited_real_secrets_fixture: List[ReportedSecret] = [
+        audited_real_secrets_fixture = [
             {
                 'failed_condition': ReportSecretType.AUDITED_REAL.value,
                 'filename': 'filenameB',

@@ -5,7 +5,6 @@ import mock
 import pytest
 
 from detect_secrets.core import audit as audit_module
-from detect_secrets.core.report.constants import ReportCheckResult
 from detect_secrets.core.report.constants import ReportExitCode
 from detect_secrets.main import main
 from testing.baseline import baseline
@@ -47,7 +46,7 @@ def mock_print_json_report():
 def mock_fail_on_unaudited():
     with mock.patch(
         'detect_secrets.core.report.report.fail_on_unaudited',
-        return_value=ReportCheckResult(ReportExitCode.PASS.value, []),
+        return_value=(ReportExitCode.PASS.value, []),
     ) as m:
         yield m
 
@@ -56,7 +55,7 @@ def mock_fail_on_unaudited():
 def mock_fail_on_live():
     with mock.patch(
         'detect_secrets.core.report.report.fail_on_live',
-        return_value=ReportCheckResult(ReportExitCode.PASS.value, []),
+        return_value=(ReportExitCode.PASS.value, []),
     ) as m:
         yield m
 
@@ -65,7 +64,7 @@ def mock_fail_on_live():
 def mock_fail_on_audited_real():
     with mock.patch(
         'detect_secrets.core.report.report.fail_on_audited_real',
-        return_value=ReportCheckResult(ReportExitCode.PASS.value, []),
+        return_value=(ReportExitCode.PASS.value, []),
     ) as m:
         yield m
 
