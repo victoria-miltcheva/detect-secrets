@@ -93,6 +93,9 @@ def execute(args) -> None:
             live_return_code,
             audited_real_return_code,
             args.filename[0],
+            True if default_conditions else args.fail_on_live,
+            True if default_conditions else args.fail_on_unaudited,
+            True if default_conditions else args.fail_on_audited_real,
             True if args.omit_instructions else False,
         )
 
