@@ -88,6 +88,9 @@ class TestReportOutput:
                 unaudited_secrets_fixture,
                 audited_real_secrets_fixture,
                 baseline_filename,
+                True,
+                True,
+                True
             )
             secrets = audit.get_secrets_list_from_file(baseline_filename)
 
@@ -98,7 +101,7 @@ class TestReportOutput:
             'audited_real': len(audited_real_secrets_fixture),
         }
 
-    def test_get_stats_failed_conditions(
+    def test_get_stats_all_failed_conditions(
         self,
         live_secrets_fixture,
         unaudited_secrets_fixture,
@@ -111,6 +114,9 @@ class TestReportOutput:
                 unaudited_secrets_fixture,
                 audited_real_secrets_fixture,
                 baseline_filename,
+                True,
+                True,
+                True
             )
             secrets = audit.get_secrets_list_from_file(baseline_filename)
 
@@ -118,6 +124,78 @@ class TestReportOutput:
             'reviewed': len(secrets),
             'live': len(live_secrets_fixture),
             'unaudited': len(unaudited_secrets_fixture),
+            'audited_real': len(audited_real_secrets_fixture),
+        }
+
+    def test_get_stats_live_only(
+        self,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+
+        with self.mock_env():
+            stats = get_stats(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+                True,
+                False,
+                False
+            )
+            secrets = audit.get_secrets_list_from_file(baseline_filename)
+
+        assert stats == {
+            'reviewed': len(secrets),
+            'live': len(live_secrets_fixture),
+        }
+
+    def test_get_stats_unaudited_only(
+        self,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+
+        with self.mock_env():
+            stats = get_stats(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+                False,
+                True,
+                False
+            )
+            secrets = audit.get_secrets_list_from_file(baseline_filename)
+
+        assert stats == {
+            'reviewed': len(secrets),
+            'unaudited': len(unaudited_secrets_fixture),
+        }
+
+    def test_get_stats_audited_real_only(
+        self,
+        live_secrets_fixture,
+        unaudited_secrets_fixture,
+        audited_real_secrets_fixture,
+    ):
+
+        with self.mock_env():
+            stats = get_stats(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+                False,
+                False,
+                True
+            )
+            secrets = audit.get_secrets_list_from_file(baseline_filename)
+
+        assert stats == {
+            'reviewed': len(secrets),
             'audited_real': len(audited_real_secrets_fixture),
         }
 
@@ -136,6 +214,9 @@ class TestReportOutput:
                 unaudited_secrets_fixture,
                 audited_real_secrets_fixture,
                 baseline_filename,
+                True,
+                True,
+                True
             )
             secrets = audit.get_secrets_list_from_file(baseline_filename)
 
@@ -167,6 +248,9 @@ class TestReportOutput:
                 unaudited_secrets_fixture,
                 audited_real_secrets_fixture,
                 baseline_filename,
+                True,
+                True,
+                True
             )
             secrets = audit.get_secrets_list_from_file(baseline_filename)
 
@@ -249,6 +333,9 @@ class TestReportOutput:
                 unaudited_secrets_fixture,
                 audited_real_secrets_fixture,
                 baseline_filename,
+                True,
+                True,
+                True
             )
             secrets = audit.get_secrets_list_from_file(baseline_filename)
 
@@ -284,6 +371,9 @@ class TestReportOutput:
                 unaudited_secrets_fixture,
                 audited_real_secrets_fixture,
                 baseline_filename,
+                True,
+                True,
+                True
             )
             secrets = audit.get_secrets_list_from_file(baseline_filename)
 
@@ -376,6 +466,9 @@ Audited as real     Test Type      filenameB       60\n"""
                 unaudited_secrets_fixture,
                 audited_real_secrets_fixture,
                 baseline_filename,
+                True,
+                True,
+                True
             )
 
         captured = capsys.readouterr()
@@ -406,6 +499,9 @@ Audited as real     Test Type      filenameB       60\n"""
                 unaudited_secrets_fixture,
                 audited_real_secrets_fixture,
                 baseline_filename,
+                True,
+                True,
+                True
             )
 
         captured = capsys.readouterr()
@@ -432,6 +528,102 @@ Audited as real     Test Type      filenameB       60\n"""
             "line": 120,
             "type": "Hex High Entropy String"
         },
+        {
+            "failed_condition": "Audited as real",
+            "filename": "will_be_mocked",
+            "line": 60,
+            "type": "Hex High Entropy String"
+        }
+    ]
+}\n"""
+        )
+
+    def test_print_json_report_only_live(self, capsys, live_secrets_fixture, unaudited_secrets_fixture, audited_real_secrets_fixture):
+        with self.mock_env():
+            print_json_report(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+                True,
+                False,
+                False
+            )
+
+        captured = capsys.readouterr()
+
+        assert (
+            captured.out
+            == """{
+    "stats": {
+        "reviewed": 3,
+        "live": 1
+    },
+    "secrets": [
+        {
+            "failed_condition": "Live",
+            "filename": "will_be_mocked",
+            "line": 90,
+            "type": "Private key"
+        }
+    ]
+}\n"""
+        )
+
+    def test_print_json_report_only_unaudited(self, capsys, live_secrets_fixture, unaudited_secrets_fixture, audited_real_secrets_fixture):
+        with self.mock_env():
+            print_json_report(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+                False,
+                True,
+                False
+            )
+
+        captured = capsys.readouterr()
+
+        assert (
+            captured.out
+            == """{
+    "stats": {
+        "reviewed": 3,
+        "unaudited": 1
+    },
+    "secrets": [
+        {
+            "failed_condition": "Unaudited",
+            "filename": "will_be_mocked",
+            "line": 120,
+            "type": "Hex High Entropy String"
+        }
+    ]
+}\n"""
+        )
+
+    def test_print_json_report_only_audited_true(self, capsys, live_secrets_fixture, unaudited_secrets_fixture, audited_real_secrets_fixture):
+        with self.mock_env():
+            print_json_report(
+                live_secrets_fixture,
+                unaudited_secrets_fixture,
+                audited_real_secrets_fixture,
+                baseline_filename,
+                False,
+                False,
+                True
+            )
+
+        captured = capsys.readouterr()
+
+        assert (
+            captured.out
+            == """{
+    "stats": {
+        "reviewed": 3,
+        "audited_real": 1
+    },
+    "secrets": [
         {
             "failed_condition": "Audited as real",
             "filename": "will_be_mocked",
@@ -508,7 +700,7 @@ Audited as real     Test Type      filenameB       60\n"""
             ' and run detect-secrets scan --update {} to re-scan.'.format(
                 baseline_filename,
             ),
-            '\nFor additional help, run detect-secret audit --report --help.\n',
+            '\nFor additional help, run detect-secrets audit --help.\n',
         )
 
     def test_print_summary_failed_conditions_omit_instructions(self, capsys):

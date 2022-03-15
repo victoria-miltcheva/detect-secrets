@@ -69,6 +69,9 @@ def execute(args) -> None:
             unaudited_secrets,
             audited_real_secrets,
             args.filename[0],
+            True if default_conditions else args.fail_on_live,
+            True if default_conditions else args.fail_on_unaudited,
+            True if default_conditions else args.fail_on_audited_real
         ),
     else:
         print_stats(
@@ -76,6 +79,9 @@ def execute(args) -> None:
             unaudited_secrets,
             audited_real_secrets,
             args.filename[0],
+            True if default_conditions else args.fail_on_live,
+            True if default_conditions else args.fail_on_unaudited,
+            True if default_conditions else args.fail_on_audited_real
         )
         print_table_report(
             live_secrets,
