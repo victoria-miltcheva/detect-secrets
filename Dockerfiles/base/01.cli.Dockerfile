@@ -1,4 +1,4 @@
-FROM git-defenders/python
+FROM git-defenders/base/python
 
 # Auto adjust line ending. Support running scan on Windows platform
 RUN git config --system core.autocrlf true
