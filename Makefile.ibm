@@ -83,14 +83,26 @@ docker-publish-images:
 		done                                                                              \
 	done
 
+# if image_name == detect-secrets, loop through folder
+# else do main logic
 docker-publish-image:
 	folder_name=$$(echo -e $$(basename $$(dirname $(IMAGE_NAME)))) ; \
+	echo "folder name: " $${folder_name} ;\
 	dockerfile_name=$$(echo -e $$(basename $(IMAGE_NAME)));           \
-	if [ $${dockerfile_name} == "detect-secrets"  ]; then \
+	echo "dockerfile name: " $${dockerfile_name} ;\
+	if [ $${folder_name} == "detect-secrets"  ]; then \
 		if [ "$(DOCKER_REGISTRY)" = "$(DOCKER_REGISTRY_DOCKERHUB)" ]; then    \
-			docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKERHUB_DOMAIN)/$${folder_name}:$${dockerfile_name};                 \
-		else                                                                                                                \
-			docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${folder_name}:$${dockerfile_name}; \
+			if [ $${dockerfile_name} == "detect-secrets" ]; then \
+				docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKERHUB_DOMAIN)/$${folder_name}:latest;                 \
+			else \
+				docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKERHUB_DOMAIN)/$${folder_name}:$${dockerfile_name};                 \
+			fi \
+		else    \
+			if [ $${dockerfile_name} == "detect-secrets" ]; then \
+				docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${folder_name}:latest; \
+			else \
+				docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${folder_name}$${dockerfile_name}; \
+			fi \
 		fi	\
 	else	\
 		if [ "$(DOCKER_REGISTRY)" = "$(DOCKER_REGISTRY_DOCKERHUB)" ]; then                                                  \
