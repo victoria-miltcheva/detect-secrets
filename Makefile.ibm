@@ -19,7 +19,7 @@ DOCKER_REGISTRY_DOCKERHUB := registry.hub.docker.com
 DOCKER_USER_DOCKERHUB := $(DOCKER_HUB_USERNAME)
 DOCKER_PASS_DOCKERHUB := $(DOCKER_HUB_API_KEY)
 
-DOCKER_IMAGES := detect-secrets/detect-secrets detect-secrets-hook/detect-secrets-hook detect-secrets/redhat-ubi detect-secrets/redhat-ubi-custom
+DOCKER_IMAGES := detect-secrets/detect-secrets detect-secrets-hook/detect-secrets-hook
 DOCKER_REGISTRIES := $(DOCKER_REGISTRY_ART) $(DOCKER_REGISTRY_DOCKERHUB)
 
 IMAGE_NAME :=
@@ -86,10 +86,18 @@ docker-publish-images:
 docker-publish-image:
 	folder_name=$$(echo -e $$(basename $$(dirname $(IMAGE_NAME)))) ; \
 	dockerfile_name=$$(echo -e $$(basename $(IMAGE_NAME)));           \
-	if [ "$(DOCKER_REGISTRY)" = "$(DOCKER_REGISTRY_DOCKERHUB)" ]; then    \
-		docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKERHUB_DOMAIN)/$${folder_name}:$${dockerfile_name};                 \
-	else                                                                                                                \
-		docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${folder_name}:$${dockerfile_name}; \
+	if [ $${dockerfile_name} == "detect-secrets"  ]; then \
+		if [ "$(DOCKER_REGISTRY)" = "$(DOCKER_REGISTRY_DOCKERHUB)" ]; then    \
+			docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKERHUB_DOMAIN)/$${folder_name}:$${dockerfile_name};                 \
+		else                                                                                                                \
+			docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${folder_name}:$${dockerfile_name}; \
+		fi	\
+	else	\
+		if [ "$(DOCKER_REGISTRY)" = "$(DOCKER_REGISTRY_DOCKERHUB)" ]; then                                                  \
+			docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKERHUB_DOMAIN)/$(IMAGE_NAME):$(IMAGE_TAG);                 \
+		else                                                                                                                \
+			docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$(IMAGE_NAME):$(IMAGE_TAG); \
+		fi \
 	fi
 
 publish-cos:
