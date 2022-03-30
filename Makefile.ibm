@@ -83,28 +83,34 @@ docker-publish-images:
 		done                                                                              \
 	done
 
-docker-publish-image:
+docker-publish-image: docker-login
 	folder_name=$$(echo -e $$(basename $$(dirname $(IMAGE_NAME)))) ; 																\
 	image_name=$$(echo -e $$(basename $(IMAGE_NAME)));               																\
 	if [ $${folder_name} == "detect-secrets"  ]; then  				 																\
 		if [ "$(DOCKER_REGISTRY)" = "$(DOCKER_REGISTRY_DOCKERHUB)" ]; then   										 				\
 			if [ $${image_name} == "detect-secrets" ]; then 														 				\
 				docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKERHUB_DOMAIN)/$${folder_name}:latest;			 				\
+				docker push $(DOCKERHUB_DOMAIN)/$${folder_name}:latest;																\
 			else 																									 				\
 				docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKERHUB_DOMAIN)/$${folder_name}:$${image_name};  				\
+				docker push $(DOCKERHUB_DOMAIN)/$${folder_name}:$${image_name};														\
 			fi 																										 				\
 		else    																									 				\
 			if [ $${image_name} == "detect-secrets" ]; then 														 				\
 				docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${folder_name}:latest; 		\
+				docker push $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${folder_name}:latest;												\
 			else 																													\
 				docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${folder_name}:$${image_name}; \
+				docker push $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${folder_name}:$${image_name};										\
 			fi 																														\
 		fi																															\
 	else																															\
 		if [ "$(DOCKER_REGISTRY)" = "$(DOCKER_REGISTRY_DOCKERHUB)" ]; then                                                  		\
 			docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKERHUB_DOMAIN)/$${image_name}:$(IMAGE_TAG);                 		\
+			docker push $(DOCKERHUB_DOMAIN)/$${image_name}:$(IMAGE_TAG);															\
 		else                                                                                                                		\
 			docker tag $(DOCKER_DOMAIN_LOCAL)/$(IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${image_name}:$(IMAGE_TAG); 		\
+			docker push $(DOCKER_REGISTRY)/$(DOCKER_DOMAIN)/$${image_name}:$(IMAGE_TAG);											\
 		fi 																															\
 	fi
 
