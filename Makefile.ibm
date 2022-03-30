@@ -60,8 +60,8 @@ docker-quality-image-%:
 docker-quality-images: $(patsubst %,docker-quality-image-%,$(DOCKER_IMAGES))
 
 docker-test-images:
-	docker run -it $(DOCKER_DOMAIN_LOCAL)/detect-secrets --version
-	docker run -it $(DOCKER_DOMAIN_LOCAL)/detect-secrets-hook --version
+	docker run -it $(DOCKER_DOMAIN_LOCAL)/detect-secrets/detect-secrets --version
+	docker run -it $(DOCKER_DOMAIN_LOCAL)/detect-secrets-hook/detect-secrets-hook --version
 
 docker-build-images:
 	for dockerfile in Dockerfiles/*/*.Dockerfile; do                                   \
