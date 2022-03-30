@@ -73,7 +73,7 @@ docker-login:
 	@echo $(DOCKER_PASS_DOCKERHUB) | docker login -u $(DOCKER_USER_DOCKERHUB) --password-stdin;
 	@echo $(DOCKER_PASS_ART) | docker login -u $(DOCKER_USER_ART) --password-stdin $(DOCKER_REGISTRY_ART);
 
-docker-publish-images:
+docker-publish-images: docker-login
 	for image_name in $(DOCKER_IMAGES) ; do                                               \
 		for registry in $(DOCKER_REGISTRIES) ; do                                         \
 			for tag in $(IMAGE_TAGS) ; do                                                 \
@@ -83,7 +83,7 @@ docker-publish-images:
 		done                                                                              \
 	done
 
-docker-publish-image: docker-login
+docker-publish-image:
 	folder_name=$$(echo -e $$(basename $$(dirname $(IMAGE_NAME)))) ; 																\
 	image_name=$$(echo -e $$(basename $(IMAGE_NAME)));               																\
 	if [ $${folder_name} == "detect-secrets"  ]; then  				 																\
