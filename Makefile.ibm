@@ -61,11 +61,11 @@ trivy-scan-python-vulnerabilities:
 	./scripts/gen-pipfile.sh > Pipfile
 	pipenv --python `which python3`
 	pipenv lock
-	$(TRIVY) fs --exit-code 1 --ignore-unfixed --security-checks vuln ./
+	$(TRIVY) fs --exit-code 1 --ignore-unfixed --security-checks vuln,config ./
 
 docker-quality-images:
 	for image_name in $(DOCKER_IMAGES_TO_SCAN) ; do												\
-		$(TRIVY) image --exit-code 1 --ignore-unfixed $(DOCKER_DOMAIN_LOCAL)/$*$${image_name};  \
+		$(TRIVY) image --exit-code 1 --ignore-unfixed --security-checks vuln,config $(DOCKER_DOMAIN_LOCAL)/$*$${image_name};  \
 	done																						\
 
 docker-test-images:
